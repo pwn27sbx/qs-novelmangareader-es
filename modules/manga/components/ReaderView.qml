@@ -2,6 +2,7 @@ import QtQuick
 import QtQuick.Controls
 import QtQuick.Layouts
 import qs.colors
+import qs.Commons
 import qs.services
 import qs.components
 
@@ -9,8 +10,8 @@ Item {
     id: readerView
 
     // ── Exposed API ──────────────────────────────────────────────────────────
-    readonly property string fontDisplay: "Noto Serif"
-    readonly property string fontBody:    "Noto Sans"
+    readonly property string fontDisplay: Style.font.displayFamily
+    readonly property string fontBody:    Style.font.family
 
     // Emitted when the user navigates back
     signal backRequested()
@@ -34,7 +35,7 @@ Item {
         color: Qt.rgba(0.05, 0.05, 0.08, 0.95)
         z: 10
         opacity: readerView.headerVisible ? 1 : 0
-        Behavior on opacity { NumberAnimation { duration: 250; easing.type: Easing.OutCubic } }
+        Behavior on opacity { NumberAnimation { duration: Style.motion.slow; easing.type: Style.motion.easeOut } }
 
         // Bottom hairline
         Rectangle {
@@ -44,8 +45,8 @@ Item {
         }
 
         RowLayout {
-            anchors { fill: parent; leftMargin: 6; rightMargin: 16 }
-            spacing: 2
+            anchors { fill: parent; leftMargin: Style.spacing.md; rightMargin: Style.space(16) }
+            spacing: Style.spacing.xxs
 
             // Back button
             Item {
@@ -53,16 +54,16 @@ Item {
 
                 Rectangle {
                     anchors.centerIn: parent
-                    width: 34; height: 34; radius: 17
+                    width: 34; height: 34; radius: height / 2
                     color: readerBackArea.containsMouse
                         ? Qt.rgba(1, 1, 1, 0.1)
                         : "transparent"
-                    Behavior on color { ColorAnimation { duration: 130 } }
+                    Behavior on color { ColorAnimation { duration: Style.motion.base } }
                 }
                 StyledText {
                     anchors.centerIn: parent
                     text: "←"
-                    font.pixelSize: 18
+                    font.pixelSize: Style.font.iconLarge
                     color: Qt.rgba(1, 1, 1, 0.7)
                 }
                 MouseArea {
@@ -81,7 +82,7 @@ Item {
                 Layout.fillWidth: true
                 text: Manga.currentManga ? Manga.currentManga.title : ""
                 font.family: readerView.fontDisplay
-                font.pixelSize: 13
+                font.pixelSize: Style.font.subtitle
                 color: Qt.rgba(1, 1, 1, 0.85)
                 elide: Text.ElideRight
             }
@@ -91,7 +92,7 @@ Item {
                 visible: Manga.chapterPages.length > 0
                 height: 24
                 width: pageCountText.implicitWidth + 18
-                radius: DesktopTheme.rad(12)
+                radius: height / 2
                 color: Qt.rgba(1, 1, 1, 0.09)
                 border.color: Qt.rgba(1, 1, 1, 0.12)
                 border.width: 1
@@ -101,7 +102,7 @@ Item {
                     anchors.centerIn: parent
                     text: (pageListView.currentIndex + 1) + " / " + Manga.chapterPages.length
                     font.family: readerView.fontBody
-                    font.pixelSize: 10
+                    font.pixelSize: Style.font.caption
                     font.letterSpacing: 0.5
                     color: Qt.rgba(1, 1, 1, 0.65)
                 }
@@ -131,11 +132,11 @@ Item {
 
         Column {
             anchors.centerIn: parent
-            spacing: 10
+            spacing: Style.spacing.xl
 
             StyledText {
                 text: "⚠"
-                font.pixelSize: 32
+                font.pixelSize: 32 // style-ignore — bespoke size
                 color: Colors.error
                 anchors.horizontalCenter: parent.horizontalCenter
                 opacity: 0.85
@@ -143,7 +144,7 @@ Item {
             StyledText {
                 text: Manga.pagesError
                 color: Qt.rgba(1, 1, 1, 0.45)
-                font.pixelSize: 11
+                font.pixelSize: Style.font.bodySmall
                 font.family: readerView.fontBody
                 wrapMode: Text.Wrap
                 width: 260
@@ -158,13 +159,13 @@ Item {
         id: pageListView
         anchors {
             fill: parent
-            topMargin: readerView.headerVisible ? 54 : 0
+            topMargin: readerView.headerVisible ? Style.space(54) : 0
         }
         clip: true
         boundsBehavior: Flickable.StopAtBounds
         model: Manga.chapterPages
-        spacing: 3
-        Behavior on anchors.topMargin { NumberAnimation { duration: 220; easing.type: Easing.OutCubic } }
+        spacing: Style.spacing.xs
+        Behavior on anchors.topMargin { NumberAnimation { duration: Style.motion.slow; easing.type: Style.motion.easeOut } }
 
         // Tap anywhere to toggle header
         MouseArea {
@@ -190,7 +191,7 @@ Item {
                 asynchronous: true
                 cache: true
                 opacity: status === Image.Ready ? 1 : 0
-                Behavior on opacity { NumberAnimation { duration: 350 } }
+                Behavior on opacity { NumberAnimation { duration: Style.motion.slow } }
 
             }
 
@@ -204,7 +205,7 @@ Item {
 
                 Column {
                     anchors.centerIn: parent
-                    spacing: 12
+                    spacing: Style.spacing.xxl
 
                     Spinner {
                         anchors.horizontalCenter: parent.horizontalCenter
@@ -213,13 +214,13 @@ Item {
                         border.width: 2
                         border.color: Qt.rgba(1, 1, 1, 0.08)
                         arcColor: Qt.rgba(1, 1, 1, 0.45)
-                        duration: 1200
+                        duration: Style.motion.loop
                     }
                     StyledText {
                         anchors.horizontalCenter: parent.horizontalCenter
                         visible: pageImg.status === Image.Error
                         text: "⊘"
-                        font.pixelSize: 22
+                        font.pixelSize: 22 // style-ignore — bespoke size
                         color: Qt.rgba(1, 1, 1, 0.3)
                     }
                     StyledText {
@@ -227,7 +228,7 @@ Item {
                         text: I18n.t("page", { 1: modelData.index + 1 })
                             + (pageImg.status === Image.Error ? "  ·  " + I18n.t("manga.pageFailed") : "")
                         color: Qt.rgba(1, 1, 1, 0.3)
-                        font.pixelSize: 10
+                        font.pixelSize: Style.font.caption
                         font.family: readerView.fontBody
                         font.letterSpacing: 1.5
                     }
@@ -236,14 +237,14 @@ Item {
                     Rectangle {
                         anchors.horizontalCenter: parent.horizontalCenter
                         visible: pageImg.status === Image.Loading && pageImg.progress > 0
-                        width: 96; height: 2; radius: 1
+                        width: 96; height: 2; radius: height / 2
                         color: Qt.rgba(1, 1, 1, 0.08)
 
                         Rectangle {
                             width: parent.width * pageImg.progress
-                            height: parent.height; radius: 1
+                            height: parent.height; radius: height / 2
                             color: Colors.primary
-                            Behavior on width { NumberAnimation { duration: 160 } }
+                            Behavior on width { NumberAnimation { duration: Style.motion.base } }
                         }
                     }
                 }
@@ -277,7 +278,7 @@ Item {
                 : 0
             height: parent.height
             color: Colors.primary
-            Behavior on width { NumberAnimation { duration: 220; easing.type: Easing.OutCubic } }
+            Behavior on width { NumberAnimation { duration: Style.motion.slow; easing.type: Style.motion.easeOut } }
         }
     }
 }

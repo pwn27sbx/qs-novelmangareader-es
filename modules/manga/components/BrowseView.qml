@@ -3,6 +3,7 @@ import QtQuick.Controls
 import QtQuick.Layouts
 import Quickshell
 import qs.colors
+import qs.Commons
 import qs.services
 import qs.components
 
@@ -10,8 +11,8 @@ Item {
     id: browseView
 
     // ── Exposed API ──────────────────────────────────────────────────────────
-    readonly property string fontDisplay: "Noto Serif"
-    readonly property string fontBody:    "Noto Sans"
+    readonly property string fontDisplay: Style.font.displayFamily
+    readonly property string fontBody:    Style.font.family
 
     // Emitted when the user taps a manga card
     signal mangaSelected(string mangaId)
@@ -20,7 +21,7 @@ Item {
 
     ColumnLayout {
         anchors.fill: parent
-        spacing: 0
+        spacing: Style.space(0)
 
         // ── Header ──────────────────────────────────────────────────────────
         Rectangle {
@@ -35,26 +36,26 @@ Item {
             }
 
             RowLayout {
-                anchors { fill: parent; leftMargin: 18; rightMargin: 12 }
-                spacing: 10
+                anchors { fill: parent; leftMargin: Style.spacing.huge; rightMargin: Style.spacing.xxl }
+                spacing: Style.spacing.xl
 
                 // Wordmark
                 Row {
-                    spacing: 0
+                    spacing: Style.space(0)
                     visible: !searchBar.visible
                     Layout.fillWidth: true
 
                     StyledText {
                         text: "M"
                         font.family: browseView.fontDisplay
-                        font.pixelSize: 24
+                        font.pixelSize: Style.font.display
                         font.letterSpacing: 1
                         color: Colors.primary
                     }
                     StyledText {
                         text: "anga" // i18n-ignore — brand wordmark (with the "M" above)
                         font.family: browseView.fontDisplay
-                        font.pixelSize: 24
+                        font.pixelSize: Style.font.display
                         font.letterSpacing: 1
                         opacity: 0.85
                     }
@@ -65,23 +66,23 @@ Item {
                     id: searchBar
                     Layout.fillWidth: true
                     height: 38
-                    radius: DesktopTheme.rad(19)
+                    radius: height / 2
                     color: Colors.surface_container
                     visible: false
                     border.color: searchField.activeFocus ? Colors.primary : Colors.outline_variant
                     border.width: searchField.activeFocus ? 1.5 : 1
-                    Behavior on border.width { NumberAnimation { duration: 120 } }
+                    Behavior on border.width { NumberAnimation { duration: Style.motion.fast } }
 
                     TextInput {
                         id: searchField
                         anchors {
                             verticalCenter: parent.verticalCenter
                             left: parent.left; right: clearBtn.left
-                            leftMargin: 16; rightMargin: 6
+                            leftMargin: Style.space(16); rightMargin: Style.spacing.md
                         }
                         color: Colors.on_surface
                         font.family: browseView.fontBody
-                        font.pixelSize: 13
+                        font.pixelSize: Style.font.subtitle
                         clip: true
                         onTextChanged: searchDebounce.restart()
                         Keys.onEscapePressed: {
@@ -92,11 +93,11 @@ Item {
                     }
 
                     StyledText {
-                        anchors { verticalCenter: parent.verticalCenter; left: parent.left; leftMargin: 16 }
+                        anchors { verticalCenter: parent.verticalCenter; left: parent.left; leftMargin: Style.space(16) }
                         text: I18n.t("manga.search")
                         color: Colors.on_surface_variant
                         font.family: browseView.fontBody
-                        font.pixelSize: 13
+                        font.pixelSize: Style.font.subtitle
                         visible: searchField.text.length === 0
                         opacity: 0.6
                     }
@@ -104,23 +105,22 @@ Item {
                     // Clear button
                     Item {
                         id: clearBtn
-                        anchors { right: parent.right; verticalCenter: parent.verticalCenter; rightMargin: 10 }
+                        anchors { right: parent.right; verticalCenter: parent.verticalCenter; rightMargin: Style.spacing.xl }
                         width: 22; height: 22
                         visible: searchField.text.length > 0
                         opacity: visible ? 1 : 0
-                        Behavior on opacity { NumberAnimation { duration: 100 } }
+                        Behavior on opacity { NumberAnimation { duration: Style.motion.fast } }
 
                         Rectangle {
                             anchors.centerIn: parent
-                            width: 18; height: 18; radius: 9
+                            width: 18; height: 18; radius: height / 2
                             color: Colors.surface_container_highest
                         }
                         StyledText {
                             anchors.centerIn: parent
                             text: "✕"
                             color: Colors.on_surface_variant
-                            font.pixelSize: 9
-                            font.bold: true
+                            font.pixelSize: 9; font.bold: true // style-ignore — bespoke size
                         }
                         MouseArea { anchors.fill: parent; onClicked: searchField.text = "" }
                     }
@@ -143,16 +143,16 @@ Item {
 
                     Rectangle {
                         anchors.centerIn: parent
-                        width: 34; height: 34; radius: 17
+                        width: 34; height: 34; radius: height / 2
                         color: searchBar.visible ? Colors.primary_container : "transparent"
-                        Behavior on color { ColorAnimation { duration: 180 } }
+                        Behavior on color { ColorAnimation { duration: Style.motion.base } }
                     }
                     StyledText {
                         anchors.centerIn: parent
                         text: "⌕"
-                        font.pixelSize: 19
+                        font.pixelSize: 19 // style-ignore — bespoke size
                         color: searchBar.visible ? Colors.on_primary_container : Colors.on_surface_variant
-                        Behavior on color { ColorAnimation { duration: 180 } }
+                        Behavior on color { ColorAnimation { duration: Style.motion.base } }
                     }
                     MouseArea {
                         anchors.fill: parent
@@ -184,9 +184,9 @@ Item {
 
             ListView {
                 id: tagList
-                anchors { fill: parent; leftMargin: 14; rightMargin: 14 }
+                anchors { fill: parent; leftMargin: Style.spacing.xxxl; rightMargin: Style.spacing.xxxl }
                 orientation: ListView.Horizontal
-                spacing: 7
+                spacing: Style.space(7)
                 clip: true
                 boundsBehavior: Flickable.StopAtBounds
 
@@ -207,7 +207,7 @@ Item {
                         anchors.centerIn: parent
                         implicitWidth: chipLabel.implicitWidth + 28
                         height: 30
-                        radius: DesktopTheme.rad(15)
+                        radius: height / 2
                         color: browseView.currentTagId === tagId
                             ? Colors.primary
                             : Colors.surface_container
@@ -215,19 +215,19 @@ Item {
                             ? Colors.primary
                             : Colors.outline_variant
                         border.width: 1
-                        Behavior on color { ColorAnimation { duration: 180 } }
+                        Behavior on color { ColorAnimation { duration: Style.motion.base } }
 
                         StyledText {
                             id: chipLabel
                             anchors.centerIn: parent
                             text: I18n.t(labelKey)
                             font.family: browseView.fontBody
-                            font.pixelSize: 12
+                            font.pixelSize: Style.font.body
                             font.letterSpacing: 0.6
                             color: browseView.currentTagId === tagId
                                 ? Colors.on_primary
                                 : Colors.on_surface_variant
-                            Behavior on color { ColorAnimation { duration: 180 } }
+                            Behavior on color { ColorAnimation { duration: Style.motion.base } }
                         }
                     }
 
@@ -279,10 +279,10 @@ Item {
 
                 Column {
                     anchors.centerIn: parent
-                    spacing: 10
+                    spacing: Style.spacing.xl
                     StyledText {
                         text: "⚠"
-                        font.pixelSize: 32
+                        font.pixelSize: 32 // style-ignore — bespoke size
                         color: Colors.error
                         anchors.horizontalCenter: parent.horizontalCenter
                         opacity: 0.8
@@ -290,7 +290,7 @@ Item {
                     StyledText {
                         text: Manga.mangaError
                         color: Colors.on_surface_variant
-                        font.pixelSize: 12
+                        font.pixelSize: Style.font.body
                         font.family: browseView.fontBody
                         wrapMode: Text.Wrap
                         width: 260
@@ -304,7 +304,7 @@ Item {
             GridView {
                 id: mangaGrid
                 anchors.fill: parent
-                anchors.margins: 10
+                anchors.margins: Style.spacing.xl
                 cellWidth: (width - 10) / 4
                 cellHeight: cellWidth * 1.58
                 clip: true
@@ -327,8 +327,8 @@ Item {
 
                     ClickableRect {
                         id: card
-                        anchors { fill: parent; margins: 5 }
-                        radius: DesktopTheme.rad(12)
+                        anchors { fill: parent; margins: Style.space(5) }
+                        radius: Style.cornerRadius
                         color: Colors.surface_container
                         clip: true
 
@@ -347,14 +347,14 @@ Item {
                             asynchronous: true
                             cache: true
                             opacity: status === Image.Ready ? 1 : 0
-                            Behavior on opacity { NumberAnimation { duration: 300 } }
+                            Behavior on opacity { NumberAnimation { duration: Style.motion.slow } }
 
                             // Type badge
                             Rectangle {
                                 visible: modelData.type && modelData.type.length > 0
-                                anchors { top: parent.top; right: parent.right; topMargin: 8; rightMargin: 8 }
+                                anchors { top: parent.top; right: parent.right; topMargin: Style.spacing.lg; rightMargin: Style.spacing.lg }
                                 height: 20
-                                radius: DesktopTheme.rad(10)
+                                radius: height / 2
                                 width: typeText.implicitWidth + 14
                                 color: Qt.rgba(0, 0, 0, 0.7)
 
@@ -363,7 +363,7 @@ Item {
                                     anchors.centerIn: parent
                                     text: I18n.tData(modelData.type || "").toUpperCase()
                                     font.family: browseView.fontBody
-                                    font.pixelSize: 8
+                                    font.pixelSize: 8 // style-ignore — bespoke size
                                     font.letterSpacing: 1
                                     font.bold: true
                                     color: Colors.primary_fixed_dim
@@ -387,18 +387,18 @@ Item {
                             anchors { bottom: parent.bottom; left: parent.left; right: parent.right }
                             height: titleText.implicitHeight + 18
                             color: Colors.surface_container
-                            radius: DesktopTheme.rad(12)
+                            radius: Style.cornerRadius
 
                             StyledText {
                                 id: titleText
                                 anchors {
                                     left: parent.left; right: parent.right
                                     verticalCenter: parent.verticalCenter
-                                    leftMargin: 10; rightMargin: 10
+                                    leftMargin: Style.spacing.xl; rightMargin: Style.spacing.xl
                                 }
                                 text: modelData.title || ""
                                 font.family: browseView.fontBody
-                                font.pixelSize: 11
+                                font.pixelSize: Style.font.bodySmall
                                 font.letterSpacing: 0.2
                                 wrapMode: Text.Wrap
                                 maximumLineCount: 2
@@ -410,12 +410,12 @@ Item {
                         // Hover + press overlay
                         Rectangle {
                             anchors.fill: parent
-                            radius: DesktopTheme.rad(12)
+                            radius: Style.cornerRadius
                             color: Colors.primary
                             opacity: card.pressed
-                                ? 0.16
-                                : (card.hovered ? 0.07 : 0)
-                            Behavior on opacity { NumberAnimation { duration: 130 } }
+                                ? Style.pressedFillAlpha
+                                : (card.hovered ? Style.hoverFillAlpha : 0)
+                            Behavior on opacity { NumberAnimation { duration: Style.motion.base } }
                         }
 
                         // Scale effect on hover
@@ -424,8 +424,8 @@ Item {
                             origin.y: card.height / 2
                             xScale: card.pressed ? 0.97 : 1.0
                             yScale: card.pressed ? 0.97 : 1.0
-                            Behavior on xScale { NumberAnimation { duration: 120; easing.type: Easing.OutCubic } }
-                            Behavior on yScale { NumberAnimation { duration: 120; easing.type: Easing.OutCubic } }
+                            Behavior on xScale { NumberAnimation { duration: Style.motion.fast; easing.type: Style.motion.easeOut } }
+                            Behavior on yScale { NumberAnimation { duration: Style.motion.fast; easing.type: Style.motion.easeOut } }
                         }
 
                         onClicked: {

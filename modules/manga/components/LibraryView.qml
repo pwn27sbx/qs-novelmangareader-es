@@ -2,14 +2,15 @@ import QtQuick
 import QtQuick.Controls
 import QtQuick.Layouts
 import qs.colors
+import qs.Commons
 import qs.services
 import qs.components
 
 Item {
     id: libraryView
 
-    readonly property string fontDisplay: "Noto Serif"
-    readonly property string fontBody:    "Noto Sans"
+    readonly property string fontDisplay: Style.font.displayFamily
+    readonly property string fontBody:    Style.font.family
 
     // Emitted when the user taps an entry — parent handles navigation
     signal mangaSelected(string mangaId)
@@ -19,7 +20,7 @@ Item {
 
     ColumnLayout {
         anchors.fill: parent
-        spacing: 0
+        spacing: Style.space(0)
 
         // ── Empty state ───────────────────────────────────────────────────────
         Item {
@@ -41,7 +42,7 @@ Item {
             Layout.fillHeight: true
             visible: !Manga.libraryLoaded
             active: !Manga.libraryLoaded
-            padding: 8
+            padding: Style.spacing.lg
             ratio: 1.72
             footerHeight: 30
         }
@@ -51,10 +52,10 @@ Item {
             Layout.fillWidth: true
             Layout.fillHeight: true
             visible: Manga.libraryList.length > 0
-            topMargin: 10
-            leftMargin: 8
-            rightMargin: 8
-            bottomMargin: 10
+            topMargin: Style.spacing.xl
+            leftMargin: Style.spacing.lg
+            rightMargin: Style.spacing.lg
+            bottomMargin: Style.spacing.xl
             cellWidth: Math.floor((width - leftMargin - rightMargin) / 4)
             cellHeight: cellWidth * 1.72
             clip: true
@@ -80,7 +81,7 @@ Item {
 
                     CoverProgressBar {
                         height: 30
-                        rowSpacing: 6
+                        rowSpacing: Style.spacing.md
                         bodyFont: libraryView.fontBody
                         started: libEntry.lastReadChapterNum
                         label: libEntry.lastReadChapterNum
