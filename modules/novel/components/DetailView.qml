@@ -260,7 +260,7 @@ Item {
 
                         Text {
                             id: statusTxt; anchors.centerIn: parent
-                            text: Novel.currentNovel ? (Novel.currentNovel.status || "").toUpperCase() : ""
+                            text: Novel.currentNovel ? I18n.tData(Novel.currentNovel.status || "").toUpperCase() : ""
                             font.family: detailView.fontBody; font.pixelSize: 9
                             font.letterSpacing: 1.2; font.bold: true; color: Colors.tertiary
                         }

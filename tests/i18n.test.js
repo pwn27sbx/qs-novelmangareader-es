@@ -51,6 +51,38 @@ test("tn() works on plain string entries too", () => {
     assert.equal(i18n.tn("es", "tab.browse", 1), "Explorar");
 });
 
+test("tData() localizes known status values to Spanish", () => {
+    assert.equal(i18n.tData("es", "Ongoing"), "En curso");
+    assert.equal(i18n.tData("es", "Completed"), "Completada");
+    assert.equal(i18n.tData("es", "Hiatus"), "En pausa");
+    assert.equal(i18n.tData("es", "Cancelled"), "Cancelada");
+});
+
+test("tData() localizes known type values to Spanish", () => {
+    assert.equal(i18n.tData("es", "Movie"), "Película");
+    assert.equal(i18n.tData("es", "Special"), "Especial");
+    assert.equal(i18n.tData("es", "TV"), "TV");
+    assert.equal(i18n.tData("es", "OVA"), "OVA");
+    assert.equal(i18n.tData("es", "ONA"), "ONA");
+});
+
+test("tData() keeps canonical English values", () => {
+    assert.equal(i18n.tData("en", "Ongoing"), "Ongoing");
+    assert.equal(i18n.tData("en", "Movie"), "Movie");
+});
+
+test("tData() falls back to the raw value when unknown", () => {
+    assert.equal(i18n.tData("es", "Weird"), "Weird");
+    assert.equal(i18n.tData("es", "Unknown Status"), "Unknown Status");
+    assert.equal(i18n.tData("es", ""), "");
+    assert.equal(i18n.tData("es", undefined), undefined);
+});
+
+test("tData() matches known values case-insensitively", () => {
+    assert.equal(i18n.tData("es", "OnGoing"), "En curso");
+    assert.equal(i18n.tData("es", "COMPLETED"), "Completada");
+});
+
 test("es and en expose the exact same key set", () => {
     const es = Object.keys(i18n.tables.es).sort();
     const en = Object.keys(i18n.tables.en).sort();

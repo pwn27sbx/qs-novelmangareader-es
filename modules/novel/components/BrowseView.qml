@@ -465,7 +465,7 @@ Item {
 
                                 Text {
                                     id: statusBadge; anchors.centerIn: parent
-                                    text: (modelData.status || "").toUpperCase()
+                                    text: I18n.tData(modelData.status || "").toUpperCase()
                                     font.family: browseView.fontBody; font.pixelSize: 7
                                     font.letterSpacing: 0.8; font.bold: true; color: "white"
                                 }

@@ -398,7 +398,7 @@ Item {
 
                                 StyledText {
                                     id: typeText; anchors.centerIn: parent
-                                    text: (modelData.type || "").toUpperCase()
+                                    text: I18n.tData(modelData.type || "").toUpperCase()
                                     font.family: browseView.fontBody
                                     font.pixelSize: 8; font.letterSpacing: 1; font.bold: true
                                     color: Colors.primary_fixed_dim

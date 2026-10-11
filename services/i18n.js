@@ -151,6 +151,35 @@ var tables = {
     }
 };
 
+// Known data values that the sources return and the UI renders verbatim
+// (status / type badges). Keyed by the raw English value; lookups are
+// case-insensitive so "OnGoing" also matches. Unknown values fall back to the
+// original string, so unfamiliar statuses never disappear.
+var display = {
+    es: {
+        "Ongoing": "En curso",
+        "Completed": "Completada",
+        "Hiatus": "En pausa",
+        "Cancelled": "Cancelada",
+        "Movie": "Película",
+        "Special": "Especial",
+        "TV": "TV",
+        "OVA": "OVA",
+        "ONA": "ONA"
+    },
+    en: {
+        "Ongoing": "Ongoing",
+        "Completed": "Completed",
+        "Hiatus": "Hiatus",
+        "Cancelled": "Cancelled",
+        "Movie": "Movie",
+        "Special": "Special",
+        "TV": "TV",
+        "OVA": "OVA",
+        "ONA": "ONA"
+    }
+};
+
 // Replace %1, %2, … with the matching entry of `params` (1-based).
 function interpolate(str, params) {
     if (!params || typeof str !== "string") {
@@ -208,7 +237,27 @@ function tn(lang, key, n, params) {
     return interpolate(entry, merged);
 }
 
+// Display a known status/type data value; fall back to the raw value.
+// tData("es", "Ongoing") -> "En curso"; tData("es", "Whatever") -> "Whatever".
+function tData(lang, value) {
+    if (value === undefined || value === null || value === "") {
+        return value;
+    }
+    var table = display[lang] || display.en;
+    var raw = String(value);
+    if (table[raw] !== undefined) {
+        return table[raw];
+    }
+    var lower = raw.toLowerCase();
+    for (var key in table) {
+        if (key.toLowerCase() === lower) {
+            return table[key];
+        }
+    }
+    return value;
+}
+
 // Exposed for the Node test runner only; QML's import ignores `module`.
 if (typeof module !== "undefined" && module.exports) {
-    module.exports = { tables: tables, t: t, tn: tn };
+    module.exports = { tables: tables, display: display, t: t, tn: tn, tData: tData };
 }

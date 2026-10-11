@@ -7,7 +7,7 @@
 | Repo de trabajo | `~/Projects/forks/qs-novelmangareader-es` |
 | Upstream | `dhrruvsharma/qs-novelmangareader` (GPL-3.0) |
 | Inicio | 2026-10-11 |
-| Estado | **Fase 1 completa (WU-0..WU-6)** · GATE §15.1 cerrado |
+| Estado | **Fase 1 completa + fix WU-6b** · GATE §15.1 cerrado |
 | Plan fuente | `2026-10-11-plan-localizacion-es-qs-novelmangareader.md` (§0–§16) |
 | Handoff | `2026-10-11-handoff-orquestador-qs-novelmangareader-es.md` |
 
@@ -73,7 +73,8 @@ Tener la interfaz de la app Quickshell `qs-novelmangareader` **en español latin
 - **WU-3 — chips Manga/Manhwa/Manhua:** se guardan como `labelKey` literal (p. ej. `"Manga"`) y el delegate hace `I18n.t(labelKey)`; al no existir la clave, el core devuelve la propia clave → se muestran sin traducir sin caso especial.
 - **WU-3 — clave extra `manga.pageFailed`** ("no se pudo cargar"/"failed to load"): el sufijo de error por página no estaba en §6.3; se añadió para no dejar EN crudo.
 - **WU-3 — `count.chapter`** corrige singular ("1 capítulo" en vez de "1 capítulos"); en EN también ("1 chapter"). Mejora intencional; notar por si querés EN byte-idéntico.
-- **WU-4 — §6.4 tiene un error:** `Ongoing` (`BrowseView:462`) es un **dato** de estado (`modelData.status === "Ongoing"`), y `All` (`Novel.qml:21`) es un **sentinel** de la API (`status` param), NO labels de UI. No se tradujeron; se eliminaron las claves muertas `novel.filter.ongoing`/`novel.filter.all`.
+- **WU-4/WU-6b — corrección a mi nota previa (el revisor tenía razón):** `Ongoing` **SÍ se muestra** en un badge (`(modelData.status).toUpperCase()`), así que §6.4 acertaba en que es visible; pero es un **valor de dato**, no un label de filtro → se resuelve con el mapeo de datos `tData` (WU-6b), NO con una clave de filtro. `All` (`Novel.qml:21`) sigue siendo un **sentinel** de la API (no se muestra). Las claves de filtro `novel.filter.ongoing`/`novel.filter.all` siguen sin uso.
+- **WU-6b — `I18n.tData(value)`**: mapea status/type conocidos (Ongoing/OnGoing→"En curso", Completed→"Completada", Hiatus→"En pausa", Cancelled→"Cancelada", Movie→"Película", Special→"Especial"; TV/OVA/ONA iguales en ambos idiomas), con **fallback al valor original** y coincidencia **case-insensitive**. Aplicado en 5 badges (anime type; manga type+status; novel status×2). Guard de test en `tests/i18n.test.js`.
 - **WU-4 — wordmark "N"/"ovel"**: marca, se mantiene (igual que "A"/"nime", "M"/"anga").
 - **WU-5 — lint:** `tools/lint-i18n.js` (a) falla si un prop de texto tiene literal EN crudo fuera de `I18n.t`/`tn`; (b) falla si una clave usada en QML no existe en la tabla. Se integra como `tests/lint.test.js`.
 - **WU-5 — reglas del lint:** los bloques `text: { … }` se evalúan solo en su expresión `return` (evita falsos positivos por comparaciones de datos como `mode === "dub"`); las líneas con `// i18n-ignore` se saltan (wordmarks de marca). Comandos: `node --test` y `node tools/lint-i18n.js`.
@@ -86,6 +87,7 @@ Tener la interfaz de la app Quickshell `qs-novelmangareader` **en español latin
 - [x] **WU-3** — Envolver manga. *(F1-5)*
 - [x] **WU-5** — Lint anti-strings sin `I18n.t` + test de paridad de claves `es`↔`en`. *(F1-8)*
 - [x] **WU-6** — QA visual integral (3 módulos × vistas). *(F1-9, read-only)*
+- [x] **WU-6b** — Fix (revisión del orquestador): traducir **datos** status/type mostrados en badges. *(gap de WU-4/WU-6)*
 - [ ] **WU-7** — Subtítulos ES (**CONDICIONADO**: requiere confirmar campo de idioma). *(F1.5-1, §13.3/§14.2)*
 - [ ] **WU-8** — MangaDex ES (`es-la`), mismo contrato JSON; tests con fixtures. *(F1.5-2, §15.5)*
 - [ ] **WU-9** — Instalador / CLI / README. *(F2)*
@@ -206,7 +208,8 @@ Pendiente (humano): la QA **visual** real (acentos `á é í ó ú ñ ¿ ¡`, de
 | WU-3 | `84ad035` | 2026-10-11 | ✅ completo |
 | WU-4 | `c4e359b` | 2026-10-11 | ✅ completo |
 | WU-5 | `17eabfc` | 2026-10-11 | ✅ completo |
-| WU-6 | `—` (commit de cierre de Fase 1) | 2026-10-11 | ✅ completo |
+| WU-6 | `edf2203` | 2026-10-11 | ✅ completo |
+| WU-6b | `—` (se completa al cierre) | 2026-10-11 | ✅ completo |
 
 ---
 

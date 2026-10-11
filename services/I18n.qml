@@ -38,4 +38,10 @@ Singleton {
     function tn(key, n, params) {
         return Core.tn(lang, key, n, params)
     }
+
+    // Localize a status/type data value returned by a source (e.g. "Ongoing",
+    // "Movie"); unknown values are returned unchanged.
+    function tData(value) {
+        return Core.tData(lang, value)
+    }
 }

@@ -218,7 +218,7 @@ Item {
 
                         StyledText {
                             id: statusText; anchors.centerIn: parent
-                            text: Manga.currentManga ? (Manga.currentManga.status || "").toUpperCase() : ""
+                            text: Manga.currentManga ? I18n.tData(Manga.currentManga.status || "").toUpperCase() : ""
                             font.family: detailView.fontBody
                             font.pixelSize: 9; font.letterSpacing: 1.2; font.bold: true
                             color: Colors.tertiary
