@@ -2,6 +2,7 @@ import QtQuick
 import QtQuick.Controls
 import QtQuick.Layouts
 import qs.colors
+import qs.Commons
 import qs.services
 import Quickshell.Io
 import qs.components
@@ -9,8 +10,8 @@ import qs.components
 Item {
     id: detailView
 
-    readonly property string fontDisplay: "Noto Serif"
-    readonly property string fontBody:    "Noto Sans"
+    readonly property string fontDisplay: Style.font.displayFamily
+    readonly property string fontBody:    Style.font.family
 
     signal backRequested()
 
@@ -52,7 +53,7 @@ Item {
 
     ColumnLayout {
         anchors.fill: parent
-        spacing: 0
+        spacing: Style.space(0)
 
         Rectangle {
             Layout.fillWidth: true
@@ -66,21 +67,21 @@ Item {
             }
 
             RowLayout {
-                anchors { fill: parent; leftMargin: 6; rightMargin: 10 }
-                spacing: 2
+                anchors { fill: parent; leftMargin: Style.spacing.md; rightMargin: Style.spacing.xl }
+                spacing: Style.spacing.xxs
 
                 // Back
                 Item {
                     width: 44; height: 44
 
                     Rectangle {
-                        anchors.centerIn: parent; width: 34; height: 34; radius: 17
+                        anchors.centerIn: parent; width: 34; height: 34; radius: height / 2
                         color: backArea.containsMouse ? Colors.surface_container : "transparent"
-                        Behavior on color { ColorAnimation { duration: 130 } }
+                        Behavior on color { ColorAnimation { duration: Style.motion.base } }
                     }
                     Text {
                         anchors.centerIn: parent
-                        text: "←"; font.pixelSize: 18; color: Colors.on_surface_variant
+                        text: "←"; font.pixelSize: Style.font.iconLarge; color: Colors.on_surface_variant
                     }
                     MouseArea {
                         id: backArea; anchors.fill: parent; hoverEnabled: true
@@ -94,7 +95,7 @@ Item {
                         ? (Anime.currentAnime.englishName || Anime.currentAnime.name || "")
                         : ""
                     font.family: detailView.fontDisplay
-                    font.pixelSize: 14; color: Colors.on_surface; elide: Text.ElideRight
+                    font.pixelSize: Style.font.title; color: Colors.on_surface; elide: Text.ElideRight
                 }
 
                 Item {
@@ -106,28 +107,28 @@ Item {
                         color: detailView._inLibrary ? Colors.primary_container : Colors.surface_container
                         border.color: detailView._inLibrary ? Colors.primary : Colors.outline_variant
                         border.width: 1
-                        Behavior on color { ColorAnimation { duration: 180 } }
+                        Behavior on color { ColorAnimation { duration: Style.motion.base } }
                     }
                     Row {
-                        anchors.centerIn: parent; spacing: 5
+                        anchors.centerIn: parent; spacing: Style.space(5)
 
                         StyledText {
                             anchors.verticalCenter: parent.verticalCenter
                             text: detailView._inLibrary ? "✓" : "+"
-                            font.pixelSize: 11; font.bold: true
+                            font.pixelSize: Style.font.bodySmall; font.bold: true
                             color: detailView._inLibrary
                                 ? Colors.on_primary_container : Colors.on_surface_variant
-                            Behavior on color { ColorAnimation { duration: 180 } }
+                            Behavior on color { ColorAnimation { duration: Style.motion.base } }
                         }
                         StyledText {
                             id: libBtnLabel
                             anchors.verticalCenter: parent.verticalCenter
                             text: I18n.t("tab.library")
                             font.family: detailView.fontBody
-                            font.pixelSize: 11; font.letterSpacing: 0.3
+                            font.pixelSize: Style.font.bodySmall; font.letterSpacing: 0.3
                             color: detailView._inLibrary
                                 ? Colors.on_primary_container : Colors.on_surface_variant
-                            Behavior on color { ColorAnimation { duration: 180 } }
+                            Behavior on color { ColorAnimation { duration: Style.motion.base } }
                         }
                     }
                     MouseArea {
@@ -149,7 +150,7 @@ Item {
             visible: Anime.currentAnime !== null
 
             RowLayout {
-                anchors { fill: parent; leftMargin: 16; rightMargin: 16 }
+                anchors { fill: parent; leftMargin: Style.space(16); rightMargin: Style.space(16) }
 
                 StyledText {
                     text: Anime.currentAnime
@@ -157,7 +158,7 @@ Item {
                             ? Anime.currentAnime.episodes.length : 0)
                         : ""
                     font.family: detailView.fontBody
-                    font.pixelSize: 11; font.letterSpacing: 1
+                    font.pixelSize: Style.font.bodySmall; font.letterSpacing: 1
                     color: Colors.on_surface_variant; opacity: 0.75
                 }
 
@@ -166,7 +167,7 @@ Item {
                     visible: Anime.currentSubtitleLabel.length > 0
                     text: I18n.t("anime.subtitles", { 1: Anime.currentSubtitleLabel })
                     font.family: detailView.fontBody
-                    font.pixelSize: 10; font.letterSpacing: 0.3
+                    font.pixelSize: Style.font.caption; font.letterSpacing: 0.3
                     color: Colors.tertiary
                     elide: Text.ElideRight
                     Layout.maximumWidth: 220
@@ -181,8 +182,8 @@ Item {
                     visible: _entry !== null && _entry !== undefined
                         && _entry.lastWatchedEpNum !== ""
                         && _entry.lastWatchedEpNum !== undefined
-                    height: 20; width: lastWatchedText.implicitWidth + 18; radius: 10
-                    color: Colors.withAlpha(Colors.primary, 0.12)
+                    height: 20; width: lastWatchedText.implicitWidth + 18; radius: height / 2
+                    color: Style.selectedFillFor(Colors.primary)
                     border.color: Colors.primary; border.width: 1
 
                     Text {
@@ -193,7 +194,7 @@ Item {
                             return e ? I18n.t("last.ep", { 1: e.lastWatchedEpNum }) : ""
                         }
                         font.family: detailView.fontBody
-                        font.pixelSize: 9; font.letterSpacing: 0.8; color: Colors.primary
+                        font.pixelSize: 9; font.letterSpacing: 0.8; color: Colors.primary // style-ignore — bespoke size
                     }
                 }
             }
@@ -229,9 +230,9 @@ Item {
                 id: linksErrorToast
                 anchors {
                     bottom: parent.bottom; horizontalCenter: parent.horizontalCenter
-                    bottomMargin: 12
+                    bottomMargin: Style.spacing.xxl
                 }
-                height: 36; radius: 18
+                height: 36; radius: height / 2
                 width: linksErrText.implicitWidth + 28
                 color: Colors.error_container
                 visible: Anime.linksError.length > 0 && !Anime.isFetchingLinks
@@ -241,7 +242,7 @@ Item {
                     id: linksErrText; anchors.centerIn: parent
                     text: Anime.linksError
                     font.family: detailView.fontBody
-                    font.pixelSize: 11; color: Colors.on_error_container; elide: Text.ElideRight
+                    font.pixelSize: Style.font.bodySmall; color: Colors.on_error_container; elide: Text.ElideRight
                 }
             }
 
@@ -265,34 +266,34 @@ Item {
                         && _libEntry.lastWatchedEpNum === String(modelData.number)
 
                     color: isLastWatched
-                        ? Colors.withAlpha(Colors.primary, 0.07)
+                        ? Style.selectedFillFor(Colors.primary)
                         : (epRowAreaRect.pressed
                             ? Colors.surface_container_high
                             : (epRowAreaRect.hovered ? Colors.surface_container : "transparent"))
-                    Behavior on color { ColorAnimation { duration: 110 } }
+                    Behavior on color { ColorAnimation { duration: Style.motion.fast } }
 
                     Rectangle {
                         anchors {
                             bottom: parent.bottom
                             left: parent.left; right: parent.right
-                            leftMargin: 64; rightMargin: 16
+                            leftMargin: Style.space(64); rightMargin: Style.space(16)
                         }
                         height: 1; color: Colors.outline_variant; opacity: 0.22
                     }
 
                     RowLayout {
-                        anchors { fill: parent; leftMargin: 16; rightMargin: 16 }
-                        spacing: 14
+                        anchors { fill: parent; leftMargin: Style.space(16); rightMargin: Style.space(16) }
+                        spacing: Style.spacing.xxxl
 
                         Rectangle {
-                            width: epPillText.implicitWidth + 16; height: 26; radius: 13
+                            width: epPillText.implicitWidth + 16; height: 26; radius: height / 2
                             color: isLastWatched ? Colors.primary : Colors.primary_container
 
                             StyledText {
                                 id: epPillText; anchors.centerIn: parent
                                 text: I18n.t("ep", { 1: modelData.number || "?" })
                                 font.family: detailView.fontBody
-                                font.pixelSize: 9; font.bold: true; font.letterSpacing: 0.5
+                                font.pixelSize: 9; font.bold: true; font.letterSpacing: 0.5 // style-ignore — bespoke size
                                 color: isLastWatched ? Colors.on_primary : Colors.on_primary_container
                             }
                         }
@@ -301,16 +302,16 @@ Item {
                             Layout.fillWidth: true
                             text: I18n.t("episode", { 1: modelData.number || "" })
                             font.family: detailView.fontBody
-                            font.pixelSize: 12; color: Colors.on_surface; elide: Text.ElideRight
+                            font.pixelSize: Style.font.body; color: Colors.on_surface; elide: Text.ElideRight
                         }
 
                         // Play icon
                         StyledText {
-                            text: "▶"; font.pixelSize: 13
+                            text: "▶"; font.pixelSize: Style.font.subtitle
                             color: epRowAreaRect.hovered ? Colors.primary : Colors.outline
                             opacity: epRowAreaRect.hovered ? 0.9 : 0.35
-                            Behavior on opacity { NumberAnimation { duration: 120 } }
-                            Behavior on color   { ColorAnimation  { duration: 120 } }
+                            Behavior on opacity { NumberAnimation { duration: Style.motion.fast } }
+                            Behavior on color   { ColorAnimation  { duration: Style.motion.fast } }
                         }
                     }
 

@@ -2,6 +2,7 @@ import QtQuick
 import QtQuick.Controls
 import QtQuick.Layouts
 import qs.colors
+import qs.Commons
 import qs.services
 import qs.modules.anime.components
 import qs.components
@@ -16,7 +17,7 @@ Item {
     implicitWidth: 540
     visible: false
 
-    readonly property string fontBody: "Noto Sans"
+    readonly property string fontBody: Style.font.family
 
     // ── Tab state ─────────────────────────────────────────────────────────────
     property int tabIndex: 0       // 0 = Browse, 1 = Library
@@ -48,7 +49,7 @@ Item {
 
     ColumnLayout {
         anchors.fill: parent
-        spacing: 0
+        spacing: Style.space(0)
 
         // ── Main content (Browse / Library stacks) ────────────────────────────
         StackLayout {
@@ -62,7 +63,7 @@ Item {
                     anchors.fill: parent
                     visible: root.browseStack === 0
                     opacity: visible ? 1 : 0
-                    Behavior on opacity { NumberAnimation { duration: 220; easing.type: Easing.OutCubic } }
+                    Behavior on opacity { NumberAnimation { duration: Style.motion.slow; easing.type: Style.motion.easeOut } }
 
                     onAnimeSelected: function(show) {
                         Anime.fetchAnimeDetail(show)
@@ -74,7 +75,7 @@ Item {
                     anchors.fill: parent
                     visible: root.browseStack === 1
                     opacity: visible ? 1 : 0
-                    Behavior on opacity { NumberAnimation { duration: 220; easing.type: Easing.OutCubic } }
+                    Behavior on opacity { NumberAnimation { duration: Style.motion.slow; easing.type: Style.motion.easeOut } }
 
                     onBackRequested: {
                         root.browseStack = 0
@@ -89,7 +90,7 @@ Item {
                     anchors.fill: parent
                     visible: root.libraryStack === 0
                     opacity: visible ? 1 : 0
-                    Behavior on opacity { NumberAnimation { duration: 220; easing.type: Easing.OutCubic } }
+                    Behavior on opacity { NumberAnimation { duration: Style.motion.slow; easing.type: Style.motion.easeOut } }
 
                     onAnimeSelected: function(show) {
                         Anime.fetchAnimeDetail(show)
@@ -101,7 +102,7 @@ Item {
                     anchors.fill: parent
                     visible: root.libraryStack === 1
                     opacity: visible ? 1 : 0
-                    Behavior on opacity { NumberAnimation { duration: 220; easing.type: Easing.OutCubic } }
+                    Behavior on opacity { NumberAnimation { duration: Style.motion.slow; easing.type: Style.motion.easeOut } }
 
                     onBackRequested: {
                         root.libraryStack = 0
@@ -125,20 +126,20 @@ Item {
 
             IconButton {
                 id: minimizeButton
-                anchors { right: parent.right; rightMargin: 8; verticalCenter: parent.verticalCenter }
+                anchors { right: parent.right; rightMargin: Style.spacing.lg; verticalCenter: parent.verticalCenter }
                 icon: "󰖰"
                 onClicked: root.minimize()
             }
 
             LanguageToggle {
                 id: languageToggle
-                anchors { right: minimizeButton.left; rightMargin: 4; verticalCenter: parent.verticalCenter }
+                anchors { right: minimizeButton.left; rightMargin: Style.spacing.sm; verticalCenter: parent.verticalCenter }
             }
 
             Row {
                 id: tabRow
                 objectName: "tabRow"
-                anchors { left: parent.left; top: parent.top; bottom: parent.bottom; right: languageToggle.left; rightMargin: 8 }
+                anchors { left: parent.left; top: parent.top; bottom: parent.bottom; right: languageToggle.left; rightMargin: Style.spacing.lg }
 
                 Repeater {
                     id: tabsRepeater
@@ -156,32 +157,32 @@ Item {
                         Rectangle {
                             anchors.fill: parent
                             color: tabArea.containsMouse && !active
-                                ? Colors.withAlpha(Colors.primary, 0.05)
+                                ? Style.hoverFillFor(Colors.primary)
                                 : "transparent"
-                            Behavior on color { ColorAnimation { duration: 120 } }
+                            Behavior on color { ColorAnimation { duration: Style.motion.fast } }
                         }
 
                         Column {
                             anchors.centerIn: parent
-                            spacing: 2
+                            spacing: Style.spacing.xxs
 
                             StyledText {
                                 anchors.horizontalCenter: parent.horizontalCenter
                                 text: modelData.icon
-                                font.pixelSize: 13
+                                font.pixelSize: Style.font.subtitle
                                 color: active ? Colors.primary : Colors.on_surface_variant
                                 opacity: active ? 1 : 0.5
-                                Behavior on color { ColorAnimation { duration: 180 } }
+                                Behavior on color { ColorAnimation { duration: Style.motion.base } }
                             }
                             StyledText {
                                 anchors.horizontalCenter: parent.horizontalCenter
                                 text: modelData.label
                                 font.family: root.fontBody
-                                font.pixelSize: 10
+                                font.pixelSize: Style.font.caption
                                 font.letterSpacing: 0.6
                                 color: active ? Colors.primary : Colors.on_surface_variant
                                 opacity: active ? 1 : 0.5
-                                Behavior on color { ColorAnimation { duration: 180 } }
+                                Behavior on color { ColorAnimation { duration: Style.motion.base } }
                             }
                         }
 
@@ -192,9 +193,9 @@ Item {
                                 horizontalCenter: parent.horizontalCenter
                             }
                             width: active ? 28 : 0
-                            height: 2; radius: 1
+                            height: 2; radius: height / 2
                             color: Colors.primary
-                            Behavior on width { NumberAnimation { duration: 200; easing.type: Easing.OutCubic } }
+                            Behavior on width { NumberAnimation { duration: Style.motion.slow; easing.type: Style.motion.easeOut } }
                         }
 
                         MouseArea {

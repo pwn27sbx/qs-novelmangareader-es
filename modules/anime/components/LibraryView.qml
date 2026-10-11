@@ -2,14 +2,15 @@ import QtQuick
 import QtQuick.Controls
 import QtQuick.Layouts
 import qs.colors
+import qs.Commons
 import qs.services
 import qs.components
 
 Item {
     id: libraryView
 
-    readonly property string fontDisplay: "Noto Serif"
-    readonly property string fontBody:    "Noto Sans"
+    readonly property string fontDisplay: Style.font.displayFamily
+    readonly property string fontBody:    Style.font.family
 
     signal animeSelected(var show)
 
@@ -17,7 +18,7 @@ Item {
 
     ColumnLayout {
         anchors.fill: parent
-        spacing: 0
+        spacing: Style.space(0)
 
         // ── Header ────────────────────────────────────────────────────────────
         Rectangle {
@@ -30,15 +31,15 @@ Item {
             }
 
             RowLayout {
-                anchors { fill: parent; leftMargin: 18; rightMargin: 16 }
+                anchors { fill: parent; leftMargin: Style.spacing.huge; rightMargin: Style.space(16) }
 
                 Row {
-                    spacing: 0; Layout.fillWidth: true
+                    spacing: Style.space(0); Layout.fillWidth: true
 
                     StyledText {
                         text: I18n.t("anime.library.title")
                         font.family: libraryView.fontDisplay
-                        font.pixelSize: 22; font.letterSpacing: 1
+                        font.pixelSize: 22; font.letterSpacing: 1 // style-ignore — bespoke size
                         color: Colors.on_surface; opacity: 0.85
                     }
                 }
@@ -46,7 +47,7 @@ Item {
                 // Entry count badge
                 Rectangle {
                     visible: Anime.libraryList.length > 0
-                    height: 22; width: libCountText.implicitWidth + 16; radius: 11
+                    height: 22; width: libCountText.implicitWidth + 16; radius: height / 2
                     color: Colors.surface_container
                     border.color: Colors.outline_variant; border.width: 1
 
@@ -54,7 +55,7 @@ Item {
                         id: libCountText; anchors.centerIn: parent
                         text: Anime.libraryList.length
                         font.family: libraryView.fontBody
-                        font.pixelSize: 10; font.letterSpacing: 0.5
+                        font.pixelSize: Style.font.caption; font.letterSpacing: 0.5
                         color: Colors.on_surface_variant
                     }
                 }
@@ -79,7 +80,7 @@ Item {
             Layout.fillWidth: true; Layout.fillHeight: true
             visible: !Anime.libraryLoaded
             active: !Anime.libraryLoaded
-            padding: 8
+            padding: Style.spacing.lg
             ratio: 1.78
             footerHeight: 28
         }
@@ -89,7 +90,7 @@ Item {
             id: libGrid
             Layout.fillWidth: true; Layout.fillHeight: true
             visible: Anime.libraryList.length > 0
-            topMargin: 10; leftMargin: 8; rightMargin: 8; bottomMargin: 10
+            topMargin: Style.spacing.xl; leftMargin: Style.spacing.lg; rightMargin: Style.spacing.lg; bottomMargin: Style.spacing.xl
             cellWidth: Math.floor((width - leftMargin - rightMargin) / 4)
             cellHeight: cellWidth * 1.78
             clip: true; boundsBehavior: Flickable.StopAtBounds
@@ -114,15 +115,15 @@ Item {
                     // Score badge
                     Rectangle {
                         visible: entry.score !== null && entry.score !== undefined
-                        anchors { top: parent.top; left: parent.left; topMargin: 8; leftMargin: 8 }
-                        height: 20; radius: 10; width: libScoreText.implicitWidth + 12
+                        anchors { top: parent.top; left: parent.left; topMargin: Style.spacing.lg; leftMargin: Style.spacing.lg }
+                        height: 20; radius: height / 2; width: libScoreText.implicitWidth + 12
                         color: Qt.rgba(0, 0, 0, 0.72)
 
                         StyledText {
                             id: libScoreText; anchors.centerIn: parent
                             text: entry.score ? "★ " + (entry.score).toFixed(1) : ""
                             font.family: libraryView.fontBody
-                            font.pixelSize: 8; font.bold: true
+                            font.pixelSize: 8; font.bold: true // style-ignore — bespoke size
                             color: "#f5c518"
                         }
                     }
@@ -130,19 +131,19 @@ Item {
                     // Bookmark indicator
                     Rectangle {
                         visible: entry.bookmarked
-                        anchors { top: parent.top; right: parent.right; topMargin: 8; rightMargin: 8 }
-                        width: 22; height: 22; radius: 11
+                        anchors { top: parent.top; right: parent.right; topMargin: Style.spacing.lg; rightMargin: Style.spacing.lg }
+                        width: 22; height: 22; radius: height / 2
                         color: Qt.rgba(0, 0, 0, 0.65)
 
                         Text {
                             anchors.centerIn: parent; text: "♥"
-                            font.pixelSize: 9; color: Colors.primary
+                            font.pixelSize: 9; color: Colors.primary // style-ignore — bespoke size
                         }
                     }
 
                     CoverProgressBar {
                         height: 28
-                        rowSpacing: 5
+                        rowSpacing: Style.space(5)
                         bodyFont: libraryView.fontBody
                         started: entry.lastWatchedEpNum
                         label: entry.lastWatchedEpNum
