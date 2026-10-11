@@ -60,26 +60,37 @@ Item {
         anchors.fill: parent
         spacing: Style.space(0)
 
-        // ── Header bar (tabs · search · language · minimize) ──────────────────
+        // ── Header (tabs · search · language · minimize) ──────────────────────
         Rectangle {
             Layout.fillWidth: true
-            height: 44
+            height: 48
             color: Colors.surface_container_low
             z: 2
 
-            ButtonGroup {
+            Row {
                 id: tabRow
                 objectName: "tabRow"
                 visible: !root.searchOpen
                 anchors { left: parent.left; leftMargin: Style.spacing.md; verticalCenter: parent.verticalCenter }
-                options: [
-                    { value: "0", label: I18n.t("tab.browse") },
-                    { value: "1", label: I18n.t("tab.library") }
-                ]
-                value: String(root.tabIndex)
-                background: "transparent"
-                fontSize: Style.font.bodySmall
-                onChanged: function(v) { root.tabIndex = parseInt(v) }
+                spacing: Style.spacing.md
+
+                Repeater {
+                    model: [
+                        { value: "0", label: I18n.t("tab.browse") },
+                        { value: "1", label: I18n.t("tab.library") }
+                    ]
+                    delegate: Button {
+                        required property var modelData
+                        readonly property bool active: String(root.tabIndex) === modelData.value
+                        text: modelData.label
+                        bordered: false
+                        background: "transparent"
+                        selected: active
+                        foreground: active ? Colors.on_surface : Colors.muted
+                        fontSize: Style.font.bodySmall
+                        onClicked: root.tabIndex = parseInt(modelData.value)
+                    }
+                }
             }
 
             // Search field — occupies the left region while searching
@@ -88,7 +99,7 @@ Item {
                 visible: root.searchOpen
                 anchors {
                     left: parent.left; leftMargin: Style.spacing.md
-                    right: searchToggle.left; rightMargin: Style.spacing.sm
+                    right: actions.left; rightMargin: Style.spacing.md
                     verticalCenter: parent.verticalCenter
                 }
                 height: 32; radius: Style.cornerRadius
@@ -159,25 +170,32 @@ Item {
                 }
             }
 
-            // ── Right actions: search · language · minimize ───────────────────
-            IconButton {
-                id: searchToggle
-                anchors { right: languageToggle.left; rightMargin: Style.spacing.sm; verticalCenter: parent.verticalCenter }
-                icon: "⌕"
-                visible: root.tabIndex === 0
-                onClicked: root.searchOpen ? root.closeSearch() : root.openSearch()
-            }
+            // ── Actions (right): search · language · minimize ─────────────────
+            Row {
+                id: actions
+                anchors { right: parent.right; rightMargin: Style.spacing.md; verticalCenter: parent.verticalCenter }
+                spacing: Style.spacing.controlGap
 
-            LanguageToggle {
-                id: languageToggle
-                anchors { right: minimizeButton.left; rightMargin: Style.spacing.sm; verticalCenter: parent.verticalCenter }
-            }
+                PanelActionButton {
+                    visible: root.tabIndex === 0
+                    iconText: "⌕"
+                    hasCursor: root.searchOpen
+                    onClicked: root.searchOpen ? root.closeSearch() : root.openSearch()
+                }
 
-            IconButton {
-                id: minimizeButton
-                anchors { right: parent.right; rightMargin: Style.spacing.lg; verticalCenter: parent.verticalCenter }
-                icon: "󰖰"
-                onClicked: root.minimize()
+                Button {
+                    text: I18n.lang === "es" ? "ES" : "EN" // i18n-ignore — language code chip
+                    bordered: false
+                    background: "transparent"
+                    foreground: Colors.muted
+                    fontSize: Style.font.caption
+                    onClicked: I18n.toggleLanguage()
+                }
+
+                PanelActionButton {
+                    iconText: "─"
+                    onClicked: root.minimize()
+                }
             }
         }
 

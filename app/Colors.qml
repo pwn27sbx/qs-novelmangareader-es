@@ -36,6 +36,7 @@ QtObject {
     readonly property color on_surface: Color.foreground
     readonly property color text: Color.foreground
     readonly property color on_surface_variant: Color.muted
+    readonly property color muted: Color.muted
     readonly property color inverse_surface: Color.foreground
     readonly property color inverse_on_surface: Color.background
     readonly property color scrim: "#000000"

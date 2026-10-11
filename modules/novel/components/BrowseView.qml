@@ -6,6 +6,7 @@ import qs.app
 import qs.Commons
 import qs.services
 import qs.components
+import qs.Ui
 
 Item {
     id: browseView
@@ -58,29 +59,17 @@ Item {
                     ListElement { labelKey: "novel.filter.latest"; fid: "latest" }
                 }
 
-                delegate: Item {
-                    width: chip.implicitWidth + 28; height: parent.height
-
-                    Rectangle {
-                        id: chip
-                        anchors.centerIn: parent
-                        implicitWidth: chipLbl.implicitWidth + 28; height: 30; radius: Style.cornerRadius
-                        color: browseView.currentFilter === fid ? Style.selectedFillFor(Colors.primary) : "transparent"
-                        Behavior on color { ColorAnimation { duration: Motion.base } }
-
-                        StyledText {
-                            id: chipLbl; anchors.centerIn: parent; text: I18n.t(labelKey)
-                            font.family: browseView.fontBody; font.pixelSize: Style.font.body
-                            font.letterSpacing: 0.6
-                            color: browseView.currentFilter === fid ? Colors.primary : Colors.on_surface_variant
-                            Behavior on color { ColorAnimation { duration: Motion.base } }
-                        }
-                    }
-
-                    MouseArea {
-                        anchors.fill: parent
-                        onClicked: browseView._switchFilter(fid)
-                    }
+                delegate: Button {
+                    required property string labelKey
+                    required property string fid
+                    readonly property bool active: browseView.currentFilter === fid
+                    text: I18n.t(labelKey)
+                    bordered: false
+                    background: "transparent"
+                    selected: active
+                    foreground: active ? Colors.on_surface : Colors.muted
+                    fontSize: Style.font.body
+                    onClicked: browseView._switchFilter(fid)
                 }
             }
 

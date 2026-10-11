@@ -70,26 +70,37 @@ Item {
         anchors.fill: parent
         spacing: Style.space(0)
 
-        // ── Header bar (tabs · search · SUB/DUB · language · minimize) ────────
+        // ── Header (tabs · search · SUB/DUB · language · minimize) ────────────
         Rectangle {
             Layout.fillWidth: true
-            height: 44
+            height: 48
             color: Colors.surface_container_low
             z: 2
 
-            ButtonGroup {
+            Row {
                 id: tabRow
                 objectName: "tabRow"
                 visible: !root.searchOpen
                 anchors { left: parent.left; leftMargin: Style.spacing.md; verticalCenter: parent.verticalCenter }
-                options: [
-                    { value: "0", label: I18n.t("tab.browse") },
-                    { value: "1", label: I18n.t("tab.library") }
-                ]
-                value: String(root.tabIndex)
-                background: "transparent"
-                fontSize: Style.font.bodySmall
-                onChanged: function(v) { root.tabIndex = parseInt(v) }
+                spacing: Style.spacing.md
+
+                Repeater {
+                    model: [
+                        { value: "0", label: I18n.t("tab.browse") },
+                        { value: "1", label: I18n.t("tab.library") }
+                    ]
+                    delegate: Button {
+                        required property var modelData
+                        readonly property bool active: String(root.tabIndex) === modelData.value
+                        text: modelData.label
+                        bordered: false
+                        background: "transparent"
+                        selected: active
+                        foreground: active ? Colors.on_surface : Colors.muted
+                        fontSize: Style.font.bodySmall
+                        onClicked: root.tabIndex = parseInt(modelData.value)
+                    }
+                }
             }
 
             // Search field — occupies the left region while searching
@@ -98,7 +109,7 @@ Item {
                 visible: root.searchOpen
                 anchors {
                     left: parent.left; leftMargin: Style.spacing.md
-                    right: searchToggle.left; rightMargin: Style.spacing.sm
+                    right: actions.left; rightMargin: Style.spacing.md
                     verticalCenter: parent.verticalCenter
                 }
                 height: 32; radius: Style.cornerRadius
@@ -169,71 +180,53 @@ Item {
                 }
             }
 
-            // ── Right actions: SUB/DUB · search · language · minimize ─────────
-            Rectangle {
-                id: modeToggle
-                visible: root.tabIndex === 0 && !root.searchOpen
-                anchors { right: searchToggle.left; rightMargin: Style.spacing.sm; verticalCenter: parent.verticalCenter }
-                height: 28
-                width: modeRow.implicitWidth + 16
-                radius: Style.cornerRadius
-                color: "transparent"
+            // ── Actions (right): search · SUB/DUB · language · minimize ───────
+            Row {
+                id: actions
+                anchors { right: parent.right; rightMargin: Style.spacing.md; verticalCenter: parent.verticalCenter }
+                spacing: Style.spacing.controlGap
+
+                PanelActionButton {
+                    visible: root.tabIndex === 0
+                    iconText: "⌕"
+                    hasCursor: root.searchOpen
+                    onClicked: root.searchOpen ? root.closeSearch() : root.openSearch()
+                }
 
                 Row {
-                    id: modeRow
-                    anchors.centerIn: parent
+                    visible: root.tabIndex === 0
                     spacing: Style.space(0)
 
                     Repeater {
                         model: ["sub", "dub"]
 
-                        delegate: Item {
-                            width: modeText.implicitWidth + 16
-                            height: 28
+                        delegate: Button {
+                            required property string modelData
                             readonly property bool active: Anime.currentMode === modelData
-
-                            Rectangle {
-                                anchors { fill: parent; margins: Style.spacing.xs }
-                                radius: Style.cornerRadius
-                                color: active ? Style.selectedFillFor(Colors.primary) : "transparent"
-                                Behavior on color { ColorAnimation { duration: Motion.base } }
-                            }
-                            StyledText {
-                                id: modeText
-                                anchors.centerIn: parent
-                                text: modelData.toUpperCase()
-                                font.family: root.fontBody
-                                font.pixelSize: Style.font.caption; font.letterSpacing: 1; font.bold: true
-                                color: active ? Colors.primary : Colors.on_surface_variant
-                                Behavior on color { ColorAnimation { duration: Motion.base } }
-                            }
-                            MouseArea {
-                                anchors.fill: parent
-                                onClicked: Anime.setMode(modelData)
-                            }
+                            text: modelData.toUpperCase()
+                            bordered: false
+                            background: "transparent"
+                            selected: active
+                            foreground: active ? Colors.on_surface : Colors.muted
+                            fontSize: Style.font.caption
+                            onClicked: Anime.setMode(modelData)
                         }
                     }
                 }
-            }
 
-            IconButton {
-                id: searchToggle
-                anchors { right: languageToggle.left; rightMargin: Style.spacing.sm; verticalCenter: parent.verticalCenter }
-                icon: "⌕"
-                visible: root.tabIndex === 0
-                onClicked: root.searchOpen ? root.closeSearch() : root.openSearch()
-            }
+                Button {
+                    text: I18n.lang === "es" ? "ES" : "EN" // i18n-ignore — language code chip
+                    bordered: false
+                    background: "transparent"
+                    foreground: Colors.muted
+                    fontSize: Style.font.caption
+                    onClicked: I18n.toggleLanguage()
+                }
 
-            LanguageToggle {
-                id: languageToggle
-                anchors { right: minimizeButton.left; rightMargin: Style.spacing.sm; verticalCenter: parent.verticalCenter }
-            }
-
-            IconButton {
-                id: minimizeButton
-                anchors { right: parent.right; rightMargin: Style.spacing.lg; verticalCenter: parent.verticalCenter }
-                icon: "󰖰"
-                onClicked: root.minimize()
+                PanelActionButton {
+                    iconText: "─"
+                    onClicked: root.minimize()
+                }
             }
         }
 

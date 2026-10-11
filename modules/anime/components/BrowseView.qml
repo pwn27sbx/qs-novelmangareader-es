@@ -6,6 +6,7 @@ import qs.app
 import qs.Commons
 import qs.services
 import qs.components
+import qs.Ui
 
 Item {
     id: browseView
@@ -57,40 +58,22 @@ Item {
                     ListElement { labelKey: "anime.filter.korea";   view: "latest";  country: "KR"  }
                 }
 
-                delegate: Item {
-                    width: chipRect.implicitWidth + 24
-                    height: chipList.height
-
-                    readonly property bool active:
-                        Anime.currentView === view && Anime.currentCountry === country
-
-                    Rectangle {
-                        id: chipRect
-                        anchors.centerIn: parent
-                        implicitWidth: chipLbl.implicitWidth + 24
-                        height: 28; radius: Style.cornerRadius
-                        color: active ? Style.selectedFillFor(Colors.primary) : "transparent"
-                        Behavior on color { ColorAnimation { duration: Motion.base } }
-
-                        StyledText {
-                            id: chipLbl
-                            anchors.centerIn: parent
-                            text: I18n.t(labelKey)
-                            font.family: browseView.fontBody
-                            font.pixelSize: Style.font.bodySmall; font.letterSpacing: 0.5
-                            color: active ? Colors.primary : Colors.on_surface_variant
-                            Behavior on color { ColorAnimation { duration: Motion.base } }
-                        }
-                    }
-
-                    MouseArea {
-                        anchors.fill: parent
-                        onClicked: {
-                            browseView.searchCleared()
-                            Anime.currentCountry = country
-                            if (view === "popular") Anime.fetchPopular(true)
-                            else Anime.fetchLatest(true)
-                        }
+                delegate: Button {
+                    required property string labelKey
+                    required property string view
+                    required property string country
+                    readonly property bool active: Anime.currentView === view && Anime.currentCountry === country
+                    text: I18n.t(labelKey)
+                    bordered: false
+                    background: "transparent"
+                    selected: active
+                    foreground: active ? Colors.on_surface : Colors.muted
+                    fontSize: Style.font.bodySmall
+                    onClicked: {
+                        browseView.searchCleared()
+                        Anime.currentCountry = country
+                        if (view === "popular") Anime.fetchPopular(true)
+                        else Anime.fetchLatest(true)
                     }
                 }
             }

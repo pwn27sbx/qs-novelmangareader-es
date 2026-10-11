@@ -6,6 +6,7 @@ import qs.app
 import qs.Commons
 import qs.services
 import qs.components
+import qs.Ui
 
 Item {
     id: browseView
@@ -58,42 +59,20 @@ Item {
                     ListElement { labelKey: "Manhua";              tagId: "zh"     }
                 }
 
-                delegate: Item {
-                    width: chip.implicitWidth + 28
-                    height: tagList.height
-
-                    Rectangle {
-                        id: chip
-                        anchors.centerIn: parent
-                        implicitWidth: chipLabel.implicitWidth + 28
-                        height: 30
-                        radius: Style.cornerRadius
-                        color: browseView.currentTagId === tagId
-                            ? Style.selectedFillFor(Colors.primary)
-                            : "transparent"
-                        Behavior on color { ColorAnimation { duration: Motion.base } }
-
-                        StyledText {
-                            id: chipLabel
-                            anchors.centerIn: parent
-                            text: I18n.t(labelKey)
-                            font.family: browseView.fontBody
-                            font.pixelSize: Style.font.body
-                            font.letterSpacing: 0.6
-                            color: browseView.currentTagId === tagId
-                                ? Colors.primary
-                                : Colors.on_surface_variant
-                            Behavior on color { ColorAnimation { duration: Motion.base } }
-                        }
-                    }
-
-                    MouseArea {
-                        anchors.fill: parent
-                        onClicked: {
-                            browseView.currentTagId = tagId
-                            browseView.searchCleared()
-                            Manga.fetchByOrigin(tagId, true)
-                        }
+                delegate: Button {
+                    required property string labelKey
+                    required property string tagId
+                    readonly property bool active: browseView.currentTagId === tagId
+                    text: I18n.t(labelKey)
+                    bordered: false
+                    background: "transparent"
+                    selected: active
+                    foreground: active ? Colors.on_surface : Colors.muted
+                    fontSize: Style.font.body
+                    onClicked: {
+                        browseView.currentTagId = tagId
+                        browseView.searchCleared()
+                        Manga.fetchByOrigin(tagId, true)
                     }
                 }
             }
