@@ -29,9 +29,10 @@ PAGE_LIMIT = 32
 USER_AGENT = "qs-novelmangareader-es/0.1 (+https://github.com/dhrruvsharma/qs-novelmangareader)"
 
 try:  # optional browser-grade TLS (used by manga_server.py); urllib is the fallback
-    from curl_cffi.requests import Session as _CffiSession  # noqa: F401
+    from curl_cffi.requests import Session as _CffiSession
     _HAVE_CFFI = True
 except Exception:  # noqa: BLE001
+    _CffiSession = None
     _HAVE_CFFI = False
 
 # ── rate limit + TTL cache (plan §15.5) ────────────────────────────────────
@@ -69,8 +70,12 @@ def _rate_limit():
 
 
 def _fetch(url, data=None, referer=None):
-    """GET/POST returning text. curl_cffi when available, else urllib."""
-    body = urllib.parse.urlencode(data, doseq=True) if data else None
+    """GET/POST returning text. curl_cffi when available, else urllib.
+
+    curl_cffi must receive the form fields as a dict: passing an already
+    url-encoded string makes InManga's search answer with the whole catalogue
+    (ignoring the query) instead of the filtered results.
+    """
     headers = {
         "User-Agent": USER_AGENT,
         "Accept-Language": "es-ES,es;q=0.9",
@@ -84,10 +89,11 @@ def _fetch(url, data=None, referer=None):
         if session is None:
             session = _CffiSession(impersonate="firefox")
             _cffi_local.session = session
-        resp = session.request("POST" if body else "GET", url, data=body, headers=headers, timeout=30)
+        resp = session.request("POST" if data else "GET", url, data=data, headers=headers, timeout=30)
         resp.raise_for_status()
         return resp.text
-    request = urllib.request.Request(url, headers=headers, data=(body.encode() if body else None))
+    body = urllib.parse.urlencode(data, doseq=True).encode() if data else None
+    request = urllib.request.Request(url, headers=headers, data=body)
     with urllib.request.urlopen(request, timeout=30) as response:
         return response.read().decode("utf-8", "replace")
 

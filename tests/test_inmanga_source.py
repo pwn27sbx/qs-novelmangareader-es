@@ -88,5 +88,41 @@ class FilterByQueryTest(unittest.TestCase):
         self.assertEqual(inmanga_source.filter_by_query(self.items, "Solo Leveling"), [])
 
 
+class FetchBodyTest(unittest.TestCase):
+    def test_curl_cffi_receives_form_dict(self):
+        # Regression: sending an url-encoded STRING makes InManga answer with the
+        # whole catalogue; the form fields must reach curl_cffi as a dict.
+        import threading
+
+        captured = {}
+
+        class FakeResponse:
+            text = "<html></html>"
+
+            def raise_for_status(self):
+                pass
+
+        class FakeSession:
+            def __init__(self, *a, **k):
+                pass
+
+            def request(self, method, url, data=None, headers=None, timeout=None):
+                captured["method"] = method
+                captured["data"] = data
+                return FakeResponse()
+
+        old = (inmanga_source._HAVE_CFFI, inmanga_source._CffiSession, inmanga_source._cffi_local)
+        inmanga_source._HAVE_CFFI = True
+        inmanga_source._CffiSession = FakeSession
+        inmanga_source._cffi_local = threading.local()
+        try:
+            inmanga_source._fetch("https://x/", data={"filter[queryString]": "naruto"})
+        finally:
+            inmanga_source._HAVE_CFFI, inmanga_source._CffiSession, inmanga_source._cffi_local = old
+        self.assertEqual(captured["method"], "POST")
+        self.assertIsInstance(captured["data"], dict)
+        self.assertEqual(captured["data"], {"filter[queryString]": "naruto"})
+
+
 if __name__ == "__main__":
     unittest.main()
