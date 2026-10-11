@@ -7,7 +7,7 @@
 | Repo de trabajo | `~/Projects/forks/qs-novelmangareader-es` |
 | Upstream | `dhrruvsharma/qs-novelmangareader` (GPL-3.0) |
 | Inicio | 2026-10-11 |
-| Estado | **WU-2 completo** · GATE §15.1 cerrado |
+| Estado | **WU-3 completo** · GATE §15.1 cerrado |
 | Plan fuente | `2026-10-11-plan-localizacion-es-qs-novelmangareader.md` (§0–§16) |
 | Handoff | `2026-10-11-handoff-orquestador-qs-novelmangareader-es.md` |
 
@@ -70,13 +70,16 @@ Tener la interfaz de la app Quickshell `qs-novelmangareader` **en español latin
 - **WU-2 — `LoadingState` default `label: ""`**: los 2 call sites pasan `label:`; se eliminó el literal inglés `"loading"` para no acoplar `components/` a `qs.services` (§14.3).
 - **WU-2 — errores del backend `data.error`**: se dejan **verbatim** (EN) por §6.8/§14.1; la mejora opcional `I18n.t("error.server", …)` se descartó por ahora para no alterar la salida en EN (DoD #4).
 - **WU-2 — normalización cosmética EN:** `"Ep."+n` y `"Ep. "+n` → clave única `ep` = `"Ep. %1"` (unifica "Ep.3"/"Ep. 3"). Cambio solo de un espacio; pendiente de tu OK si querés EN byte-idéntico.
+- **WU-3 — chips Manga/Manhwa/Manhua:** se guardan como `labelKey` literal (p. ej. `"Manga"`) y el delegate hace `I18n.t(labelKey)`; al no existir la clave, el core devuelve la propia clave → se muestran sin traducir sin caso especial.
+- **WU-3 — clave extra `manga.pageFailed`** ("no se pudo cargar"/"failed to load"): el sufijo de error por página no estaba en §6.3; se añadió para no dejar EN crudo.
+- **WU-3 — `count.chapter`** corrige singular ("1 capítulo" en vez de "1 capítulos"); en EN también ("1 chapter"). Mejora intencional; notar por si querés EN byte-idéntico.
 
 > Orden de ejecución recomendado (novela diferida): `WU-0 → 1 → 2 → 3 → 5 → 6 → [7 cond.] → 8 → 9 → [10 opc.] → [4 si aplica]`.
 
 - [x] **WU-0** — Setup: clonar fork, `upstream`, rama `i18n-es`, feature doc + espejo Engram. *(F1-1)*
 - [x] **WU-1** — Núcleo i18n: `services/I18n.qml` (`pragma Singleton` + `Singleton{}`), `t()` + `tn()` (plurales), sin `qmldir`. *(F1-2, F1-7, §15.4)*
 - [x] **WU-2** — Envolver comunes + anime. *(F1-3, F1-4)*
-- [ ] **WU-3** — Envolver manga. *(F1-5)*
+- [x] **WU-3** — Envolver manga. *(F1-5)*
 - [ ] **WU-5** — Lint anti-strings sin `I18n.t` + test de paridad de claves `es`↔`en`. *(F1-8)*
 - [ ] **WU-6** — QA visual integral (3 módulos × vistas). *(F1-9, read-only)*
 - [ ] **WU-7** — Subtítulos ES (**CONDICIONADO**: requiere confirmar campo de idioma). *(F1.5-1, §13.3/§14.2)*
@@ -184,9 +187,11 @@ Tener la interfaz de la app Quickshell `qs-novelmangareader` **en español latin
 |---|---|---|---|
 | WU-0 | `eb39f81` | 2026-10-11 | ✅ completo |
 | WU-1 | `3f8cdc4` | 2026-10-11 | ✅ completo |
+| WU-2 | `5048592` | 2026-10-11 | ✅ completo |
+| WU-3 | `—` (se completa al cierre) | 2026-10-11 | ✅ completo |
 
 ---
 
 ## Próximo paso
 
-WU-3: envolver manga — `modules/manga/**`, `services/Manga.qml`. Ruta planificada: delegado (writer) o inline. Luego WU-4 (novela), WU-5 (lint), WU-6 (QA). **RITMO FLOW: sin parar por WU.**
+WU-4: envolver novela — `modules/novel/**`, `services/Novel.qml` (el dueño no usa novelas; va último entre módulos). Luego WU-5 (lint), WU-6 (QA). **RITMO FLOW: sin parar por WU.**

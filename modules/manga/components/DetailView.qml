@@ -134,7 +134,7 @@ Item {
                         StyledText {
                             id: libBtnLabel
                             anchors.verticalCenter: parent.verticalCenter
-                            text: "Library"
+                            text: I18n.t("tab.library")
                             font.family: detailView.fontBody
                             font.pixelSize: 11; font.letterSpacing: 0.3
                             color: detailView._inLibrary ? Colors.on_primary_container : Colors.on_surface_variant
@@ -262,7 +262,7 @@ Item {
                 anchors { fill: parent; leftMargin: 16; rightMargin: 16 }
 
                 StyledText {
-                    text: Manga.currentManga ? Manga.currentManga.chapters.length + " chapters" : ""
+                    text: Manga.currentManga ? I18n.tn("count.chapter", Manga.currentManga.chapters.length) : ""
                     font.family: detailView.fontBody
                     font.pixelSize: 11; font.letterSpacing: 1
                     color: Colors.on_surface_variant; opacity: 0.75
@@ -286,7 +286,7 @@ Item {
                         text: {
                             var e = Manga.currentManga
                                 ? Manga.getLibraryEntry(Manga.currentManga.id) : null
-                            return e ? "Last: Ch. " + detailView.formatChapter(e.lastReadChapterNum) : ""
+                            return e ? I18n.t("last.ch", { 1: detailView.formatChapter(e.lastReadChapterNum) }) : ""
                         }
                         font.family: detailView.fontBody
                         font.pixelSize: 9; font.letterSpacing: 0.8; color: Colors.primary
@@ -342,7 +342,7 @@ Item {
                             // Placeholder text
                             StyledText {
                                 anchors.verticalCenter: parent.verticalCenter
-                                text: "Filter chapters…"
+                                text: I18n.t("filterChapters")
                                 font.family: detailView.fontBody
                                 font.pixelSize: 12
                                 color: Colors.on_surface_variant
@@ -406,7 +406,7 @@ Item {
 
                         ToolTip.visible: containsMouse
                         ToolTip.delay: 600
-                        ToolTip.text: detailView._sortAscending ? "Sort: Ascending" : "Sort: Descending"
+                        ToolTip.text: detailView._sortAscending ? I18n.t("sort.ascending") : I18n.t("sort.descending")
                     }
                 }
             }
@@ -476,7 +476,7 @@ Item {
 
                             StyledText {
                                 id: chapterPillText; anchors.centerIn: parent
-                                text: "Ch." + detailView.formatChapter(modelData.chapter)
+                                text: I18n.t("ch", { 1: detailView.formatChapter(modelData.chapter) })
                                 font.family: detailView.fontBody
                                 font.pixelSize: 9; font.bold: true; font.letterSpacing: 0.5
                                 color: isLastRead ? Colors.on_primary : Colors.on_primary_container
@@ -488,7 +488,7 @@ Item {
 
                             Text {
                                 width: parent.width
-                                text: modelData.title || ("Chapter " + detailView.formatChapter(modelData.chapter))
+                                text: modelData.title || I18n.t("chapter", { 1: detailView.formatChapter(modelData.chapter) })
                                 font.family: detailView.fontBody
                                 font.pixelSize: 12; color: Colors.on_surface; elide: Text.ElideRight
                             }

@@ -93,7 +93,7 @@ Item {
 
                     StyledText {
                         anchors { verticalCenter: parent.verticalCenter; left: parent.left; leftMargin: 16 }
-                        text: "Search titles…"
+                        text: I18n.t("manga.search")
                         color: Colors.on_surface_variant
                         font.family: browseView.fontBody
                         font.pixelSize: 13
@@ -191,11 +191,11 @@ Item {
                 boundsBehavior: Flickable.StopAtBounds
 
                 model: ListModel {
-                    ListElement { label: "Hot";     tagId: ""       }
-                    ListElement { label: "Latest";  tagId: "latest" }
-                    ListElement { label: "Manga";   tagId: "ja"     }
-                    ListElement { label: "Manhwa";  tagId: "ko"     }
-                    ListElement { label: "Manhua";  tagId: "zh"     }
+                    ListElement { labelKey: "manga.filter.hot";    tagId: ""       }
+                    ListElement { labelKey: "manga.filter.latest"; tagId: "latest" }
+                    ListElement { labelKey: "Manga";               tagId: "ja"     }
+                    ListElement { labelKey: "Manhwa";              tagId: "ko"     }
+                    ListElement { labelKey: "Manhua";              tagId: "zh"     }
                 }
 
                 delegate: Item {
@@ -220,7 +220,7 @@ Item {
                         StyledText {
                             id: chipLabel
                             anchors.centerIn: parent
-                            text: label
+                            text: I18n.t(labelKey)
                             font.family: browseView.fontBody
                             font.pixelSize: 12
                             font.letterSpacing: 0.6

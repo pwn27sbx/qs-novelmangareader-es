@@ -29,12 +29,19 @@ var tables = {
         // ── Interpolation / counts (plan §6, F1-7) ──────────────────────
         "ep": "Ep. %1",
         "episode": "Episodio %1",
+        "ch": "Cap. %1",
+        "chapter": "Capítulo %1",
         "last.ep": "Último: Ep. %1",
         "last.ch": "Último: Cap. %1",
         "page": "pág. %1",
         "words": "%1 mil palabras",
         "count.episode": { one: "%1 episodio", other: "%1 episodios" },
         "count.chapter": { one: "%1 capítulo", other: "%1 capítulos" },
+
+        // ── List controls (shared) ──────────────────────────────────────
+        "filterChapters": "Filtrar capítulos…",
+        "sort.ascending": "Orden: Ascendente",
+        "sort.descending": "Orden: Descendente",
 
         // ── Anime ───────────────────────────────────────────────────────
         "panel.anime": "anime",
@@ -49,7 +56,18 @@ var tables = {
         "anime.fetching": "cargando el video",
         "anime.noStream": "No se encontró una transmisión para este episodio",
         "anime.epCount": "%1 ep",
-        "anime.mpvTitle": "Anime"
+        "anime.mpvTitle": "Anime",
+
+        // ── Manga ───────────────────────────────────────────────────────
+        "panel.manga": "manga",
+        "manga.search": "Buscar títulos…",
+        "manga.filter.hot": "Tendencias",
+        "manga.filter.latest": "Recientes",
+        "manga.library.hint": "Abre cualquier manga y toca  + Biblioteca",
+        "manga.loadingPages": "cargando páginas",
+        "manga.invalidResponse": "Respuesta no válida",
+        "manga.noPages": "No se encontraron páginas para este capítulo",
+        "manga.pageFailed": "no se pudo cargar"
     },
 
     en: {
@@ -71,12 +89,19 @@ var tables = {
         // ── Interpolation / counts (plan §6, F1-7) ──────────────────────
         "ep": "Ep. %1",
         "episode": "Episode %1",
+        "ch": "Ch. %1",
+        "chapter": "Chapter %1",
         "last.ep": "Last: Ep. %1",
         "last.ch": "Last: Ch. %1",
         "page": "p. %1",
         "words": "%1k words",
         "count.episode": { one: "%1 episode", other: "%1 episodes" },
         "count.chapter": { one: "%1 chapter", other: "%1 chapters" },
+
+        // ── List controls (shared) ──────────────────────────────────────
+        "filterChapters": "Filter chapters…",
+        "sort.ascending": "Sort: Ascending",
+        "sort.descending": "Sort: Descending",
 
         // ── Anime ───────────────────────────────────────────────────────
         "panel.anime": "anime",
@@ -91,7 +116,18 @@ var tables = {
         "anime.fetching": "fetching stream",
         "anime.noStream": "No working stream found for this episode",
         "anime.epCount": "%1 ep",
-        "anime.mpvTitle": "Anime"
+        "anime.mpvTitle": "Anime",
+
+        // ── Manga ───────────────────────────────────────────────────────
+        "panel.manga": "manga",
+        "manga.search": "Search titles…",
+        "manga.filter.hot": "Hot",
+        "manga.filter.latest": "Latest",
+        "manga.library.hint": "Open any manga and tap  + Library",
+        "manga.loadingPages": "loading pages",
+        "manga.invalidResponse": "Invalid response",
+        "manga.noPages": "No pages found for this chapter",
+        "manga.pageFailed": "failed to load"
     }
 };
 

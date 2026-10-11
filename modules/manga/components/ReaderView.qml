@@ -117,7 +117,7 @@ Item {
         color: "#08080a"
         textColor: "white"
         spinnerSize: 40
-        label: "loading pages"
+        label: I18n.t("manga.loadingPages")
         detail: Manga.currentManga ? Manga.currentManga.title : ""
         bodyFont: readerView.fontBody
     }
@@ -224,8 +224,8 @@ Item {
                     }
                     StyledText {
                         anchors.horizontalCenter: parent.horizontalCenter
-                        text: "p. " + (modelData.index + 1)
-                            + (pageImg.status === Image.Error ? "  ·  failed to load" : "")
+                        text: I18n.t("page", { 1: modelData.index + 1 })
+                            + (pageImg.status === Image.Error ? "  ·  " + I18n.t("manga.pageFailed") : "")
                         color: Qt.rgba(1, 1, 1, 0.3)
                         font.pixelSize: 10
                         font.family: readerView.fontBody

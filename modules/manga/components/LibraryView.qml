@@ -28,8 +28,8 @@ Item {
             visible: Manga.libraryList.length === 0 && Manga.libraryLoaded
 
             EmptyState {
-                title: "Your library is empty"
-                subtitle: "Open any manga and tap  + Library"
+                title: I18n.t("empty.library")
+                subtitle: I18n.t("manga.library.hint")
                 displayFont: libraryView.fontDisplay
                 bodyFont: libraryView.fontBody
             }
@@ -84,8 +84,8 @@ Item {
                         bodyFont: libraryView.fontBody
                         started: libEntry.lastReadChapterNum
                         label: libEntry.lastReadChapterNum
-                                ? "Ch. " + libEntry.lastReadChapterNum
-                                : "Not started"
+                                ? I18n.t("ch", { 1: libEntry.lastReadChapterNum })
+                                : I18n.t("state.notStarted")
                     }
 
                     onClicked: {
