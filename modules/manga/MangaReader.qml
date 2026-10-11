@@ -67,26 +67,18 @@ Item {
             color: Colors.surface_container_low
             z: 2
 
-            Row {
+            SegmentBar {
                 id: tabRow
                 objectName: "tabRow"
                 visible: !root.searchOpen
                 anchors { left: parent.left; leftMargin: Style.spacing.md; verticalCenter: parent.verticalCenter }
-                spacing: Style.spacing.md
-
-                Repeater {
-                    model: [
-                        { value: "0", label: I18n.t("tab.browse") },
-                        { value: "1", label: I18n.t("tab.library") }
-                    ]
-                    delegate: SegmentChip {
-                        required property var modelData
-                        text: modelData.label
-                        active: String(root.tabIndex) === modelData.value
-                        fontFamily: root.fontBody
-                        onClicked: root.tabIndex = parseInt(modelData.value)
-                    }
-                }
+                options: [
+                    { value: "0", label: I18n.t("tab.browse") },
+                    { value: "1", label: I18n.t("tab.library") }
+                ]
+                value: String(root.tabIndex)
+                fontFamily: root.fontBody
+                onActivated: function(v) { root.tabIndex = parseInt(v) }
             }
 
             // Search field — occupies the left region while searching
@@ -177,6 +169,7 @@ Item {
                     iconText: "⌕"
                     hasCursor: root.searchOpen
                     size: Style.space(36)
+                    fontSize: Style.font.iconLarge
                     onClicked: root.searchOpen ? root.closeSearch() : root.openSearch()
                 }
 
