@@ -10,11 +10,18 @@ import qs.components
 Item {
     id: browseView
 
-    readonly property string fontDisplay: Style.font.family
-    readonly property string fontBody:    Style.font.family
+    readonly property string fontBody: Style.font.family
 
     // Passes the full show object so DetailView can seed itself immediately
     signal animeSelected(var show)
+
+    // Emitted when an in-panel filter change invalidates the current search;
+    // the panel clears its search bar in response.
+    signal searchCleared()
+
+    function resetList() {
+        Anime.fetchPopular(true)
+    }
 
     // ── Background ────────────────────────────────────────────────────────────
     Rectangle { anchors.fill: parent; color: Colors.background }
@@ -22,191 +29,6 @@ Item {
     ColumnLayout {
         anchors.fill: parent
         spacing: Style.space(0)
-
-        // ── Header ────────────────────────────────────────────────────────────
-        Rectangle {
-            Layout.fillWidth: true
-            height: 56
-            color: Colors.surface_container_low
-            z: 2
-
-            Rectangle {
-                anchors { bottom: parent.bottom; left: parent.left; right: parent.right }
-                height: 1; color: Colors.outline_variant; opacity: 0.5
-            }
-
-            RowLayout {
-                anchors { fill: parent; leftMargin: Style.spacing.huge; rightMargin: Style.spacing.xl }
-                spacing: Style.spacing.lg
-
-                // Wordmark (hidden when search is open)
-                Row {
-                    spacing: Style.space(0)
-                    visible: !searchBar.visible
-                    Layout.fillWidth: true
-
-                    StyledText {
-                        text: "A"
-                        font.family: browseView.fontDisplay
-                        font.pixelSize: Style.font.display; font.letterSpacing: 1
-                        color: Colors.primary
-                    }
-                    StyledText {
-                        text: "nime" // i18n-ignore — brand wordmark (with the "A" above)
-                        font.family: browseView.fontDisplay
-                        font.pixelSize: Style.font.display; font.letterSpacing: 1
-                        color: Colors.on_surface; opacity: 0.85
-                    }
-                }
-
-                // Search bar
-                Rectangle {
-                    id: searchBar
-                    Layout.fillWidth: true
-                    height: 36; radius: Style.cornerRadius
-                    color: Colors.surface_container
-                    visible: false
-                    border.color: searchField.activeFocus ? Colors.primary : Colors.outline_variant
-                    border.width: searchField.activeFocus ? 1.5 : 1
-                    Behavior on border.width { NumberAnimation { duration: Motion.fast } }
-
-                    TextInput {
-                        id: searchField
-                        anchors {
-                            verticalCenter: parent.verticalCenter
-                            left: parent.left; right: clearBtn.left
-                            leftMargin: Style.spacing.xxxl; rightMargin: Style.spacing.md
-                        }
-                        color: Colors.on_surface
-                        font.family: browseView.fontBody
-                        font.pixelSize: Style.font.subtitle
-                        clip: true
-                        onTextChanged: searchDebounce.restart()
-                        Keys.onEscapePressed: {
-                            searchBar.visible = false
-                            text = ""
-                            Anime.fetchPopular(true)
-                        }
-                    }
-
-                    StyledText {
-                        anchors { verticalCenter: parent.verticalCenter; left: parent.left; leftMargin: Style.spacing.xxxl }
-                        text: I18n.t("anime.search")
-                        color: Colors.on_surface_variant
-                        font.family: browseView.fontBody
-                        font.pixelSize: Style.font.subtitle
-                        visible: searchField.text.length === 0
-                        opacity: 0.6
-                    }
-
-                    Item {
-                        id: clearBtn
-                        anchors { right: parent.right; verticalCenter: parent.verticalCenter; rightMargin: Style.spacing.xl }
-                        width: 22; height: 22
-                        visible: searchField.text.length > 0
-                        opacity: visible ? 1 : 0
-                        Behavior on opacity { NumberAnimation { duration: Motion.fast } }
-
-                        Rectangle {
-                            anchors.centerIn: parent
-                                    width: 18; height: 18; radius: Style.cornerRadius
-                            color: Colors.surface_container_highest
-                        }
-                        StyledText {
-                            anchors.centerIn: parent
-                            text: "✕"
-                            color: Colors.on_surface_variant
-                            font.pixelSize: 9; font.bold: true // style-ignore — bespoke size
-                        }
-                        MouseArea { anchors.fill: parent; onClicked: searchField.text = "" }
-                    }
-                }
-
-                Timer {
-                    id: searchDebounce
-                    interval: 350
-                    onTriggered: {
-                        if (searchField.text.trim().length > 0)
-                            Anime.searchAnime(searchField.text.trim(), true)
-                        else
-                            Anime.fetchPopular(true)
-                    }
-                }
-
-                // Search toggle
-                Item {
-                    width: 38; height: 38
-
-                    Rectangle {
-                        anchors.centerIn: parent
-                        width: 32; height: 32; radius: Style.cornerRadius
-                        color: searchBar.visible ? Colors.primary_container : "transparent"
-                        Behavior on color { ColorAnimation { duration: Motion.base } }
-                    }
-                    StyledText {
-                        anchors.centerIn: parent
-                        text: "⌕"; font.pixelSize: Style.font.iconLarge
-                        color: searchBar.visible ? Colors.on_primary_container : Colors.on_surface_variant
-                        Behavior on color { ColorAnimation { duration: Motion.base } }
-                    }
-                    MouseArea {
-                        anchors.fill: parent
-                        onClicked: {
-                            searchBar.visible = !searchBar.visible
-                            if (searchBar.visible) searchField.forceActiveFocus()
-                            else {
-                                searchField.text = ""
-                                Anime.fetchPopular(true)
-                            }
-                        }
-                    }
-                }
-
-                // Sub / Dub toggle
-                Rectangle {
-                    height: 28
-                    width: modeRow.implicitWidth + 16
-                    radius: Style.cornerRadius
-                    color: "transparent"
-
-                    Row {
-                        id: modeRow
-                        anchors.centerIn: parent
-                        spacing: Style.space(0)
-
-                        Repeater {
-                            model: ["sub", "dub"]
-
-                            delegate: Item {
-                                width: modeText.implicitWidth + 16
-                                height: 28
-                                readonly property bool active: Anime.currentMode === modelData
-
-                                Rectangle {
-                                    anchors { fill: parent; margins: Style.spacing.xs }
-                                    radius: Style.cornerRadius
-                                    color: active ? Style.selectedFillFor(Colors.primary) : "transparent"
-                                    Behavior on color { ColorAnimation { duration: Motion.base } }
-                                }
-                                StyledText {
-                                    id: modeText
-                                    anchors.centerIn: parent
-                                    text: modelData.toUpperCase()
-                                    font.family: browseView.fontBody
-                                    font.pixelSize: Style.font.caption; font.letterSpacing: 1; font.bold: true
-                                    color: active ? Colors.primary : Colors.on_surface_variant
-                                    Behavior on color { ColorAnimation { duration: Motion.base } }
-                                }
-                                MouseArea {
-                                    anchors.fill: parent
-                                    onClicked: Anime.setMode(modelData)
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        }
 
         // ── Filter chips ──────────────────────────────────────────────────────
         Rectangle {
@@ -264,8 +86,7 @@ Item {
                     MouseArea {
                         anchors.fill: parent
                         onClicked: {
-                            searchField.text = ""
-                            searchBar.visible = false
+                            browseView.searchCleared()
                             Anime.currentCountry = country
                             if (view === "popular") Anime.fetchPopular(true)
                             else Anime.fetchLatest(true)

@@ -11,164 +11,24 @@ Item {
     id: browseView
 
     // ── Exposed API ──────────────────────────────────────────────────────────
-    readonly property string fontDisplay: Style.font.family
-    readonly property string fontBody:    Style.font.family
+    readonly property string fontBody: Style.font.family
 
     // Emitted when the user taps a manga card
     signal mangaSelected(string mangaId)
 
     property string currentTagId: ""
 
+    // Emitted when an in-panel filter change invalidates the current search;
+    // the panel clears its search bar in response.
+    signal searchCleared()
+
+    function resetList() {
+        Manga.fetchByOrigin(currentTagId, true)
+    }
+
     ColumnLayout {
         anchors.fill: parent
         spacing: Style.space(0)
-
-        // ── Header ──────────────────────────────────────────────────────────
-        Rectangle {
-            Layout.fillWidth: true
-            height: 60
-            color: Colors.surface_container_low
-            z: 2
-
-            Divider {
-                anchors { bottom: parent.bottom; left: parent.left; right: parent.right }
-                opacity: 0.5
-            }
-
-            RowLayout {
-                anchors { fill: parent; leftMargin: Style.spacing.huge; rightMargin: Style.spacing.xxl }
-                spacing: Style.spacing.xl
-
-                // Wordmark
-                Row {
-                    spacing: Style.space(0)
-                    visible: !searchBar.visible
-                    Layout.fillWidth: true
-
-                    StyledText {
-                        text: "M"
-                        font.family: browseView.fontDisplay
-                        font.pixelSize: Style.font.display
-                        font.letterSpacing: 1
-                        color: Colors.primary
-                    }
-                    StyledText {
-                        text: "anga" // i18n-ignore — brand wordmark (with the "M" above)
-                        font.family: browseView.fontDisplay
-                        font.pixelSize: Style.font.display
-                        font.letterSpacing: 1
-                        opacity: 0.85
-                    }
-                }
-
-                // Search bar
-                Rectangle {
-                    id: searchBar
-                    Layout.fillWidth: true
-                    height: 38
-                    radius: Style.cornerRadius
-                    color: Colors.surface_container
-                    visible: false
-                    border.color: searchField.activeFocus ? Colors.primary : Colors.outline_variant
-                    border.width: searchField.activeFocus ? 1.5 : 1
-                    Behavior on border.width { NumberAnimation { duration: Motion.fast } }
-
-                    TextInput {
-                        id: searchField
-                        anchors {
-                            verticalCenter: parent.verticalCenter
-                            left: parent.left; right: clearBtn.left
-                            leftMargin: Style.space(16); rightMargin: Style.spacing.md
-                        }
-                        color: Colors.on_surface
-                        font.family: browseView.fontBody
-                        font.pixelSize: Style.font.subtitle
-                        clip: true
-                        onTextChanged: searchDebounce.restart()
-                        Keys.onEscapePressed: {
-                            searchBar.visible = false
-                            text = ""
-                            Manga.fetchByOrigin(browseView.currentTagId, true)
-                        }
-                    }
-
-                    StyledText {
-                        anchors { verticalCenter: parent.verticalCenter; left: parent.left; leftMargin: Style.space(16) }
-                        text: I18n.t("manga.search")
-                        color: Colors.on_surface_variant
-                        font.family: browseView.fontBody
-                        font.pixelSize: Style.font.subtitle
-                        visible: searchField.text.length === 0
-                        opacity: 0.6
-                    }
-
-                    // Clear button
-                    Item {
-                        id: clearBtn
-                        anchors { right: parent.right; verticalCenter: parent.verticalCenter; rightMargin: Style.spacing.xl }
-                        width: 22; height: 22
-                        visible: searchField.text.length > 0
-                        opacity: visible ? 1 : 0
-                        Behavior on opacity { NumberAnimation { duration: Motion.fast } }
-
-                        Rectangle {
-                            anchors.centerIn: parent
-                            width: 18; height: 18; radius: Style.cornerRadius
-                            color: Colors.surface_container_highest
-                        }
-                        StyledText {
-                            anchors.centerIn: parent
-                            text: "✕"
-                            color: Colors.on_surface_variant
-                            font.pixelSize: 9; font.bold: true // style-ignore — bespoke size
-                        }
-                        MouseArea { anchors.fill: parent; onClicked: searchField.text = "" }
-                    }
-                }
-
-                Timer {
-                    id: searchDebounce
-                    interval: 350
-                    onTriggered: {
-                        if (searchField.text.trim().length > 0)
-                            Manga.searchManga(searchField.text.trim(), true)
-                        else
-                            Manga.fetchByOrigin(browseView.currentTagId, true)
-                    }
-                }
-
-                // Search toggle button
-                Item {
-                    width: 40; height: 40
-
-                    Rectangle {
-                        anchors.centerIn: parent
-                        width: 34; height: 34; radius: Style.cornerRadius
-                        color: searchBar.visible ? Colors.primary_container : "transparent"
-                        Behavior on color { ColorAnimation { duration: Motion.base } }
-                    }
-                    StyledText {
-                        anchors.centerIn: parent
-                        text: "⌕"
-                        font.pixelSize: 19 // style-ignore — bespoke size
-                        color: searchBar.visible ? Colors.on_primary_container : Colors.on_surface_variant
-                        Behavior on color { ColorAnimation { duration: Motion.base } }
-                    }
-                    MouseArea {
-                        anchors.fill: parent
-                        onClicked: {
-                            searchBar.visible = !searchBar.visible
-                            if (searchBar.visible) {
-                                searchField.forceActiveFocus()
-                            } else {
-                                searchField.text = ""
-                                Manga.fetchByOrigin(browseView.currentTagId, true)
-                            }
-                        }
-                    }
-                }
-            }
-        }
 
         // ── Tag filter chips ─────────────────────────────────────────────────
         Rectangle {
@@ -231,8 +91,7 @@ Item {
                         anchors.fill: parent
                         onClicked: {
                             browseView.currentTagId = tagId
-                            searchField.text = ""
-                            searchBar.visible = false
+                            browseView.searchCleared()
                             Manga.fetchByOrigin(tagId, true)
                         }
                     }

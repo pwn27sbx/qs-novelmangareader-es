@@ -10,18 +10,25 @@ import qs.components
 Item {
     id: browseView
 
-    readonly property string fontDisplay: Style.font.family
-    readonly property string fontBody:    Style.font.family
+    readonly property string fontBody: Style.font.family
 
     signal novelSelected(string novelId)
 
     property string currentFilter: "hot"
 
+    // Emitted when an in-panel filter change invalidates the current search;
+    // the panel clears its search bar in response.
+    signal searchCleared()
+
+    function resetList() {
+        currentFilter = "hot"
+        Novel.fetchHot()
+    }
+
     function _switchFilter(f) {
         if (currentFilter === f) return
         currentFilter = f
-        searchBar.visible = false
-        searchField.text = ""
+        browseView.searchCleared()
         Novel.clearNovelList()
         if (f === "hot") Novel.fetchHot()
         else             Novel.fetchLatest(true)
@@ -30,290 +37,6 @@ Item {
     ColumnLayout {
         anchors.fill: parent
         spacing: Style.space(0)
-
-        // ── Top bar ───────────────────────────────────────────────────────────
-        Rectangle {
-            Layout.fillWidth: true
-            height: 60
-            color: Colors.surface_container_low
-            z: 2
-
-            Rectangle {
-                anchors { bottom: parent.bottom; left: parent.left; right: parent.right }
-                height: 1; color: Colors.outline_variant; opacity: 0.5
-            }
-
-            RowLayout {
-                anchors { fill: parent; leftMargin: Style.spacing.huge; rightMargin: Style.spacing.xxl }
-                spacing: Style.spacing.xl
-
-                // Title (hidden while search bar is open)
-                Row {
-                    spacing: Style.space(0)
-                    visible: !searchBar.visible
-                    StyledText {
-                        text: "N"
-                        font.family: browseView.fontDisplay
-                        font.pixelSize: Style.font.display; font.letterSpacing: 1
-                        color: Colors.primary
-                    }
-                    StyledText {
-                        text: "ovel" // i18n-ignore — brand wordmark (with the "N" above)
-                        font.family: browseView.fontDisplay
-                        font.pixelSize: Style.font.display; font.letterSpacing: 1
-                        color: Colors.on_surface; opacity: 0.85
-                    }
-                }
-
-                // Search bar (shown when search icon is tapped)
-                Rectangle {
-                    id: searchBar
-                    Layout.fillWidth: true
-                    height: 38; radius: Style.cornerRadius
-                    color: Colors.surface_container
-                    visible: false
-                    border.color: searchField.activeFocus ? Colors.primary : Colors.outline_variant
-                    border.width: searchField.activeFocus ? 1.5 : 1
-                    Behavior on border.width { NumberAnimation { duration: Motion.fast } }
-
-                    TextInput {
-                        id: searchField
-                        anchors {
-                            verticalCenter: parent.verticalCenter
-                            left: parent.left; right: clearBtn.left
-                            leftMargin: Style.space(16); rightMargin: Style.spacing.md
-                        }
-                        color: Colors.on_surface
-                        font.family: browseView.fontBody; font.pixelSize: Style.font.subtitle
-                        clip: true
-                        onTextChanged: searchDebounce.restart()
-                        Keys.onEscapePressed: {
-                            searchBar.visible = false
-                            text = ""
-                            browseView.currentFilter = "hot"
-                            Novel.fetchHot()
-                        }
-                    }
-
-                    StyledText {
-                        anchors { verticalCenter: parent.verticalCenter; left: parent.left; leftMargin: Style.space(16) }
-                        text: I18n.t("novel.search")
-                        color: Colors.on_surface_variant; font.family: browseView.fontBody
-                        font.pixelSize: Style.font.subtitle; visible: searchField.text.length === 0; opacity: 0.6
-                    }
-
-                    Item {
-                        id: clearBtn
-                        anchors { right: parent.right; verticalCenter: parent.verticalCenter; rightMargin: Style.spacing.xl }
-                        width: 22; height: 22
-                        visible: searchField.text.length > 0
-                        opacity: visible ? 1 : 0
-                        Behavior on opacity { NumberAnimation { duration: Motion.fast } }
-                        Rectangle {
-                            anchors.centerIn: parent; width: 18; height: 18; radius: Style.cornerRadius
-                            color: Colors.surface_container_highest
-                        }
-                        StyledText {
-                            anchors.centerIn: parent; text: "✕"
-                            color: Colors.on_surface_variant; font.pixelSize: 9; font.bold: true // style-ignore — bespoke size
-                        }
-                        MouseArea { anchors.fill: parent; onClicked: searchField.text = "" }
-                    }
-                }
-
-                Timer {
-                    id: searchDebounce
-                    interval: 380
-                    onTriggered: {
-                        var q = searchField.text.trim()
-                        if (q.length > 0) {
-                            browseView.currentFilter = "search"
-                            Novel.searchNovels(q, "", "All", true)
-                        } else {
-                            browseView.currentFilter = "hot"
-                            Novel.fetchHot()
-                        }
-                    }
-                }
-
-                // ── Provider dropdown button ──────────────────────────────────
-                Item {
-                    visible: !searchBar.visible
-                    width: 200
-                    height: 32
-
-                    Rectangle {
-                        anchors.fill: parent; radius: Style.cornerRadius
-                        color: providerDropArea.containsMouse
-                            ? Colors.surface_container_highest
-                            : Colors.surface_container
-                        border.color: Colors.outline_variant; border.width: 1
-                        Behavior on color { ColorAnimation { duration: Motion.base } }
-                    }
-
-                    Row {
-                        anchors.centerIn: parent
-                        spacing: Style.space(5)
-
-                        StyledText {
-                            id: providerLabel
-                            text: {
-                                for (var i = 0; i < Novel.availableProviders.length; i++) {
-                                    if (Novel.availableProviders[i].name === Novel.activeProvider)
-                                        return Novel.availableProviders[i].label
-                                }
-                                return Novel.activeProvider
-                            }
-                            font.family: browseView.fontBody; font.pixelSize: Style.font.bodySmall
-                            font.letterSpacing: 0.3
-                            color: Novel.isSwitchingProvider ? Colors.on_surface_variant : Colors.on_surface
-                            anchors.verticalCenter: parent.verticalCenter
-                            Behavior on color { ColorAnimation { duration: Motion.base } }
-                        }
-
-                        // Tiny spinner shown while switching
-                        Spinner {
-                            visible: Novel.isSwitchingProvider
-                            width: 10
-                            border.width: 1.5
-                            anchors.verticalCenter: parent.verticalCenter
-                            duration: Motion.loop
-                            running: Novel.isSwitchingProvider
-                        }
-
-                        // Chevron (hidden while switching)
-                        StyledText {
-                            visible: !Novel.isSwitchingProvider
-                            text: providerPopup.visible ? "▲" : "▾"
-                            font.pixelSize: 8 // style-ignore — bespoke size
-                            color: Colors.on_surface_variant
-                            anchors.verticalCenter: parent.verticalCenter
-                        }
-                    }
-
-                    MouseArea {
-                        id: providerDropArea
-                        anchors.fill: parent
-                        hoverEnabled: true
-                        onClicked: {
-                            if (!Novel.isSwitchingProvider)
-                                providerPopup.visible = !providerPopup.visible
-                        }
-                    }
-
-                    // ── Dropdown popup ────────────────────────────────────────
-                    Rectangle {
-                        id: providerPopup
-                        visible: false
-                        // Anchor below the button, right-aligned
-                        anchors { top: parent.bottom; right: parent.right; topMargin: Style.spacing.md }
-                        width: 150
-                        height: popupColumn.implicitHeight + 10
-                        radius: Style.cornerRadius
-                        color: Colors.surface_container_high
-                        border.color: Colors.outline_variant; border.width: 1
-                        z: 100
-
-                        // Drop shadow hint
-                        layer.enabled: true
-
-                        Column {
-                            id: popupColumn
-                            anchors { top: parent.top; left: parent.left; right: parent.right; topMargin: Style.space(5) }
-                            spacing: Style.space(0)
-
-                            Repeater {
-                                model: Novel.availableProviders
-
-                                delegate: Item {
-                                    width: parent.width
-                                    height: 36
-
-                                    Rectangle {
-                                        anchors.fill: parent
-                                        anchors.leftMargin: Style.spacing.sm; anchors.rightMargin: Style.spacing.sm
-                                        radius: Style.cornerRadius
-                                        color: {
-                                            if (modelData.name === Novel.activeProvider)
-                                                return Colors.primary_container
-                                            return optionArea.containsMouse
-                                                ? Colors.surface_container_highest
-                                                : "transparent"
-                                        }
-                                        Behavior on color { ColorAnimation { duration: Motion.fast } }
-                                    }
-
-                                    Row {
-                                        anchors { verticalCenter: parent.verticalCenter; left: parent.left; leftMargin: Style.spacing.xxxl }
-                                        spacing: Style.spacing.lg
-
-                                        // Active indicator dot
-                                        Rectangle {
-                                            width: 6; height: 6; radius: height / 2 // style-ignore — dot
-                                            anchors.verticalCenter: parent.verticalCenter
-                                            color: Colors.primary
-                                            visible: modelData.name === Novel.activeProvider
-                                        }
-                                        // Spacer when not active so text stays aligned
-                                        Item {
-                                            width: 6; height: 6
-                                            visible: modelData.name !== Novel.activeProvider
-                                        }
-
-                                        StyledText {
-                                            text: modelData.label
-                                            font.family: browseView.fontBody; font.pixelSize: Style.font.body
-                                            color: modelData.name === Novel.activeProvider
-                                                ? Colors.on_primary_container
-                                                : Colors.on_surface
-                                            anchors.verticalCenter: parent.verticalCenter
-                                        }
-                                    }
-
-                                    MouseArea {
-                                        id: optionArea
-                                        anchors.fill: parent
-                                        hoverEnabled: true
-                                        onClicked: {
-                                            providerPopup.visible = false
-                                            Novel.switchProvider(modelData.name)
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-
-                // ── Search icon ───────────────────────────────────────────────
-                Item {
-                    width: 40; height: 40
-
-                    Rectangle {
-                        anchors.centerIn: parent; width: 34; height: 34; radius: Style.cornerRadius
-                        color: searchBar.visible ? Colors.primary_container : "transparent"
-                        Behavior on color { ColorAnimation { duration: Motion.base } }
-                    }
-                    StyledText {
-                        anchors.centerIn: parent; text: "⌕"; font.pixelSize: 19 // style-ignore — bespoke size
-                        color: searchBar.visible ? Colors.on_primary_container : Colors.on_surface_variant
-                        Behavior on color { ColorAnimation { duration: Motion.base } }
-                    }
-                    MouseArea {
-                        anchors.fill: parent
-                        onClicked: {
-                            searchBar.visible = !searchBar.visible
-                            if (searchBar.visible) searchField.forceActiveFocus()
-                            else {
-                                searchField.text = ""
-                                browseView.currentFilter = "hot"
-                                Novel.fetchHot()
-                            }
-                        }
-                    }
-                }
-            }
-        }
 
         // ── Filter chips (Hot / Latest) ───────────────────────────────────────
         Rectangle {
@@ -370,14 +93,6 @@ Item {
         // ── Novel grid ────────────────────────────────────────────────────────
         Item {
             Layout.fillWidth: true; Layout.fillHeight: true
-
-            // Close the provider popup when clicking outside it
-            MouseArea {
-                anchors.fill: parent
-                enabled: providerPopup.visible
-                onClicked: providerPopup.visible = false
-                z: 50
-            }
 
             // Loading overlay: ghost cards where the first page will land
             SkeletonGrid {

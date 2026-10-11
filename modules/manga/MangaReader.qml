@@ -22,6 +22,9 @@ Item {
 
     property int tabIndex: 0
 
+    // ── Search state ──────────────────────────────────────────────────────────
+    property bool searchOpen: false
+
     property int browseStack: 0
     property int libraryStack: 0
 
@@ -36,33 +39,38 @@ Item {
         visible = false
     }
 
+    function openSearch() {
+        searchOpen = true
+        Qt.callLater(function() { searchField.forceActiveFocus() })
+    }
+
+    function clearSearch() {
+        searchOpen = false
+        if (searchField) searchField.text = ""
+    }
+
+    function closeSearch() {
+        clearSearch()
+        browseView.resetList()
+    }
+
     Rectangle { anchors.fill: parent; color: Colors.background }
 
     ColumnLayout {
         anchors.fill: parent
         spacing: Style.space(0)
 
+        // ── Header bar (tabs · search · language · minimize) ──────────────────
         Rectangle {
             Layout.fillWidth: true
-            height: 36
+            height: 44
             color: Colors.surface_container_low
-            z: 10
-
-            IconButton {
-                id: minimizeButton
-                anchors { right: parent.right; rightMargin: Style.spacing.lg; verticalCenter: parent.verticalCenter }
-                icon: "󰖰"
-                onClicked: root.minimize()
-            }
-
-            LanguageToggle {
-                id: languageToggle
-                anchors { right: minimizeButton.left; rightMargin: Style.spacing.sm; verticalCenter: parent.verticalCenter }
-            }
+            z: 2
 
             ButtonGroup {
                 id: tabRow
                 objectName: "tabRow"
+                visible: !root.searchOpen
                 anchors { left: parent.left; leftMargin: Style.spacing.md; verticalCenter: parent.verticalCenter }
                 options: [
                     { value: "0", label: I18n.t("tab.browse") },
@@ -72,6 +80,104 @@ Item {
                 background: "transparent"
                 fontSize: Style.font.bodySmall
                 onChanged: function(v) { root.tabIndex = parseInt(v) }
+            }
+
+            // Search field — occupies the left region while searching
+            Rectangle {
+                id: searchBar
+                visible: root.searchOpen
+                anchors {
+                    left: parent.left; leftMargin: Style.spacing.md
+                    right: searchToggle.left; rightMargin: Style.spacing.sm
+                    verticalCenter: parent.verticalCenter
+                }
+                height: 32; radius: Style.cornerRadius
+                color: Colors.surface_container
+                border.color: searchField.activeFocus ? Colors.primary : Colors.outline_variant
+                border.width: searchField.activeFocus ? 1.5 : 1
+                Behavior on border.width { NumberAnimation { duration: Motion.fast } }
+
+                TextInput {
+                    id: searchField
+                    anchors {
+                        verticalCenter: parent.verticalCenter
+                        left: parent.left; right: clearBtn.left
+                        leftMargin: Style.spacing.xxxl; rightMargin: Style.spacing.md
+                    }
+                    color: Colors.on_surface
+                    font.family: root.fontBody
+                    font.pixelSize: Style.font.subtitle
+                    clip: true
+                    onTextChanged: searchDebounce.restart()
+                    Keys.onEscapePressed: {
+                        searchField.text = ""
+                        root.closeSearch()
+                    }
+                }
+
+                StyledText {
+                    anchors { verticalCenter: parent.verticalCenter; left: parent.left; leftMargin: Style.spacing.xxxl }
+                    text: I18n.t("manga.search")
+                    color: Colors.on_surface_variant
+                    font.family: root.fontBody
+                    font.pixelSize: Style.font.subtitle
+                    visible: searchField.text.length === 0
+                    opacity: 0.6
+                }
+
+                Item {
+                    id: clearBtn
+                    anchors { right: parent.right; verticalCenter: parent.verticalCenter; rightMargin: Style.spacing.xl }
+                    width: 22; height: 22
+                    visible: searchField.text.length > 0
+                    opacity: visible ? 1 : 0
+                    Behavior on opacity { NumberAnimation { duration: Motion.fast } }
+
+                    Rectangle {
+                        anchors.centerIn: parent
+                        width: 18; height: 18; radius: Style.cornerRadius
+                        color: Colors.surface_container_highest
+                    }
+                    StyledText {
+                        anchors.centerIn: parent
+                        text: "✕"
+                        color: Colors.on_surface_variant
+                        font.pixelSize: 9; font.bold: true // style-ignore — bespoke size
+                    }
+                    MouseArea { anchors.fill: parent; onClicked: searchField.text = "" }
+                }
+            }
+
+            Timer {
+                id: searchDebounce
+                interval: 350
+                onTriggered: {
+                    if (searchField.text.trim().length > 0)
+                        Manga.searchManga(searchField.text.trim(), true)
+                    else
+                        browseView.resetList()
+                }
+            }
+
+            // ── Right actions: search · language · minimize ───────────────────
+            IconButton {
+                id: searchToggle
+                anchors { right: languageToggle.left; rightMargin: Style.spacing.sm; verticalCenter: parent.verticalCenter }
+                icon: "⌕"
+                visible: root.tabIndex === 0
+                onClicked: root.searchOpen ? root.closeSearch() : root.openSearch()
+            }
+
+            LanguageToggle {
+                id: languageToggle
+                anchors { right: minimizeButton.left; rightMargin: Style.spacing.sm; verticalCenter: parent.verticalCenter }
+            }
+
+            IconButton {
+                id: minimizeButton
+                anchors { right: parent.right; rightMargin: Style.spacing.lg; verticalCenter: parent.verticalCenter }
+                icon: "󰖰"
+                onClicked: root.minimize()
             }
         }
 
@@ -83,10 +189,13 @@ Item {
             Item {
 
                 BrowseView {
+                    id: browseView
                     anchors.fill: parent
                     visible: root.browseStack === 0
                     opacity: visible ? 1 : 0
                     Behavior on opacity { NumberAnimation { duration: Motion.slow; easing.type: Motion.easeOut } }
+
+                    onSearchCleared: root.clearSearch()
 
                     onMangaSelected: function(mangaId) {
                         root.selectedMangaId = mangaId
