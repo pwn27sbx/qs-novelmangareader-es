@@ -15,7 +15,7 @@ Rectangle {
     property int columns: 4
     // Cell height / cell width, as the real grid's cellHeight.
     property real ratio: 1.58
-    property real padding: 10
+    property real padding: Style.spacing.xl
     property real cellWidth: (width - padding * 2) / columns
     // Height of an extra bottom strip (the library's progress row).
     property int footerHeight: 0
@@ -28,7 +28,7 @@ Rectangle {
     clip: true
     opacity: root.active ? 1 : 0
     visible: root.opacity > 0
-    Behavior on opacity { NumberAnimation { duration: 280; easing.type: Easing.OutCubic } }
+    Behavior on opacity { NumberAnimation { duration: Style.motion.slow; easing.type: Style.motion.easeOut } }
 
     Grid {
         x: root.padding
@@ -49,7 +49,7 @@ Rectangle {
 
                 Rectangle {
                     id: card
-                    anchors { fill: parent; margins: 5 }
+                    anchors { fill: parent; margins: Style.space(5) }
                     radius: Style.cornerRadius
                     color: Colors.surface_container
 
@@ -57,7 +57,7 @@ Rectangle {
                     Rectangle {
                         anchors {
                             top: parent.top; left: parent.left; right: parent.right
-                            bottom: lines.top; bottomMargin: 10
+                            bottom: lines.top; bottomMargin: Style.spacing.xl
                         }
                         radius: card.radius
                         color: Colors.surface_container_high
@@ -69,19 +69,19 @@ Rectangle {
                         anchors {
                             left: parent.left; right: parent.right
                             bottom: parent.bottom
-                            leftMargin: 10; rightMargin: 10
-                            bottomMargin: 10 + root.footerHeight
+                            leftMargin: Style.spacing.xl; rightMargin: Style.spacing.xl
+                            bottomMargin: Style.spacing.xl + root.footerHeight
                         }
-                        spacing: 6
+                        spacing: Style.spacing.md
 
                         Rectangle {
                             width: parent.width * (cell.index % 3 === 1 ? 0.9 : 0.75)
-                            height: 7; radius: 3.5
+                            height: 7; radius: height / 2
                             color: Colors.surface_container_highest
                         }
                         Rectangle {
                             width: parent.width * (cell.index % 2 ? 0.4 : 0.55)
-                            height: 7; radius: 3.5
+                            height: 7; radius: height / 2
                             color: Colors.surface_container_highest
                         }
                     }
@@ -92,10 +92,10 @@ Rectangle {
                         anchors {
                             left: parent.left; right: parent.right
                             bottom: parent.bottom
-                            leftMargin: 10; rightMargin: 10
+                            leftMargin: Style.spacing.xl; rightMargin: Style.spacing.xl
                             bottomMargin: (root.footerHeight - height) / 2
                         }
-                        height: 3; radius: 1.5
+                        height: 3; radius: height / 2
                         color: Colors.surface_container_highest
                     }
                 }

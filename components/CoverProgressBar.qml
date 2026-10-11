@@ -14,7 +14,7 @@ Rectangle {
     property var started: false
     property string label: ""
     property string bodyFont: ""
-    property int rowSpacing: 6
+    property int rowSpacing: Style.spacing.md
 
     anchors { bottom: parent.bottom; left: parent.left; right: parent.right }
     height: 30
@@ -31,14 +31,14 @@ Rectangle {
     Row {
         anchors {
             verticalCenter: parent.verticalCenter
-            left: parent.left; leftMargin: 10
+            left: parent.left; leftMargin: Style.spacing.xl
         }
         spacing: root.rowSpacing
 
         StyledText {
             anchors.verticalCenter: parent.verticalCenter
             text: "▶"
-            font.pixelSize: 7
+            font.pixelSize: 7 // style-ignore — bespoke size
             color: root.started ? Colors.primary : Colors.outline
             opacity: root.started ? 1 : 0.4
         }
@@ -47,7 +47,7 @@ Rectangle {
             anchors.verticalCenter: parent.verticalCenter
             text: root.label
             font.family: root.bodyFont
-            font.pixelSize: 10
+            font.pixelSize: Style.font.caption
             font.letterSpacing: 0.4
             color: root.started ? Colors.on_surface : Colors.on_surface_variant
             opacity: root.started ? 0.85 : 0.45

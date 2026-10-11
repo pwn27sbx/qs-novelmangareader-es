@@ -18,7 +18,7 @@ ClickableRect {
     property int gradientHeight: 48
     property int footerHeight: 0
 
-    anchors.margins: 5
+    anchors.margins: Style.space(5)
     radius: Style.cornerRadius
     color: Colors.surface_container
     clip: true
@@ -39,7 +39,7 @@ ClickableRect {
         asynchronous: true
         cache: true
         opacity: status === Image.Ready ? 1 : 0
-        Behavior on opacity { NumberAnimation { duration: 300 } }
+        Behavior on opacity { NumberAnimation { duration: Style.motion.slow } }
 
         Rectangle {
             anchors { bottom: parent.bottom; left: parent.left; right: parent.right }
@@ -67,11 +67,11 @@ ClickableRect {
             anchors {
                 left: parent.left; right: parent.right
                 verticalCenter: parent.verticalCenter
-                leftMargin: 10; rightMargin: 10
+                leftMargin: Style.spacing.xl; rightMargin: Style.spacing.xl
             }
             text: root.title
             font.family: root.bodyFont
-            font.pixelSize: 11
+            font.pixelSize: Style.font.bodySmall
             font.letterSpacing: 0.2
             wrapMode: Text.Wrap
             maximumLineCount: 2
@@ -85,8 +85,8 @@ ClickableRect {
         anchors.fill: parent
         radius: root.radius
         color: Colors.primary
-        opacity: root.pressed ? 0.16 : (root.hovered ? 0.07 : 0)
-        Behavior on opacity { NumberAnimation { duration: 130 } }
+        opacity: root.pressed ? Style.pressedFillAlpha : (root.hovered ? Style.hoverFillAlpha : 0)
+        Behavior on opacity { NumberAnimation { duration: Style.motion.base } }
     }
 
     transform: Scale {
@@ -94,7 +94,7 @@ ClickableRect {
         origin.y: root.height / 2
         xScale: root.pressed ? 0.97 : 1.0
         yScale: root.pressed ? 0.97 : 1.0
-        Behavior on xScale { NumberAnimation { duration: 120; easing.type: Easing.OutCubic } }
-        Behavior on yScale { NumberAnimation { duration: 120; easing.type: Easing.OutCubic } }
+        Behavior on xScale { NumberAnimation { duration: Style.motion.fast; easing.type: Style.motion.easeOut } }
+        Behavior on yScale { NumberAnimation { duration: Style.motion.fast; easing.type: Style.motion.easeOut } }
     }
 }

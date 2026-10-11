@@ -1,5 +1,6 @@
 import QtQuick
 import qs.colors
+import qs.Commons
 
 // A thin indeterminate strip: a short bar sliding across a faint track. For
 // "more is on its way" while content is already on screen (next page,
@@ -14,7 +15,7 @@ Item {
     clip: true
     opacity: root.active ? 1 : 0
     visible: root.opacity > 0
-    Behavior on opacity { NumberAnimation { duration: 220 } }
+    Behavior on opacity { NumberAnimation { duration: Style.motion.slow } }
 
     Rectangle {
         anchors.fill: parent
@@ -31,10 +32,10 @@ Item {
         XAnimator on x {
             from: -bar.width
             to: root.width
-            duration: 1100
+            duration: Style.motion.loop
             loops: Animation.Infinite
             running: root.visible
-            easing.type: Easing.InOutQuad
+            easing.type: Style.motion.easeInOut
         }
     }
 }

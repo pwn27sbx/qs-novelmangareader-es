@@ -1,5 +1,6 @@
 import QtQuick
 import qs.colors
+import qs.Commons
 
 // A full-area "working on it" overlay: the spinner with a small caption and an
 // optional detail line (which chapter, which episode). Fades in and out with
@@ -19,33 +20,33 @@ Rectangle {
     color: Colors.background
     opacity: root.active ? 1 : 0
     visible: root.opacity > 0
-    Behavior on opacity { NumberAnimation { duration: 220; easing.type: Easing.OutCubic } }
+    Behavior on opacity { NumberAnimation { duration: Style.motion.slow; easing.type: Style.motion.easeOut } }
 
     // Swallow clicks so nothing behind reacts while this is up.
     MouseArea { anchors.fill: parent; enabled: root.active }
 
     Column {
         anchors.centerIn: parent
-        spacing: 14
+        spacing: Style.spacing.xxxl
 
         Spinner {
             anchors.horizontalCenter: parent.horizontalCenter
             width: root.spinnerSize
             border.width: 2.5
             arcColor: root.arcColor
-            duration: 1000
+            duration: Style.motion.loop
         }
 
         Column {
             anchors.horizontalCenter: parent.horizontalCenter
-            spacing: 5
+            spacing: Style.space(5)
 
             Text {
                 anchors.horizontalCenter: parent.horizontalCenter
                 text: root.label
                 color: root.textColor
                 font.family: root.bodyFont
-                font.pixelSize: 11
+                font.pixelSize: Style.font.bodySmall
                 font.letterSpacing: 2.5
                 opacity: 0.75
             }
@@ -58,7 +59,7 @@ Rectangle {
                 text: root.detail
                 color: root.textColor
                 font.family: root.bodyFont
-                font.pixelSize: 11
+                font.pixelSize: Style.font.bodySmall
                 elide: Text.ElideRight
                 opacity: 0.45
             }

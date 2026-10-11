@@ -2,6 +2,7 @@ pragma ComponentBehavior: Bound
 
 import QtQuick
 import qs.colors
+import qs.Commons
 
 // Placeholder page of prose while a chapter loads: a heading, the accent rule
 // and paragraphs of ragged lines, set in the reader's measure and line height
@@ -27,31 +28,31 @@ Rectangle {
     clip: true
     opacity: root.active ? 1 : 0
     visible: root.opacity > 0
-    Behavior on opacity { NumberAnimation { duration: 280; easing.type: Easing.OutCubic } }
+    Behavior on opacity { NumberAnimation { duration: Style.motion.slow; easing.type: Style.motion.easeOut } }
 
     Column {
         id: page
         width: root._measure
         anchors.horizontalCenter: parent.horizontalCenter
         y: root.topInset + 36
-        spacing: 0
+        spacing: Style.space(0)
 
         // Heading
         Rectangle {
             id: heading
             width: page.width * 0.55
             height: (root.fontSize + 7) * 0.9
-            radius: 5
+            radius: Style.cornerRadius
             color: root.blockColor
         }
 
         Item { width: 1; height: 16 }
 
         Row {
-            spacing: 5
-            Rectangle { width: 8;  height: 2; radius: 1; color: Colors.primary; opacity: 0.2 }
-            Rectangle { width: 32; height: 2; radius: 1; color: Colors.primary; opacity: 0.45 }
-            Rectangle { width: 8;  height: 2; radius: 1; color: Colors.primary; opacity: 0.2 }
+            spacing: Style.space(5)
+            Rectangle { width: 8;  height: 2; radius: height / 2; color: Colors.primary; opacity: 0.2 }
+            Rectangle { width: 32; height: 2; radius: height / 2; color: Colors.primary; opacity: 0.45 }
+            Rectangle { width: 8;  height: 2; radius: height / 2; color: Colors.primary; opacity: 0.2 }
         }
 
         Item { width: 1; height: 32 }
@@ -99,7 +100,7 @@ Rectangle {
                         SkeletonPulse {
                             target: bar
                             delay: (para.firstLine + line.index) * 60
-                            period: 1600
+                            period: Style.motion.loop
                             low: 0.35
                             running: root.visible
                         }

@@ -120,14 +120,14 @@ Unificar la UI sobre un **sistema de tokens** (`qs.Commons.Style`) espejo de Oma
 
 | Tarea | Commit | Estado |
 |---|---|---|
-| R1.0 | — | en curso |
-| R1.1 | — | pendiente |
-| R1.2 | — | pendiente |
+| R1.0 | `0ab04ed` | ✅ completo |
+| R1.1 | `23145c6` | ✅ completo |
+| R1.2 | — | ✅ completo (lint components 0) |
 | R1.3 | — | pendiente |
 | R1.4 | — | pendiente |
 | R1.5 | — | pendiente |
 | R1.6 | — | pendiente |
-| R1.7 | — | pendiente |
+| R1.7 | — | pendiente (lint tool `877fa4a` ya listo) |
 
 ## Próximo paso
 
