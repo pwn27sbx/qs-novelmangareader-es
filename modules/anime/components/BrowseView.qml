@@ -34,7 +34,7 @@ Item {
         // ── Filter chips ──────────────────────────────────────────────────────
         Rectangle {
             Layout.fillWidth: true
-            height: 44
+            height: 48
             color: Colors.surface_container_low
             clip: true
 
@@ -45,7 +45,11 @@ Item {
 
             ListView {
                 id: chipList
-                anchors { fill: parent; leftMargin: Style.spacing.xxl; rightMargin: Style.spacing.xxl }
+                anchors {
+                    fill: parent
+                    topMargin: Style.spacing.md; bottomMargin: Style.spacing.md
+                    leftMargin: Style.spacing.xxl; rightMargin: Style.spacing.xxl
+                }
                 orientation: ListView.Horizontal
                 spacing: Style.space(7); clip: true
                 boundsBehavior: Flickable.StopAtBounds
@@ -58,17 +62,13 @@ Item {
                     ListElement { labelKey: "anime.filter.korea";   view: "latest";  country: "KR"  }
                 }
 
-                delegate: Button {
+                delegate: SegmentChip {
                     required property string labelKey
                     required property string view
                     required property string country
-                    readonly property bool active: Anime.currentView === view && Anime.currentCountry === country
                     text: I18n.t(labelKey)
-                    bordered: false
-                    background: "transparent"
-                    selected: active
-                    foreground: active ? Colors.on_surface : Colors.muted
-                    fontSize: Style.font.bodySmall
+                    active: Anime.currentView === view && Anime.currentCountry === country
+                    fontFamily: browseView.fontBody
                     onClicked: {
                         browseView.searchCleared()
                         Anime.currentCountry = country

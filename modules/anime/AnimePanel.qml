@@ -89,15 +89,11 @@ Item {
                         { value: "0", label: I18n.t("tab.browse") },
                         { value: "1", label: I18n.t("tab.library") }
                     ]
-                    delegate: Button {
+                    delegate: SegmentChip {
                         required property var modelData
-                        readonly property bool active: String(root.tabIndex) === modelData.value
                         text: modelData.label
-                        bordered: false
-                        background: "transparent"
-                        selected: active
-                        foreground: active ? Colors.on_surface : Colors.muted
-                        fontSize: Style.font.bodySmall
+                        active: String(root.tabIndex) === modelData.value
+                        fontFamily: root.fontBody
                         onClicked: root.tabIndex = parseInt(modelData.value)
                     }
                 }
@@ -190,6 +186,7 @@ Item {
                     visible: root.tabIndex === 0
                     iconText: "⌕"
                     hasCursor: root.searchOpen
+                    size: Style.space(36)
                     onClicked: root.searchOpen ? root.closeSearch() : root.openSearch()
                 }
 
@@ -200,15 +197,11 @@ Item {
                     Repeater {
                         model: ["sub", "dub"]
 
-                        delegate: Button {
+                        delegate: SegmentChip {
                             required property string modelData
-                            readonly property bool active: Anime.currentMode === modelData
                             text: modelData.toUpperCase()
-                            bordered: false
-                            background: "transparent"
-                            selected: active
-                            foreground: active ? Colors.on_surface : Colors.muted
-                            fontSize: Style.font.caption
+                            active: Anime.currentMode === modelData
+                            fontFamily: root.fontBody
                             onClicked: Anime.setMode(modelData)
                         }
                     }
@@ -216,6 +209,7 @@ Item {
 
                 Button {
                     text: I18n.lang === "es" ? "ES" : "EN" // i18n-ignore — language code chip
+                    height: Style.space(36)
                     bordered: false
                     background: "transparent"
                     foreground: Colors.muted
@@ -225,6 +219,7 @@ Item {
 
                 PanelActionButton {
                     iconText: "─"
+                    size: Style.space(36)
                     onClicked: root.minimize()
                 }
             }

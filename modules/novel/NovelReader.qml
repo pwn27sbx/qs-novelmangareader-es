@@ -78,15 +78,11 @@ Item {
                         { value: "0", label: I18n.t("tab.browse") },
                         { value: "1", label: I18n.t("tab.library") }
                     ]
-                    delegate: Button {
+                    delegate: SegmentChip {
                         required property var modelData
-                        readonly property bool active: String(root.tabIndex) === modelData.value
                         text: modelData.label
-                        bordered: false
-                        background: "transparent"
-                        selected: active
-                        foreground: active ? Colors.on_surface : Colors.muted
-                        fontSize: Style.font.bodySmall
+                        active: String(root.tabIndex) === modelData.value
+                        fontFamily: root.fontBody
                         onClicked: root.tabIndex = parseInt(modelData.value)
                     }
                 }
@@ -177,7 +173,7 @@ Item {
                 visible: root.tabIndex === 0 && !root.searchOpen
                 anchors { right: searchToggle.left; rightMargin: Style.spacing.controlGap; verticalCenter: parent.verticalCenter }
                 width: providerRow.implicitWidth + Style.spacing.lg * 2
-                height: 30
+                height: Style.space(36)
 
                 Rectangle {
                     anchors.fill: parent; radius: Style.cornerRadius
@@ -304,6 +300,7 @@ Item {
                 iconText: "⌕"
                 visible: root.tabIndex === 0
                 hasCursor: root.searchOpen
+                size: Style.space(36)
                 onClicked: root.searchOpen ? root.closeSearch() : root.openSearch()
             }
 
@@ -311,6 +308,7 @@ Item {
                 id: languageButton
                 anchors { right: minimizeButton.left; rightMargin: Style.spacing.controlGap; verticalCenter: parent.verticalCenter }
                 text: I18n.lang === "es" ? "ES" : "EN" // i18n-ignore — language code chip
+                height: Style.space(36)
                 bordered: false
                 background: "transparent"
                 foreground: Colors.muted
@@ -322,6 +320,7 @@ Item {
                 id: minimizeButton
                 anchors { right: parent.right; rightMargin: Style.spacing.md; verticalCenter: parent.verticalCenter }
                 iconText: "─"
+                size: Style.space(36)
                 onClicked: root.minimize()
             }
         }

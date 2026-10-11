@@ -45,7 +45,11 @@ Item {
 
             ListView {
                 id: tagList
-                anchors { fill: parent; leftMargin: Style.spacing.xxxl; rightMargin: Style.spacing.xxxl }
+                anchors {
+                    fill: parent
+                    topMargin: Style.spacing.md; bottomMargin: Style.spacing.md
+                    leftMargin: Style.spacing.xxxl; rightMargin: Style.spacing.xxxl
+                }
                 orientation: ListView.Horizontal
                 spacing: Style.space(7)
                 clip: true
@@ -59,16 +63,12 @@ Item {
                     ListElement { labelKey: "Manhua";              tagId: "zh"     }
                 }
 
-                delegate: Button {
+                delegate: SegmentChip {
                     required property string labelKey
                     required property string tagId
-                    readonly property bool active: browseView.currentTagId === tagId
                     text: I18n.t(labelKey)
-                    bordered: false
-                    background: "transparent"
-                    selected: active
-                    foreground: active ? Colors.on_surface : Colors.muted
-                    fontSize: Style.font.body
+                    active: browseView.currentTagId === tagId
+                    fontFamily: browseView.fontBody
                     onClicked: {
                         browseView.currentTagId = tagId
                         browseView.searchCleared()

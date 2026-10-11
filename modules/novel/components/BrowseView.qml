@@ -50,7 +50,11 @@ Item {
             }
 
             ListView {
-                anchors { fill: parent; leftMargin: Style.spacing.xxxl; rightMargin: Style.spacing.xxxl }
+                anchors {
+                    fill: parent
+                    topMargin: Style.spacing.md; bottomMargin: Style.spacing.md
+                    leftMargin: Style.spacing.xxxl; rightMargin: Style.spacing.xxxl
+                }
                 orientation: ListView.Horizontal; spacing: Style.space(7); clip: true
                 boundsBehavior: Flickable.StopAtBounds
 
@@ -59,16 +63,12 @@ Item {
                     ListElement { labelKey: "novel.filter.latest"; fid: "latest" }
                 }
 
-                delegate: Button {
+                delegate: SegmentChip {
                     required property string labelKey
                     required property string fid
-                    readonly property bool active: browseView.currentFilter === fid
                     text: I18n.t(labelKey)
-                    bordered: false
-                    background: "transparent"
-                    selected: active
-                    foreground: active ? Colors.on_surface : Colors.muted
-                    fontSize: Style.font.body
+                    active: browseView.currentFilter === fid
+                    fontFamily: browseView.fontBody
                     onClicked: browseView._switchFilter(fid)
                 }
             }
