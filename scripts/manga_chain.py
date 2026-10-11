@@ -143,7 +143,7 @@ def info(prefixed_id):
         title = title or data.get("title", "")
         if data.get("chapters"):
             return _prefix_info(policy, data)
-    return {"error": NO_SPANISH_MESSAGE}
+    return {"error": NO_SPANISH_MESSAGE, "title": title}
 
 
 def pages(prefixed_chapter_id):

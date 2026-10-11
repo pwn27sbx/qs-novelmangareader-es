@@ -38,6 +38,7 @@ except ImportError:
 
 import manga_chain
 import manga_sources
+import titles
 
 PORT        = 5150
 BASE        = "https://weebcentral.com"
@@ -635,6 +636,34 @@ def _send_image(handler, body, ctype):
         pass
 
 
+def _english_fallback(title):
+    """English (WeebCentral) info for a title, or None.
+
+    Used when the Spanish chain has no chapters; the response carries
+    language="en" and notice="no_spanish" so the UI can warn the user. Ids are
+    weebcentral-prefixed so /pages routes back to this scraper.
+    """
+    if not title:
+        return None
+    try:
+        results = search(title, None, 0, "Best Match")
+    except Exception:  # noqa: BLE001
+        return None
+    for item in results.get("results", []):
+        if titles.titles_match(title, item.get("title", "")):
+            try:
+                data = info(item["id"])
+            except Exception:  # noqa: BLE001
+                return None
+            data["id"] = "weebcentral:" + data.get("id", "")
+            for chapter in data.get("chapters", []):
+                chapter["id"] = "weebcentral:" + chapter.get("id", "")
+            data["language"] = "en"
+            data["notice"] = "no_spanish"
+            return data
+    return None
+
+
 # ── Image proxy ─────────────────────────────────────────────────────────────
 
 def _retry_mangadex_page(chapter, page, old_url):
@@ -762,12 +791,25 @@ class Handler(BaseHTTPRequestHandler):
                 mid = param("id")
                 if not mid:
                     return self._error("missing id", 400)
-                self._json(manga_chain.info(mid) if use_chain else info(mid))
+                if use_chain:
+                    data = manga_chain.info(mid)
+                    if data.get("error") == manga_chain.NO_SPANISH_MESSAGE:
+                        english = _english_fallback(data.get("title", ""))
+                        if english:
+                            data = english
+                    self._json(data)
+                else:
+                    self._json(info(mid))
             elif p == "/pages":
                 cid = param("chapterId")
                 if not cid:
                     return self._error("missing chapterId", 400)
-                self._json(manga_chain.pages(cid) if use_chain else pages(cid))
+                if cid.startswith("weebcentral:"):
+                    self._json(pages(cid.split(":", 1)[1]))
+                elif use_chain:
+                    self._json(manga_chain.pages(cid))
+                else:
+                    self._json(pages(cid))
             elif p == "/image":
                 img_url = unquote(param("url"))
                 if not img_url:

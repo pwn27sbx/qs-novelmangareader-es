@@ -69,6 +69,7 @@ var tables = {
         "manga.invalidResponse": "Respuesta no válida",
         "manga.noPages": "No se encontraron páginas para este capítulo",
         "manga.pageFailed": "no se pudo cargar",
+        "manga.englishNotice": "No hay capítulos en español para este título — se muestra en inglés",
 
         // ── Novel ───────────────────────────────────────────────────────
         "panel.novel": "novelas",
@@ -140,6 +141,7 @@ var tables = {
         "manga.invalidResponse": "Invalid response",
         "manga.noPages": "No pages found for this chapter",
         "manga.pageFailed": "failed to load",
+        "manga.englishNotice": "No Spanish chapters for this title — showing English",
 
         // ── Novel ───────────────────────────────────────────────────────
         "panel.novel": "novels",

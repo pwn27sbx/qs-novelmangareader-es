@@ -90,6 +90,8 @@ class ChainTest(unittest.TestCase):
         self.set_modules(FakeSource(chapters=False), FakeSource(found=True, chapters=False))
         data = manga_chain.info("mangadex:x")
         self.assertEqual(data.get("error"), "Sin capítulos en español")
+        # The title is carried so the server can fall back to the English source.
+        self.assertEqual(data.get("title"), "Foo")
 
     def test_fallthrough_rejects_non_matching_title(self):
         # The fall-through source answers with an unrelated series: it must NOT

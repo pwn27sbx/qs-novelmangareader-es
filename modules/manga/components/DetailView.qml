@@ -159,6 +159,29 @@ Item {
             }
         }
 
+        // ── English-only notice ───────────────────────────────────────────────
+        Rectangle {
+            Layout.fillWidth: true
+            visible: Manga.currentManga !== null && Manga.currentManga.language === "en"
+            Layout.preferredHeight: visible ? englishNoticeText.implicitHeight + 22 : 0
+            color: Colors.error_container
+            z: 3
+
+            StyledText {
+                id: englishNoticeText
+                anchors {
+                    left: parent.left; right: parent.right
+                    verticalCenter: parent.verticalCenter
+                    leftMargin: 16; rightMargin: 16
+                }
+                text: "⚠  " + I18n.t("manga.englishNotice")
+                font.family: detailView.fontBody
+                font.pixelSize: 11; font.bold: true
+                color: Colors.on_error_container
+                wrapMode: Text.Wrap
+            }
+        }
+
         // ── Hero banner ───────────────────────────────────────────────────────
         Item {
             Layout.fillWidth: true

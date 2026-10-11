@@ -104,6 +104,20 @@ class ProxyImageTest(unittest.TestCase):
             manga_sources.at_home_fresh = original
         self.assertEqual(url, "https://uploads.mangadex.org/data-saver/h/f.jpg")
 
+    def test_english_fallback_flags_language(self):
+        orig_search, orig_info = manga_server.search, manga_server.info
+        manga_server.search = lambda q, mtype=None, offset=0, sort="": {
+            "results": [{"id": "S1", "title": "Foo"}]}
+        manga_server.info = lambda i: {"id": "S1", "title": "Foo", "chapters": [{"id": "C1", "chapter": "1"}]}
+        try:
+            data = manga_server._english_fallback("Foo")
+        finally:
+            manga_server.search, manga_server.info = orig_search, orig_info
+        self.assertEqual(data["language"], "en")
+        self.assertEqual(data["notice"], "no_spanish")
+        self.assertTrue(data["id"].startswith("weebcentral:"))
+        self.assertTrue(data["chapters"][0]["id"].startswith("weebcentral:"))
+
 
 if __name__ == "__main__":
     unittest.main()
