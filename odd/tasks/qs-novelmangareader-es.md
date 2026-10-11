@@ -174,7 +174,7 @@ Tener la interfaz de la app Quickshell `qs-novelmangareader` **en español latin
 
 | WU | Commit | Fecha | Estado |
 |---|---|---|---|
-| WU-0 | _(se registra al commitear)_ | 2026-10-11 | en curso |
+| WU-0 | `eb39f81` | 2026-10-11 | ✅ completo |
 
 ---
 
