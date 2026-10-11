@@ -2,14 +2,15 @@ import QtQuick
 import QtQuick.Controls
 import QtQuick.Layouts
 import qs.colors
+import qs.Commons
 import qs.services
 import qs.components
 
 Item {
     id: libraryView
 
-    readonly property string fontDisplay: "Noto Serif"
-    readonly property string fontBody:    "Noto Sans"
+    readonly property string fontDisplay: Style.font.displayFamily
+    readonly property string fontBody:    Style.font.family
 
     signal novelSelected(string novelId)
 
@@ -17,7 +18,7 @@ Item {
 
     ColumnLayout {
         anchors.fill: parent
-        spacing: 0
+        spacing: Style.space(0)
 
         Item {
             Layout.fillWidth: true; Layout.fillHeight: true
@@ -36,7 +37,7 @@ Item {
             Layout.fillWidth: true; Layout.fillHeight: true
             visible: !Novel.libraryLoaded
             active: !Novel.libraryLoaded
-            padding: 8
+            padding: Style.spacing.lg
             ratio: 1.72
             footerHeight: 30
         }
@@ -45,7 +46,8 @@ Item {
             id: libGrid
             Layout.fillWidth: true; Layout.fillHeight: true
             visible: Novel.libraryList.length > 0
-            topMargin: 10; leftMargin: 8; rightMargin: 8; bottomMargin: 10
+            topMargin: Style.spacing.xl; leftMargin: Style.spacing.lg
+            rightMargin: Style.spacing.lg; bottomMargin: Style.spacing.xl
             cellWidth: Math.floor((width - leftMargin - rightMargin) / 4)
             cellHeight: cellWidth * 1.72
             clip: true; boundsBehavior: Flickable.StopAtBounds
@@ -53,7 +55,7 @@ Item {
 
             ScrollBar.vertical: ScrollBar {
                 policy: ScrollBar.AsNeeded
-                contentItem: Rectangle { implicitWidth: 3; color: Colors.primary; opacity: 0.45; radius: 2 }
+                contentItem: Rectangle { implicitWidth: 3; color: Colors.primary; opacity: 0.45; radius: Style.cornerRadius }
             }
 
             delegate: Item {
@@ -70,7 +72,7 @@ Item {
 
                     CoverProgressBar {
                         height: 30
-                        rowSpacing: 6
+                        rowSpacing: Style.spacing.md
                         bodyFont: libraryView.fontBody
                         started: modelData.lastReadChapterNum
                         label: modelData.lastReadChapterNum

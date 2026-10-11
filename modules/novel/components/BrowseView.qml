@@ -3,14 +3,15 @@ import QtQuick.Controls
 import QtQuick.Layouts
 import Quickshell
 import qs.colors
+import qs.Commons
 import qs.services
 import qs.components
 
 Item {
     id: browseView
 
-    readonly property string fontDisplay: "Noto Serif"
-    readonly property string fontBody:    "Noto Sans"
+    readonly property string fontDisplay: Style.font.displayFamily
+    readonly property string fontBody:    Style.font.family
 
     signal novelSelected(string novelId)
 
@@ -28,7 +29,7 @@ Item {
 
     ColumnLayout {
         anchors.fill: parent
-        spacing: 0
+        spacing: Style.space(0)
 
         // ── Top bar ───────────────────────────────────────────────────────────
         Rectangle {
@@ -43,23 +44,23 @@ Item {
             }
 
             RowLayout {
-                anchors { fill: parent; leftMargin: 18; rightMargin: 12 }
-                spacing: 10
+                anchors { fill: parent; leftMargin: Style.spacing.huge; rightMargin: Style.spacing.xxl }
+                spacing: Style.spacing.xl
 
                 // Title (hidden while search bar is open)
                 Row {
-                    spacing: 0
+                    spacing: Style.space(0)
                     visible: !searchBar.visible
                     StyledText {
                         text: "N"
                         font.family: browseView.fontDisplay
-                        font.pixelSize: 24; font.letterSpacing: 1
+                        font.pixelSize: Style.font.display; font.letterSpacing: 1
                         color: Colors.primary
                     }
                     StyledText {
                         text: "ovel" // i18n-ignore — brand wordmark (with the "N" above)
                         font.family: browseView.fontDisplay
-                        font.pixelSize: 24; font.letterSpacing: 1
+                        font.pixelSize: Style.font.display; font.letterSpacing: 1
                         color: Colors.on_surface; opacity: 0.85
                     }
                 }
@@ -68,22 +69,22 @@ Item {
                 Rectangle {
                     id: searchBar
                     Layout.fillWidth: true
-                    height: 38; radius: 19
+                    height: 38; radius: height / 2
                     color: Colors.surface_container
                     visible: false
                     border.color: searchField.activeFocus ? Colors.primary : Colors.outline_variant
                     border.width: searchField.activeFocus ? 1.5 : 1
-                    Behavior on border.width { NumberAnimation { duration: 120 } }
+                    Behavior on border.width { NumberAnimation { duration: Style.motion.fast } }
 
                     TextInput {
                         id: searchField
                         anchors {
                             verticalCenter: parent.verticalCenter
                             left: parent.left; right: clearBtn.left
-                            leftMargin: 16; rightMargin: 6
+                            leftMargin: Style.space(16); rightMargin: Style.spacing.md
                         }
                         color: Colors.on_surface
-                        font.family: browseView.fontBody; font.pixelSize: 13
+                        font.family: browseView.fontBody; font.pixelSize: Style.font.subtitle
                         clip: true
                         onTextChanged: searchDebounce.restart()
                         Keys.onEscapePressed: {
@@ -95,26 +96,26 @@ Item {
                     }
 
                     StyledText {
-                        anchors { verticalCenter: parent.verticalCenter; left: parent.left; leftMargin: 16 }
+                        anchors { verticalCenter: parent.verticalCenter; left: parent.left; leftMargin: Style.space(16) }
                         text: I18n.t("novel.search")
                         color: Colors.on_surface_variant; font.family: browseView.fontBody
-                        font.pixelSize: 13; visible: searchField.text.length === 0; opacity: 0.6
+                        font.pixelSize: Style.font.subtitle; visible: searchField.text.length === 0; opacity: 0.6
                     }
 
                     Item {
                         id: clearBtn
-                        anchors { right: parent.right; verticalCenter: parent.verticalCenter; rightMargin: 10 }
+                        anchors { right: parent.right; verticalCenter: parent.verticalCenter; rightMargin: Style.spacing.xl }
                         width: 22; height: 22
                         visible: searchField.text.length > 0
                         opacity: visible ? 1 : 0
-                        Behavior on opacity { NumberAnimation { duration: 100 } }
+                        Behavior on opacity { NumberAnimation { duration: Style.motion.fast } }
                         Rectangle {
-                            anchors.centerIn: parent; width: 18; height: 18; radius: 9
+                            anchors.centerIn: parent; width: 18; height: 18; radius: height / 2
                             color: Colors.surface_container_highest
                         }
                         StyledText {
                             anchors.centerIn: parent; text: "✕"
-                            color: Colors.on_surface_variant; font.pixelSize: 9; font.bold: true
+                            color: Colors.on_surface_variant; font.pixelSize: 9; font.bold: true // style-ignore — bespoke size
                         }
                         MouseArea { anchors.fill: parent; onClicked: searchField.text = "" }
                     }
@@ -142,17 +143,17 @@ Item {
                     height: 32
 
                     Rectangle {
-                        anchors.fill: parent; radius: 16
+                        anchors.fill: parent; radius: height / 2
                         color: providerDropArea.containsMouse
                             ? Colors.surface_container_highest
                             : Colors.surface_container
                         border.color: Colors.outline_variant; border.width: 1
-                        Behavior on color { ColorAnimation { duration: 150 } }
+                        Behavior on color { ColorAnimation { duration: Style.motion.base } }
                     }
 
                     Row {
                         anchors.centerIn: parent
-                        spacing: 5
+                        spacing: Style.space(5)
 
                         StyledText {
                             id: providerLabel
@@ -163,11 +164,11 @@ Item {
                                 }
                                 return Novel.activeProvider
                             }
-                            font.family: browseView.fontBody; font.pixelSize: 11
+                            font.family: browseView.fontBody; font.pixelSize: Style.font.bodySmall
                             font.letterSpacing: 0.3
                             color: Novel.isSwitchingProvider ? Colors.on_surface_variant : Colors.on_surface
                             anchors.verticalCenter: parent.verticalCenter
-                            Behavior on color { ColorAnimation { duration: 150 } }
+                            Behavior on color { ColorAnimation { duration: Style.motion.base } }
                         }
 
                         // Tiny spinner shown while switching
@@ -176,7 +177,7 @@ Item {
                             width: 10
                             border.width: 1.5
                             anchors.verticalCenter: parent.verticalCenter
-                            duration: 700
+                            duration: Style.motion.loop
                             running: Novel.isSwitchingProvider
                         }
 
@@ -184,7 +185,7 @@ Item {
                         StyledText {
                             visible: !Novel.isSwitchingProvider
                             text: providerPopup.visible ? "▲" : "▾"
-                            font.pixelSize: 8
+                            font.pixelSize: 8 // style-ignore — bespoke size
                             color: Colors.on_surface_variant
                             anchors.verticalCenter: parent.verticalCenter
                         }
@@ -205,10 +206,10 @@ Item {
                         id: providerPopup
                         visible: false
                         // Anchor below the button, right-aligned
-                        anchors { top: parent.bottom; right: parent.right; topMargin: 6 }
+                        anchors { top: parent.bottom; right: parent.right; topMargin: Style.spacing.md }
                         width: 150
                         height: popupColumn.implicitHeight + 10
-                        radius: DesktopTheme.rad(10)
+                        radius: Style.cornerRadius
                         color: Colors.surface_container_high
                         border.color: Colors.outline_variant; border.width: 1
                         z: 100
@@ -218,8 +219,8 @@ Item {
 
                         Column {
                             id: popupColumn
-                            anchors { top: parent.top; left: parent.left; right: parent.right; topMargin: 5 }
-                            spacing: 0
+                            anchors { top: parent.top; left: parent.left; right: parent.right; topMargin: Style.space(5) }
+                            spacing: Style.space(0)
 
                             Repeater {
                                 model: Novel.availableProviders
@@ -230,8 +231,8 @@ Item {
 
                                     Rectangle {
                                         anchors.fill: parent
-                                        anchors.leftMargin: 4; anchors.rightMargin: 4
-                                        radius: DesktopTheme.rad(7)
+                                        anchors.leftMargin: Style.spacing.sm; anchors.rightMargin: Style.spacing.sm
+                                        radius: Style.cornerRadius
                                         color: {
                                             if (modelData.name === Novel.activeProvider)
                                                 return Colors.primary_container
@@ -239,16 +240,16 @@ Item {
                                                 ? Colors.surface_container_highest
                                                 : "transparent"
                                         }
-                                        Behavior on color { ColorAnimation { duration: 120 } }
+                                        Behavior on color { ColorAnimation { duration: Style.motion.fast } }
                                     }
 
                                     Row {
-                                        anchors { verticalCenter: parent.verticalCenter; left: parent.left; leftMargin: 14 }
-                                        spacing: 8
+                                        anchors { verticalCenter: parent.verticalCenter; left: parent.left; leftMargin: Style.spacing.xxxl }
+                                        spacing: Style.spacing.lg
 
                                         // Active indicator dot
                                         Rectangle {
-                                            width: 6; height: 6; radius: 3
+                                            width: 6; height: 6; radius: height / 2
                                             anchors.verticalCenter: parent.verticalCenter
                                             color: Colors.primary
                                             visible: modelData.name === Novel.activeProvider
@@ -261,7 +262,7 @@ Item {
 
                                         StyledText {
                                             text: modelData.label
-                                            font.family: browseView.fontBody; font.pixelSize: 12
+                                            font.family: browseView.fontBody; font.pixelSize: Style.font.body
                                             color: modelData.name === Novel.activeProvider
                                                 ? Colors.on_primary_container
                                                 : Colors.on_surface
@@ -289,14 +290,14 @@ Item {
                     width: 40; height: 40
 
                     Rectangle {
-                        anchors.centerIn: parent; width: 34; height: 34; radius: 17
+                        anchors.centerIn: parent; width: 34; height: 34; radius: height / 2
                         color: searchBar.visible ? Colors.primary_container : "transparent"
-                        Behavior on color { ColorAnimation { duration: 180 } }
+                        Behavior on color { ColorAnimation { duration: Style.motion.base } }
                     }
                     StyledText {
-                        anchors.centerIn: parent; text: "⌕"; font.pixelSize: 19
+                        anchors.centerIn: parent; text: "⌕"; font.pixelSize: 19 // style-ignore — bespoke size
                         color: searchBar.visible ? Colors.on_primary_container : Colors.on_surface_variant
-                        Behavior on color { ColorAnimation { duration: 180 } }
+                        Behavior on color { ColorAnimation { duration: Style.motion.base } }
                     }
                     MouseArea {
                         anchors.fill: parent
@@ -325,8 +326,8 @@ Item {
             }
 
             ListView {
-                anchors { fill: parent; leftMargin: 14; rightMargin: 14 }
-                orientation: ListView.Horizontal; spacing: 7; clip: true
+                anchors { fill: parent; leftMargin: Style.spacing.xxxl; rightMargin: Style.spacing.xxxl }
+                orientation: ListView.Horizontal; spacing: Style.space(7); clip: true
                 boundsBehavior: Flickable.StopAtBounds
 
                 model: ListModel {
@@ -340,18 +341,18 @@ Item {
                     Rectangle {
                         id: chip
                         anchors.centerIn: parent
-                        implicitWidth: chipLbl.implicitWidth + 28; height: 30; radius: 15
+                        implicitWidth: chipLbl.implicitWidth + 28; height: 30; radius: height / 2
                         color: browseView.currentFilter === fid ? Colors.primary : Colors.surface_container
                         border.color: browseView.currentFilter === fid ? Colors.primary : Colors.outline_variant
                         border.width: 1
-                        Behavior on color { ColorAnimation { duration: 180 } }
+                        Behavior on color { ColorAnimation { duration: Style.motion.base } }
 
                         StyledText {
                             id: chipLbl; anchors.centerIn: parent; text: I18n.t(labelKey)
-                            font.family: browseView.fontBody; font.pixelSize: 12
+                            font.family: browseView.fontBody; font.pixelSize: Style.font.body
                             font.letterSpacing: 0.6
                             color: browseView.currentFilter === fid ? Colors.on_primary : Colors.on_surface_variant
-                            Behavior on color { ColorAnimation { duration: 180 } }
+                            Behavior on color { ColorAnimation { duration: Style.motion.base } }
                         }
                     }
 
@@ -402,11 +403,11 @@ Item {
                 visible: Novel.novelError.length > 0 && !Novel.isFetchingNovel
 
                 Column {
-                    anchors.centerIn: parent; spacing: 10
-                    Text { text: "⚠"; font.pixelSize: 32; color: Colors.error; anchors.horizontalCenter: parent.horizontalCenter; opacity: 0.8 }
+                    anchors.centerIn: parent; spacing: Style.spacing.xl
+                    Text { text: "⚠"; font.pixelSize: 32; color: Colors.error; anchors.horizontalCenter: parent.horizontalCenter; opacity: 0.8 } // style-ignore — bespoke size
                     Text {
                         text: Novel.novelError; color: Colors.on_surface_variant
-                        font.pixelSize: 12; font.family: browseView.fontBody
+                        font.pixelSize: Style.font.body; font.family: browseView.fontBody
                         wrapMode: Text.Wrap; width: 260; horizontalAlignment: Text.AlignHCenter; lineHeight: 1.4
                     }
                 }
@@ -414,7 +415,7 @@ Item {
 
             GridView {
                 id: novelGrid
-                anchors.fill: parent; anchors.margins: 10
+                anchors.fill: parent; anchors.margins: Style.spacing.xl
                 cellWidth: (width - 10) / 4
                 cellHeight: cellWidth * 1.65
                 clip: true; boundsBehavior: Flickable.StopAtBounds
@@ -424,7 +425,7 @@ Item {
 
                 ScrollBar.vertical: ScrollBar {
                     policy: ScrollBar.AsNeeded
-                    contentItem: Rectangle { implicitWidth: 3; color: Colors.primary; opacity: 0.45; radius: 2 }
+                    contentItem: Rectangle { implicitWidth: 3; color: Colors.primary; opacity: 0.45; radius: Style.cornerRadius }
                 }
 
                 onContentYChanged: {
@@ -437,8 +438,8 @@ Item {
 
                     ClickableRect {
                         id: nCard
-                        anchors { fill: parent; margins: 5 }
-                        radius: 10; color: Colors.surface_container; clip: true
+                        anchors { fill: parent; margins: Style.space(5) }
+                        radius: Style.cornerRadius; color: Colors.surface_container; clip: true
 
                         CoverPlaceholder {
                             anchors.fill: coverImg
@@ -453,12 +454,12 @@ Item {
                             source: modelData.coverUrl || ""
                             fillMode: Image.PreserveAspectCrop; asynchronous: true; cache: true
                             opacity: status === Image.Ready ? 1 : 0
-                            Behavior on opacity { NumberAnimation { duration: 300 } }
+                            Behavior on opacity { NumberAnimation { duration: Style.motion.slow } }
 
                             Rectangle {
                                 visible: modelData.status && modelData.status.length > 0
-                                anchors { top: parent.top; left: parent.left; topMargin: 8; leftMargin: 8 }
-                                height: 18; radius: 9; width: statusBadge.implicitWidth + 12
+                                anchors { top: parent.top; left: parent.left; topMargin: Style.spacing.lg; leftMargin: Style.spacing.lg }
+                                height: 18; radius: height / 2; width: statusBadge.implicitWidth + 12
                                 color: modelData.status === "Ongoing"
                                     ? Qt.rgba(0.2, 0.75, 0.4, 0.85)
                                     : Qt.rgba(0.3, 0.5, 0.9, 0.85)
@@ -466,7 +467,7 @@ Item {
                                 Text {
                                     id: statusBadge; anchors.centerIn: parent
                                     text: I18n.tData(modelData.status || "").toUpperCase()
-                                    font.family: browseView.fontBody; font.pixelSize: 7
+                                    font.family: browseView.fontBody; font.pixelSize: 7 // style-ignore — bespoke size
                                     font.letterSpacing: 0.8; font.bold: true; color: "white"
                                 }
                             }
@@ -484,20 +485,20 @@ Item {
                         Rectangle {
                             id: nTitleBar
                             anchors { bottom: parent.bottom; left: parent.left; right: parent.right }
-                            height: nTitleText.implicitHeight + 18; color: Colors.surface_container; radius: 10
+                            height: nTitleText.implicitHeight + 18; color: Colors.surface_container; radius: Style.cornerRadius
 
                             Column {
                                 anchors {
                                     left: parent.left; right: parent.right
                                     verticalCenter: parent.verticalCenter
-                                    leftMargin: 10; rightMargin: 10
+                                    leftMargin: Style.spacing.xl; rightMargin: Style.spacing.xl
                                 }
-                                spacing: 3
+                                spacing: Style.spacing.xs
 
                                 Text {
                                     id: nTitleText; width: parent.width
                                     text: modelData.title || ""
-                                    font.family: browseView.fontBody; font.pixelSize: 11
+                                    font.family: browseView.fontBody; font.pixelSize: Style.font.bodySmall
                                     font.letterSpacing: 0.2; color: Colors.on_surface
                                     wrapMode: Text.Wrap; maximumLineCount: 2; elide: Text.ElideRight; lineHeight: 1.3
                                 }
@@ -505,7 +506,7 @@ Item {
                                     visible: modelData.author && modelData.author.length > 0
                                     width: parent.width
                                     text: modelData.author || ""
-                                    font.family: browseView.fontBody; font.pixelSize: 9
+                                    font.family: browseView.fontBody; font.pixelSize: 9 // style-ignore — bespoke size
                                     color: Colors.on_surface_variant; opacity: 0.6
                                     elide: Text.ElideRight; font.letterSpacing: 0.3
                                 }
@@ -513,17 +514,17 @@ Item {
                         }
 
                         Rectangle {
-                            anchors.fill: parent; radius: 10; color: Colors.primary
-                            opacity: nCard.pressed ? 0.16 : (nCard.hovered ? 0.07 : 0)
-                            Behavior on opacity { NumberAnimation { duration: 130 } }
+                            anchors.fill: parent; radius: Style.cornerRadius; color: Colors.primary
+                            opacity: nCard.pressed ? Style.pressedFillAlpha : (nCard.hovered ? Style.hoverFillAlpha : 0)
+                            Behavior on opacity { NumberAnimation { duration: Style.motion.base } }
                         }
 
                         transform: Scale {
                             origin.x: nCard.width / 2; origin.y: nCard.height / 2
                             xScale: nCard.pressed ? 0.97 : 1.0
                             yScale: nCard.pressed ? 0.97 : 1.0
-                            Behavior on xScale { NumberAnimation { duration: 120; easing.type: Easing.OutCubic } }
-                            Behavior on yScale { NumberAnimation { duration: 120; easing.type: Easing.OutCubic } }
+                            Behavior on xScale { NumberAnimation { duration: Style.motion.fast; easing.type: Style.motion.easeOut } }
+                            Behavior on yScale { NumberAnimation { duration: Style.motion.fast; easing.type: Style.motion.easeOut } }
                         }
 
                         onClicked: {

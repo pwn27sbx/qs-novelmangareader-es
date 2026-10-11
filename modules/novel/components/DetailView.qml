@@ -2,14 +2,15 @@ import QtQuick
 import QtQuick.Controls
 import QtQuick.Layouts
 import qs.colors
+import qs.Commons
 import qs.services
 import qs.components
 
 Item {
     id: detailView
 
-    readonly property string fontDisplay: "Noto Serif"
-    readonly property string fontBody:    "Noto Sans"
+    readonly property string fontDisplay: Style.font.displayFamily
+    readonly property string fontBody:    Style.font.family
 
     signal backRequested()
     signal chapterSelected(string chapterId)
@@ -115,7 +116,7 @@ Item {
     // ═════════════════════════════════════════════════════════════════════════
     ColumnLayout {
         anchors.fill: parent
-        spacing: 0
+        spacing: Style.space(0)
 
         // ── Header ────────────────────────────────────────────────────────────
         Rectangle {
@@ -128,18 +129,18 @@ Item {
             }
 
             RowLayout {
-                anchors { fill: parent; leftMargin: 6; rightMargin: 10 }
-                spacing: 2
+                anchors { fill: parent; leftMargin: Style.spacing.md; rightMargin: Style.spacing.xl }
+                spacing: Style.spacing.xxs
 
                 // Back button
                 Item {
                     width: 44; height: 44
                     Rectangle {
-                        anchors.centerIn: parent; width: 34; height: 34; radius: 17
+                        anchors.centerIn: parent; width: 34; height: 34; radius: height / 2
                         color: backArea.containsMouse ? Colors.surface_container : "transparent"
-                        Behavior on color { ColorAnimation { duration: 130 } }
+                        Behavior on color { ColorAnimation { duration: Style.motion.base } }
                     }
-                    Text { anchors.centerIn: parent; text: "←"; font.pixelSize: 18; color: Colors.on_surface_variant }
+                    Text { anchors.centerIn: parent; text: "←"; font.pixelSize: Style.font.iconLarge; color: Colors.on_surface_variant }
                     MouseArea {
                         id: backArea; anchors.fill: parent; hoverEnabled: true
                         onClicked: { Novel.clearDetail(); detailView.backRequested() }
@@ -150,7 +151,7 @@ Item {
                     Layout.fillWidth: true
                     text: Novel.currentNovel ? Novel.currentNovel.title : ""
                     font.family: detailView.fontDisplay
-                    font.pixelSize: 15; color: Colors.on_surface; elide: Text.ElideRight
+                    font.pixelSize: 15; color: Colors.on_surface; elide: Text.ElideRight // style-ignore — bespoke size
                 }
 
                 // Library toggle
@@ -163,24 +164,24 @@ Item {
                         color: detailView._inLibrary ? Colors.primary_container : Colors.surface_container
                         border.color: detailView._inLibrary ? Colors.primary : Colors.outline_variant
                         border.width: 1
-                        Behavior on color { ColorAnimation { duration: 180 } }
+                        Behavior on color { ColorAnimation { duration: Style.motion.base } }
                     }
 
                     Row {
-                        anchors.centerIn: parent; spacing: 5
+                        anchors.centerIn: parent; spacing: Style.space(5)
                         StyledText {
                             anchors.verticalCenter: parent.verticalCenter
                             text: detailView._inLibrary ? "✓" : "+"
-                            font.pixelSize: 11; font.bold: true
+                            font.pixelSize: Style.font.bodySmall; font.bold: true
                             color: detailView._inLibrary ? Colors.on_primary_container : Colors.on_surface_variant
-                            Behavior on color { ColorAnimation { duration: 180 } }
+                            Behavior on color { ColorAnimation { duration: Style.motion.base } }
                         }
                         StyledText {
                             id: libBtnLabel; anchors.verticalCenter: parent.verticalCenter
                             text: I18n.t("tab.library"); font.family: detailView.fontBody
-                            font.pixelSize: 11; font.letterSpacing: 0.3
+                            font.pixelSize: Style.font.bodySmall; font.letterSpacing: 0.3
                             color: detailView._inLibrary ? Colors.on_primary_container : Colors.on_surface_variant
-                            Behavior on color { ColorAnimation { duration: 180 } }
+                            Behavior on color { ColorAnimation { duration: Style.motion.base } }
                         }
                     }
 
@@ -206,7 +207,7 @@ Item {
             Layout.fillWidth: true
             Layout.preferredHeight: Novel.currentNovel !== null ? 160 : 0
             clip: true
-            Behavior on Layout.preferredHeight { NumberAnimation { duration: 220; easing.type: Easing.OutCubic } }
+            Behavior on Layout.preferredHeight { NumberAnimation { duration: Style.motion.slow; easing.type: Style.motion.easeOut } }
 
             // Blurred cover background
             Image {
@@ -227,12 +228,12 @@ Item {
 
             // Content row
             Row {
-                anchors { fill: parent; margins: 14 }
-                spacing: 14
+                anchors { fill: parent; margins: Style.spacing.xxxl }
+                spacing: Style.spacing.xxxl
 
                 // Cover thumbnail
                 Rectangle {
-                    width: 90; height: 130; radius: 8
+                    width: 90; height: 130; radius: Style.cornerRadius
                     color: Colors.surface_container_high; clip: true
                     anchors.verticalCenter: parent.verticalCenter
 
@@ -242,26 +243,26 @@ Item {
                         fillMode: Image.PreserveAspectCrop; asynchronous: true
                     }
                     Rectangle {
-                        anchors.fill: parent; radius: 8; color: "transparent"
+                        anchors.fill: parent; radius: Style.cornerRadius; color: "transparent"
                         border.color: Colors.outline_variant; border.width: 1
                     }
                 }
 
                 Column {
                     width: parent.width - 104
-                    spacing: 6; anchors.verticalCenter: parent.verticalCenter
+                    spacing: Style.spacing.md; anchors.verticalCenter: parent.verticalCenter
 
                     // Status badge
                     Rectangle {
                         visible: Novel.currentNovel && Novel.currentNovel.status.length > 0
-                        height: 18; width: statusTxt.implicitWidth + 14; radius: 9
+                        height: 18; width: statusTxt.implicitWidth + 14; radius: height / 2
                         color: Colors.withAlpha(Colors.tertiary, 0.15)
                         border.color: Colors.tertiary; border.width: 1
 
                         Text {
                             id: statusTxt; anchors.centerIn: parent
                             text: Novel.currentNovel ? I18n.tData(Novel.currentNovel.status || "").toUpperCase() : ""
-                            font.family: detailView.fontBody; font.pixelSize: 9
+                            font.family: detailView.fontBody; font.pixelSize: 9 // style-ignore — bespoke size
                             font.letterSpacing: 1.2; font.bold: true; color: Colors.tertiary
                         }
                     }
@@ -270,7 +271,7 @@ Item {
                     StyledText {
                         width: parent.width
                         text: Novel.currentNovel ? Novel.currentNovel.author : ""
-                        font.family: detailView.fontBody; font.pixelSize: 12; font.bold: true
+                        font.family: detailView.fontBody; font.pixelSize: Style.font.body; font.bold: true
                         color: Colors.on_surface; elide: Text.ElideRight
                     }
 
@@ -279,7 +280,7 @@ Item {
                         visible: Novel.currentNovel && Novel.currentNovel.genres.length > 0
                         width: parent.width
                         text: Novel.currentNovel ? Novel.currentNovel.genres.join(" · ") : ""
-                        font.family: detailView.fontBody; font.pixelSize: 10
+                        font.family: detailView.fontBody; font.pixelSize: Style.font.caption
                         color: Colors.primary; opacity: 0.85; elide: Text.ElideRight; font.letterSpacing: 0.2
                     }
 
@@ -287,7 +288,7 @@ Item {
                     StyledText {
                         width: parent.width
                         text: Novel.currentNovel ? Novel.currentNovel.description : ""
-                        font.family: detailView.fontBody; font.pixelSize: 11
+                        font.family: detailView.fontBody; font.pixelSize: Style.font.bodySmall
                         color: Colors.on_surface_variant; wrapMode: Text.Wrap
                         maximumLineCount: 3; elide: Text.ElideRight; opacity: 0.8; lineHeight: 1.35
                     }
@@ -307,11 +308,11 @@ Item {
             visible: Novel.currentNovel !== null
 
             RowLayout {
-                anchors { fill: parent; leftMargin: 16; rightMargin: 16 }
+                anchors { fill: parent; leftMargin: Style.space(16); rightMargin: Style.space(16) }
 
                 Text {
                     text: Novel.currentNovel ? I18n.tn("count.chapter", Novel.currentNovel.chapters.length) : ""
-                    font.family: detailView.fontBody; font.pixelSize: 11
+                    font.family: detailView.fontBody; font.pixelSize: Style.font.bodySmall
                     font.letterSpacing: 1; color: Colors.on_surface_variant; opacity: 0.75
                 }
 
@@ -319,7 +320,7 @@ Item {
                 Text {
                     visible: Novel.currentNovel !== null && Novel.currentNovel.partial
                     text: I18n.t("novel.listIncomplete")
-                    font.family: detailView.fontBody; font.pixelSize: 10
+                    font.family: detailView.fontBody; font.pixelSize: Style.font.caption
                     color: Colors.tertiary
                     MouseArea {
                         anchors.fill: parent
@@ -335,8 +336,8 @@ Item {
                         ? Novel.getLibraryEntry(Novel.currentNovel.id) : null
                     visible: _entry !== null && _entry !== undefined
                         && _entry.lastReadChapterNum !== "" && _entry.lastReadChapterNum !== undefined
-                    height: 20; width: lastReadTxt.implicitWidth + 18; radius: 10
-                    color: Colors.withAlpha(Colors.primary, 0.12)
+                    height: 20; width: lastReadTxt.implicitWidth + 18; radius: height / 2
+                    color: Style.selectedFillFor(Colors.primary)
                     border.color: Colors.primary; border.width: 1
 
                     Text {
@@ -345,7 +346,7 @@ Item {
                             var e = Novel.currentNovel ? Novel.getLibraryEntry(Novel.currentNovel.id) : null
                             return e ? I18n.t("last.ch", { 1: e.lastReadChapterNum }) : ""
                         }
-                        font.family: detailView.fontBody; font.pixelSize: 9
+                        font.family: detailView.fontBody; font.pixelSize: 9 // style-ignore — bespoke size
                         font.letterSpacing: 0.8; color: Colors.primary
                     }
                 }
@@ -364,32 +365,32 @@ Item {
             visible: Novel.currentNovel !== null
 
             RowLayout {
-                anchors { fill: parent; leftMargin: 12; rightMargin: 12 }
-                spacing: 8
+                anchors { fill: parent; leftMargin: Style.spacing.xxl; rightMargin: Style.spacing.xxl }
+                spacing: Style.spacing.lg
 
                 Button {
                     text: I18n.t("action.continue")
-                    font.family: detailView.fontBody; font.pixelSize: 12; font.bold: true
+                    font.family: detailView.fontBody; font.pixelSize: Style.font.body; font.bold: true
                     contentItem: StyledText {
                         text: parent.text; font: parent.font
                         color: Colors.on_primary
                         horizontalAlignment: Text.AlignHCenter
                         verticalAlignment: Text.AlignVCenter
                     }
-                    background: Rectangle { color: Colors.primary; radius: 14; opacity: parent.enabled ? 1 : 0.6 }
+                    background: Rectangle { color: Colors.primary; radius: Style.cornerRadius; opacity: parent.enabled ? 1 : 0.6 }
                     onClicked: continueReading()
                 }
 
                 Button {
                     text: I18n.t("novel.nextChapter")
-                    font.family: detailView.fontBody; font.pixelSize: 12; font.bold: true
+                    font.family: detailView.fontBody; font.pixelSize: Style.font.body; font.bold: true
                     contentItem: StyledText {
                         text: parent.text; font: parent.font
                         color: Colors.on_primary
                         horizontalAlignment: Text.AlignHCenter
                         verticalAlignment: Text.AlignVCenter
                     }
-                    background: Rectangle { color: Colors.primary; radius: 14; opacity: parent.enabled ? 1 : 0.6 }
+                    background: Rectangle { color: Colors.primary; radius: Style.cornerRadius; opacity: parent.enabled ? 1 : 0.6 }
                     onClicked: readNext()
                 }
             }
@@ -407,26 +408,26 @@ Item {
             visible: Novel.currentNovel !== null
 
             RowLayout {
-                anchors { fill: parent; leftMargin: 12; rightMargin: 12 }
-                spacing: 8
+                anchors { fill: parent; leftMargin: Style.spacing.xxl; rightMargin: Style.spacing.xxl }
+                spacing: Style.spacing.lg
 
                 // Search pill
                 Rectangle {
                     Layout.fillWidth: true
-                    height: 36; radius: 18
+                    height: 36; radius: height / 2
                     color: Colors.surface_container
                     border.width: 1
                     border.color: chapterSearch.activeFocus
                         ? Colors.primary
                         : Colors.withAlpha(Colors.outline, 0.2)
-                    Behavior on border.color { ColorAnimation { duration: 130 } }
+                    Behavior on border.color { ColorAnimation { duration: Style.motion.base } }
 
                     RowLayout {
-                        anchors { fill: parent; leftMargin: 12; rightMargin: 4 }
-                        spacing: 6
+                        anchors { fill: parent; leftMargin: Style.spacing.xxl; rightMargin: Style.spacing.sm }
+                        spacing: Style.spacing.md
 
                         StyledText {
-                            text: "⌕"; font.pixelSize: 16
+                            text: "⌕"; font.pixelSize: Style.font.heading
                             color: Colors.primary; opacity: 0.7
                         }
 
@@ -434,15 +435,15 @@ Item {
                             id: chapterSearch
                             Layout.fillWidth: true
                             Layout.alignment: Qt.AlignVCenter
-                            font.family: detailView.fontBody; font.pixelSize: 12
+                            font.family: detailView.fontBody; font.pixelSize: Style.font.body
                             color: Colors.on_surface
-                            selectionColor: Colors.withAlpha(Colors.primary, 0.35)
+                            selectionColor: Style.selectionFillFor(Colors.primary)
                             clip: true
 
                             StyledText {
                                 anchors.verticalCenter: parent.verticalCenter
                                 text: I18n.t("filterChapters")
-                                font.family: detailView.fontBody; font.pixelSize: 12
+                                font.family: detailView.fontBody; font.pixelSize: Style.font.body
                                 color: Colors.on_surface_variant; opacity: 0.45
                                 visible: chapterSearch.text === "" && !chapterSearch.activeFocus
                             }
@@ -456,15 +457,15 @@ Item {
                             visible: detailView._chapterFilter !== ""
 
                             Rectangle {
-                                anchors.centerIn: parent; width: 22; height: 22; radius: 11
+                                anchors.centerIn: parent; width: 22; height: 22; radius: height / 2
                                 color: clearArea.containsMouse
-                                    ? Colors.withAlpha(Colors.on_surface, 0.12)
+                                    ? Style.hoverFillFor(Colors.on_surface)
                                     : "transparent"
-                                Behavior on color { ColorAnimation { duration: 100 } }
+                                Behavior on color { ColorAnimation { duration: Style.motion.fast } }
                             }
                             Text {
                                 anchors.centerIn: parent
-                                text: "✕"; font.pixelSize: 11; color: Colors.on_surface_variant
+                                text: "✕"; font.pixelSize: Style.font.bodySmall; color: Colors.on_surface_variant
                             }
                             MouseArea {
                                 id: clearArea; anchors.fill: parent; hoverEnabled: true
@@ -482,17 +483,17 @@ Item {
                     width: 36; height: 36
 
                     Rectangle {
-                        anchors.fill: parent; radius: 18
+                        anchors.fill: parent; radius: height / 2
                         color: sortArea.containsMouse
                             ? Colors.primary_container
                             : Colors.withAlpha(Colors.primary_container, 0.6)
                         border.color: Colors.primary; border.width: 1
-                        Behavior on color { ColorAnimation { duration: 130 } }
+                        Behavior on color { ColorAnimation { duration: Style.motion.base } }
                     }
                     StyledText {
                         anchors.centerIn: parent
                         text: detailView._sortAscending ? "↑" : "↓"
-                        font.pixelSize: 16; font.bold: true
+                        font.pixelSize: Style.font.heading; font.bold: true
                         color: Colors.on_primary_container
                     }
                     MouseArea {
@@ -533,31 +534,31 @@ Item {
                 visible: Novel.detailError.length > 0 && !Novel.isFetchingDetail
 
                 Column {
-                    anchors.centerIn: parent; spacing: 12
+                    anchors.centerIn: parent; spacing: Style.spacing.xxl
 
                     Text {
                         anchors.horizontalCenter: parent.horizontalCenter
-                        text: "⚠"; font.pixelSize: 30; color: Colors.error; opacity: 0.8
+                        text: "⚠"; font.pixelSize: 30; color: Colors.error; opacity: 0.8 // style-ignore — bespoke size
                     }
                     Text {
                         anchors.horizontalCenter: parent.horizontalCenter
                         width: 280; horizontalAlignment: Text.AlignHCenter
                         text: I18n.t("novel.loadFailed") + "\n" + Novel.detailError
                         color: Colors.on_surface_variant
-                        font.family: detailView.fontBody; font.pixelSize: 12
+                        font.family: detailView.fontBody; font.pixelSize: Style.font.body
                         wrapMode: Text.Wrap; lineHeight: 1.4
                     }
                     Rectangle {
                         anchors.horizontalCenter: parent.horizontalCenter
                         width: retryLabel.implicitWidth + 32; height: 32
-                        radius: DesktopTheme.rad(16)
+                        radius: height / 2
                         color: retryArea.containsMouse ? Colors.primary : Colors.primary_container
-                        Behavior on color { ColorAnimation { duration: 130 } }
+                        Behavior on color { ColorAnimation { duration: Style.motion.base } }
 
                         Text {
                             id: retryLabel; anchors.centerIn: parent
                             text: I18n.t("action.retry")
-                            font.family: detailView.fontBody; font.pixelSize: 12; font.bold: true
+                            font.family: detailView.fontBody; font.pixelSize: Style.font.body; font.bold: true
                             color: retryArea.containsMouse ? Colors.on_primary : Colors.on_primary_container
                         }
                         MouseArea {
@@ -576,7 +577,7 @@ Item {
 
                 ScrollBar.vertical: ScrollBar {
                     policy: ScrollBar.AsNeeded
-                    contentItem: Rectangle { implicitWidth: 3; color: Colors.primary; opacity: 0.45; radius: 2 }
+                    contentItem: Rectangle { implicitWidth: 3; color: Colors.primary; opacity: 0.45; radius: Style.cornerRadius }
                 }
 
                 delegate: ClickableRect {
@@ -590,55 +591,55 @@ Item {
                         && _libEntry.lastReadChapterId === modelData.id
 
                     color: isLastRead
-                        ? Colors.withAlpha(Colors.primary, 0.07)
+                        ? Style.selectedFillFor(Colors.primary)
                         : (rowAreaRect.pressed ? Colors.surface_container_high
                             : (rowAreaRect.hovered ? Colors.surface_container : "transparent"))
-                    Behavior on color { ColorAnimation { duration: 110 } }
+                    Behavior on color { ColorAnimation { duration: Style.motion.fast } }
 
                     Rectangle {
-                        anchors { bottom: parent.bottom; left: parent.left; right: parent.right; leftMargin: 72; rightMargin: 16 }
+                        anchors { bottom: parent.bottom; left: parent.left; right: parent.right; leftMargin: Style.space(72); rightMargin: Style.space(16) }
                         height: 1; color: Colors.outline_variant; opacity: 0.25
                     }
 
                     RowLayout {
-                        anchors { fill: parent; leftMargin: 16; rightMargin: 16 }
-                        spacing: 14
+                        anchors { fill: parent; leftMargin: Style.space(16); rightMargin: Style.space(16) }
+                        spacing: Style.spacing.xxxl
 
                         // Chapter pill
                         Rectangle {
-                            width: chPillTxt.implicitWidth + 16; height: 26; radius: 13
+                            width: chPillTxt.implicitWidth + 16; height: 26; radius: height / 2
                             color: isLastRead ? Colors.primary : Colors.primary_container
 
                             StyledText {
                                 id: chPillTxt; anchors.centerIn: parent
                                 text: I18n.t("ch", { 1: detailView.formatChapter(modelData.chapter) })
-                                font.family: detailView.fontBody; font.pixelSize: 9
+                                font.family: detailView.fontBody; font.pixelSize: 9 // style-ignore — bespoke size
                                 font.bold: true; font.letterSpacing: 0.5
                                 color: isLastRead ? Colors.on_primary : Colors.on_primary_container
                             }
                         }
 
                         Column {
-                            Layout.fillWidth: true; spacing: 3
+                            Layout.fillWidth: true; spacing: Style.spacing.xs
 
                             StyledText {
                                 width: parent.width
                                 text: modelData.title || I18n.t("chapter", { 1: detailView.formatChapter(modelData.chapter) })
-                                font.family: detailView.fontBody; font.pixelSize: 12
+                                font.family: detailView.fontBody; font.pixelSize: Style.font.body
                                 color: Colors.on_surface; elide: Text.ElideRight
                             }
 
                             StyledText {
                                 visible: false
-                                font.family: detailView.fontBody; font.pixelSize: 10
+                                font.family: detailView.fontBody; font.pixelSize: Style.font.caption
                                 color: Colors.on_surface_variant; opacity: 0.5; font.letterSpacing: 0.3
                             }
                         }
 
                         Text {
-                            text: "›"; font.pixelSize: 20; color: Colors.outline
+                            text: "›"; font.pixelSize: 20; color: Colors.outline // style-ignore — bespoke size
                             opacity: rowAreaRect.hovered ? 0.9 : 0.4
-                            Behavior on opacity { NumberAnimation { duration: 120 } }
+                            Behavior on opacity { NumberAnimation { duration: Style.motion.fast } }
                         }
                     }
 

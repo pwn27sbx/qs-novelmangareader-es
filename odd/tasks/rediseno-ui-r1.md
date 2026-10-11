@@ -125,8 +125,8 @@ Unificar la UI sobre un **sistema de tokens** (`qs.Commons.Style`) espejo de Oma
 | R1.2 | — | ✅ completo (lint components 0) |
 | R1.3 | — | ✅ completo (lint anime 0) |
 | R1.4 | — | ✅ completo (lint manga 0) |
-| R1.5 | — | pendiente |
-| R1.6 | — | pendiente |
+| R1.5 | — | ✅ completo (lint novel 0) |
+| R1.6 | — | ✅ completo (no-op: shell.qml + widget ya usan Style) |
 | R1.7 | — | pendiente (lint tool `877fa4a` ya listo) |
 
 ## Próximo paso
