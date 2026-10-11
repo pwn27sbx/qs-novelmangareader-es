@@ -342,16 +342,14 @@ Item {
                         id: chip
                         anchors.centerIn: parent
                         implicitWidth: chipLbl.implicitWidth + 28; height: 30; radius: Style.cornerRadius
-                        color: browseView.currentFilter === fid ? Colors.primary : Colors.surface_container
-                        border.color: browseView.currentFilter === fid ? Colors.primary : Colors.outline_variant
-                        border.width: 1
+                        color: browseView.currentFilter === fid ? Style.selectedFillFor(Colors.primary) : "transparent"
                         Behavior on color { ColorAnimation { duration: Motion.base } }
 
                         StyledText {
                             id: chipLbl; anchors.centerIn: parent; text: I18n.t(labelKey)
                             font.family: browseView.fontBody; font.pixelSize: Style.font.body
                             font.letterSpacing: 0.6
-                            color: browseView.currentFilter === fid ? Colors.on_primary : Colors.on_surface_variant
+                            color: browseView.currentFilter === fid ? Colors.primary : Colors.on_surface_variant
                             Behavior on color { ColorAnimation { duration: Motion.base } }
                         }
                     }

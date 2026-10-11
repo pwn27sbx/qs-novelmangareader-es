@@ -167,8 +167,7 @@ Item {
                     height: 28
                     width: modeRow.implicitWidth + 16
                     radius: Style.cornerRadius
-                    color: Colors.surface_container
-                    border.color: Colors.outline_variant; border.width: 1
+                    color: "transparent"
 
                     Row {
                         id: modeRow
@@ -186,7 +185,7 @@ Item {
                                 Rectangle {
                                     anchors { fill: parent; margins: Style.spacing.xs }
                                     radius: Style.cornerRadius
-                                    color: active ? Colors.primary : "transparent"
+                                    color: active ? Style.selectedFillFor(Colors.primary) : "transparent"
                                     Behavior on color { ColorAnimation { duration: Motion.base } }
                                 }
                                 StyledText {
@@ -195,7 +194,7 @@ Item {
                                     text: modelData.toUpperCase()
                                     font.family: browseView.fontBody
                                     font.pixelSize: Style.font.caption; font.letterSpacing: 1; font.bold: true
-                                    color: active ? Colors.on_primary : Colors.on_surface_variant
+                                    color: active ? Colors.primary : Colors.on_surface_variant
                                     Behavior on color { ColorAnimation { duration: Motion.base } }
                                 }
                                 MouseArea {
@@ -248,9 +247,7 @@ Item {
                         anchors.centerIn: parent
                         implicitWidth: chipLbl.implicitWidth + 24
                         height: 28; radius: Style.cornerRadius
-                        color: active ? Colors.primary : Colors.surface_container
-                        border.color: active ? Colors.primary : Colors.outline_variant
-                        border.width: 1
+                        color: active ? Style.selectedFillFor(Colors.primary) : "transparent"
                         Behavior on color { ColorAnimation { duration: Motion.base } }
 
                         StyledText {
@@ -259,7 +256,7 @@ Item {
                             text: I18n.t(labelKey)
                             font.family: browseView.fontBody
                             font.pixelSize: Style.font.bodySmall; font.letterSpacing: 0.5
-                            color: active ? Colors.on_primary : Colors.on_surface_variant
+                            color: active ? Colors.primary : Colors.on_surface_variant
                             Behavior on color { ColorAnimation { duration: Motion.base } }
                         }
                     }

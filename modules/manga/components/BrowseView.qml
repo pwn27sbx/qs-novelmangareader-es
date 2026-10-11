@@ -209,12 +209,8 @@ Item {
                         height: 30
                         radius: Style.cornerRadius
                         color: browseView.currentTagId === tagId
-                            ? Colors.primary
-                            : Colors.surface_container
-                        border.color: browseView.currentTagId === tagId
-                            ? Colors.primary
-                            : Colors.outline_variant
-                        border.width: 1
+                            ? Style.selectedFillFor(Colors.primary)
+                            : "transparent"
                         Behavior on color { ColorAnimation { duration: Motion.base } }
 
                         StyledText {
@@ -225,7 +221,7 @@ Item {
                             font.pixelSize: Style.font.body
                             font.letterSpacing: 0.6
                             color: browseView.currentTagId === tagId
-                                ? Colors.on_primary
+                                ? Colors.primary
                                 : Colors.on_surface_variant
                             Behavior on color { ColorAnimation { duration: Motion.base } }
                         }
