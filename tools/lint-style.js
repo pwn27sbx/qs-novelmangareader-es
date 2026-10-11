@@ -63,6 +63,10 @@ function scanFile(abs) {
     for (let i = 0; i < lines.length; i++) {
         // `// style-ignore` documents a deliberate exception on that line.
         if (lines[i].includes("style-ignore")) continue;
+        if (lines[i].includes("DesktopTheme")) {
+            violations.push({ file: rel, line: i + 1, prop: "DesktopTheme", value: "deprecated — use Style.*" });
+            continue;
+        }
         const line = stripComment(lines[i]);
         PROP.lastIndex = 0;
         let m;
