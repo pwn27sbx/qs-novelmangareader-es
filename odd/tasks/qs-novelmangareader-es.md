@@ -7,7 +7,7 @@
 | Repo de trabajo | `~/Projects/forks/qs-novelmangareader-es` |
 | Upstream | `dhrruvsharma/qs-novelmangareader` (GPL-3.0) |
 | Inicio | 2026-10-11 |
-| Estado | **Fase 1 completa + fix WU-6b** · GATE §15.1 cerrado |
+| Estado | **Fase 1 completa + WU-6b/6c** · UI sigue al sistema (EN por defecto) · GATE §15.1 cerrado |
 | Plan fuente | `2026-10-11-plan-localizacion-es-qs-novelmangareader.md` (§0–§16) |
 | Handoff | `2026-10-11-handoff-orquestador-qs-novelmangareader-es.md` |
 
@@ -61,6 +61,22 @@ Tener la interfaz de la app Quickshell `qs-novelmangareader` **en español latin
 
 ---
 
+## Idioma: UI vs contenido (diseño)
+
+Dos preferencias **independientes**:
+
+| Aspecto | Variable | Resolución | En esta máquina |
+|---|---|---|---|
+| **UI** (etiquetas, botones, errores) | `QS_LANG` | `QS_LANG` → `LANG` → `en` | **EN** (sistema `en_US.UTF-8`) |
+| **Contenido** (subtítulos, capítulos) | `QS_CONTENT_LANG` | lista ordenada; gana el primero que la fuente ofrezca | **`es`** |
+
+- **UI:** sigue al sistema por defecto (EN aquí). Para la UI en español → `QS_LANG=es`. **No se hardcodea `QS_LANG`** en ningún archivo; el wrapper `bin/qs-novelmangareader` pasa el entorno tal cual. Resolver: `services/I18n.qml` (`lang`).
+- **Contenido:** `QS_CONTENT_LANG` es una lista separada por comas con orden de preferencia (`"es-419,es"`), default `"es"`. La consumen **WU-7** (subtítulos, `scripts/anime_server.py`) y **WU-8** (MangaDex `translatedLanguage[]`).
+- Implementación: `scripts/content_lang.py` → `content_langs()` (lista ordenada) y `content_lang()` (la primera). Tests: `tests/test_content_lang.py` (`python3 -m unittest discover -s tests -p "test_*.py"`).
+- Resultado: el **contenido** sale en español **aunque la UI esté en inglés** (caso del dueño).
+
+---
+
 ## Decisiones de implementación (registradas por WU)
 
 - **WU-1 — núcleo i18n en JS puro.** Las tablas y `t()`/`tn()` viven en `services/i18n.js` (JS puro, sin QML); `services/I18n.qml` es un wrapper delgado (`lang`, `t`, `tn`). Motivo: test unitario determinista con `node --test`, sin sesión Wayland (§15.7). El plan D2 ponía las tablas dentro del singleton; se extraen por testabilidad, conservando la intención (clave en inglés, tabla central, interpolación, sin `qmldir`). El singleton **no** importa `qs.services` (§14.3).
@@ -75,6 +91,8 @@ Tener la interfaz de la app Quickshell `qs-novelmangareader` **en español latin
 - **WU-3 — `count.chapter`** corrige singular ("1 capítulo" en vez de "1 capítulos"); en EN también ("1 chapter"). Mejora intencional; notar por si querés EN byte-idéntico.
 - **WU-4/WU-6b — corrección a mi nota previa (el revisor tenía razón):** `Ongoing` **SÍ se muestra** en un badge (`(modelData.status).toUpperCase()`), así que §6.4 acertaba en que es visible; pero es un **valor de dato**, no un label de filtro → se resuelve con el mapeo de datos `tData` (WU-6b), NO con una clave de filtro. `All` (`Novel.qml:21`) sigue siendo un **sentinel** de la API (no se muestra). Las claves de filtro `novel.filter.ongoing`/`novel.filter.all` siguen sin uso.
 - **WU-6b — `I18n.tData(value)`**: mapea status/type conocidos (Ongoing/OnGoing→"En curso", Completed→"Completada", Hiatus→"En pausa", Cancelled→"Cancelada", Movie→"Película", Special→"Especial"; TV/OVA/ONA iguales en ambos idiomas), con **fallback al valor original** y coincidencia **case-insensitive**. Aplicado en 5 badges (anime type; manga type+status; novel status×2). Guard de test en `tests/i18n.test.js`.
+- **WU-6c (corregido) — la UI sigue al sistema:** el resolver de `services/I18n.qml` es `QS_LANG` (override) → derivado de `LANG` → `en`. En la máquina del dueño (`LANG=en_US.UTF-8`) la UI queda **en inglés por defecto**; español de UI con `QS_LANG=es`. **No se hardcodea `QS_LANG` en ningún lado**; el wrapper `bin/qs-novelmangareader` no se toca (pasa el entorno tal cual). Verificado: sin `QS_LANG` → `en`/`Browse`; `QS_LANG=es` → `es`/`Explorar`.
+- **WU-6c (corregido) — idioma de contenido separado:** el idioma del **contenido** (subtítulos WU-7, MangaDex WU-8) es independiente de la UI → `QS_CONTENT_LANG` (default `es`, acepta lista `es-419,es`). Implementado en `scripts/content_lang.py` (ver sección «Idioma de UI vs contenido»).
 - **WU-4 — wordmark "N"/"ovel"**: marca, se mantiene (igual que "A"/"nime", "M"/"anga").
 - **WU-5 — lint:** `tools/lint-i18n.js` (a) falla si un prop de texto tiene literal EN crudo fuera de `I18n.t`/`tn`; (b) falla si una clave usada en QML no existe en la tabla. Se integra como `tests/lint.test.js`.
 - **WU-5 — reglas del lint:** los bloques `text: { … }` se evalúan solo en su expresión `return` (evita falsos positivos por comparaciones de datos como `mode === "dub"`); las líneas con `// i18n-ignore` se saltan (wordmarks de marca). Comandos: `node --test` y `node tools/lint-i18n.js`.
@@ -88,6 +106,7 @@ Tener la interfaz de la app Quickshell `qs-novelmangareader` **en español latin
 - [x] **WU-5** — Lint anti-strings sin `I18n.t` + test de paridad de claves `es`↔`en`. *(F1-8)*
 - [x] **WU-6** — QA visual integral (3 módulos × vistas). *(F1-9, read-only)*
 - [x] **WU-6b** — Fix (revisión del orquestador): traducir **datos** status/type mostrados en badges. *(gap de WU-4/WU-6)*
+- [x] **WU-6c** — Idioma: la **UI sigue al sistema** (`QS_LANG`→`LANG`→`en`; en esta máquina EN por defecto; español con `QS_LANG=es`). El **contenido** usa una preferencia aparte (`QS_CONTENT_LANG`, default `es`).
 - [ ] **WU-7** — Subtítulos ES (**CONDICIONADO**: requiere confirmar campo de idioma). *(F1.5-1, §13.3/§14.2)*
 - [ ] **WU-8** — MangaDex ES (`es-la`), mismo contrato JSON; tests con fixtures. *(F1.5-2, §15.5)*
 - [ ] **WU-9** — Instalador / CLI / README. *(F2)*
@@ -209,7 +228,8 @@ Pendiente (humano): la QA **visual** real (acentos `á é í ó ú ñ ¿ ¡`, de
 | WU-4 | `c4e359b` | 2026-10-11 | ✅ completo |
 | WU-5 | `17eabfc` | 2026-10-11 | ✅ completo |
 | WU-6 | `edf2203` | 2026-10-11 | ✅ completo |
-| WU-6b | `—` (se completa al cierre) | 2026-10-11 | ✅ completo |
+| WU-6b | `8d1c35e` | 2026-10-11 | ✅ completo |
+| WU-6c | `533ec29` (UI) + `43cc008` (contenido) | 2026-10-11 | ✅ completo |
 
 ---
 
