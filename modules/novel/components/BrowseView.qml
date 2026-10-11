@@ -2,7 +2,7 @@ import QtQuick
 import QtQuick.Controls
 import QtQuick.Layouts
 import Quickshell
-import qs.colors
+import qs.app
 import qs.Commons
 import qs.services
 import qs.components
@@ -10,7 +10,7 @@ import qs.components
 Item {
     id: browseView
 
-    readonly property string fontDisplay: Style.font.displayFamily
+    readonly property string fontDisplay: Style.font.family
     readonly property string fontBody:    Style.font.family
 
     signal novelSelected(string novelId)
@@ -74,7 +74,7 @@ Item {
                     visible: false
                     border.color: searchField.activeFocus ? Colors.primary : Colors.outline_variant
                     border.width: searchField.activeFocus ? 1.5 : 1
-                    Behavior on border.width { NumberAnimation { duration: Style.motion.fast } }
+                    Behavior on border.width { NumberAnimation { duration: Motion.fast } }
 
                     TextInput {
                         id: searchField
@@ -108,7 +108,7 @@ Item {
                         width: 22; height: 22
                         visible: searchField.text.length > 0
                         opacity: visible ? 1 : 0
-                        Behavior on opacity { NumberAnimation { duration: Style.motion.fast } }
+                        Behavior on opacity { NumberAnimation { duration: Motion.fast } }
                         Rectangle {
                             anchors.centerIn: parent; width: 18; height: 18; radius: height / 2
                             color: Colors.surface_container_highest
@@ -148,7 +148,7 @@ Item {
                             ? Colors.surface_container_highest
                             : Colors.surface_container
                         border.color: Colors.outline_variant; border.width: 1
-                        Behavior on color { ColorAnimation { duration: Style.motion.base } }
+                        Behavior on color { ColorAnimation { duration: Motion.base } }
                     }
 
                     Row {
@@ -168,7 +168,7 @@ Item {
                             font.letterSpacing: 0.3
                             color: Novel.isSwitchingProvider ? Colors.on_surface_variant : Colors.on_surface
                             anchors.verticalCenter: parent.verticalCenter
-                            Behavior on color { ColorAnimation { duration: Style.motion.base } }
+                            Behavior on color { ColorAnimation { duration: Motion.base } }
                         }
 
                         // Tiny spinner shown while switching
@@ -177,7 +177,7 @@ Item {
                             width: 10
                             border.width: 1.5
                             anchors.verticalCenter: parent.verticalCenter
-                            duration: Style.motion.loop
+                            duration: Motion.loop
                             running: Novel.isSwitchingProvider
                         }
 
@@ -240,7 +240,7 @@ Item {
                                                 ? Colors.surface_container_highest
                                                 : "transparent"
                                         }
-                                        Behavior on color { ColorAnimation { duration: Style.motion.fast } }
+                                        Behavior on color { ColorAnimation { duration: Motion.fast } }
                                     }
 
                                     Row {
@@ -292,12 +292,12 @@ Item {
                     Rectangle {
                         anchors.centerIn: parent; width: 34; height: 34; radius: height / 2
                         color: searchBar.visible ? Colors.primary_container : "transparent"
-                        Behavior on color { ColorAnimation { duration: Style.motion.base } }
+                        Behavior on color { ColorAnimation { duration: Motion.base } }
                     }
                     StyledText {
                         anchors.centerIn: parent; text: "⌕"; font.pixelSize: 19 // style-ignore — bespoke size
                         color: searchBar.visible ? Colors.on_primary_container : Colors.on_surface_variant
-                        Behavior on color { ColorAnimation { duration: Style.motion.base } }
+                        Behavior on color { ColorAnimation { duration: Motion.base } }
                     }
                     MouseArea {
                         anchors.fill: parent
@@ -345,14 +345,14 @@ Item {
                         color: browseView.currentFilter === fid ? Colors.primary : Colors.surface_container
                         border.color: browseView.currentFilter === fid ? Colors.primary : Colors.outline_variant
                         border.width: 1
-                        Behavior on color { ColorAnimation { duration: Style.motion.base } }
+                        Behavior on color { ColorAnimation { duration: Motion.base } }
 
                         StyledText {
                             id: chipLbl; anchors.centerIn: parent; text: I18n.t(labelKey)
                             font.family: browseView.fontBody; font.pixelSize: Style.font.body
                             font.letterSpacing: 0.6
                             color: browseView.currentFilter === fid ? Colors.on_primary : Colors.on_surface_variant
-                            Behavior on color { ColorAnimation { duration: Style.motion.base } }
+                            Behavior on color { ColorAnimation { duration: Motion.base } }
                         }
                     }
 
@@ -454,7 +454,7 @@ Item {
                             source: modelData.coverUrl || ""
                             fillMode: Image.PreserveAspectCrop; asynchronous: true; cache: true
                             opacity: status === Image.Ready ? 1 : 0
-                            Behavior on opacity { NumberAnimation { duration: Style.motion.slow } }
+                            Behavior on opacity { NumberAnimation { duration: Motion.slow } }
 
                             Rectangle {
                                 visible: modelData.status && modelData.status.length > 0
@@ -516,15 +516,15 @@ Item {
                         Rectangle {
                             anchors.fill: parent; radius: Style.cornerRadius; color: Colors.primary
                             opacity: nCard.pressed ? Style.pressedFillAlpha : (nCard.hovered ? Style.hoverFillAlpha : 0)
-                            Behavior on opacity { NumberAnimation { duration: Style.motion.base } }
+                            Behavior on opacity { NumberAnimation { duration: Motion.base } }
                         }
 
                         transform: Scale {
                             origin.x: nCard.width / 2; origin.y: nCard.height / 2
                             xScale: nCard.pressed ? 0.97 : 1.0
                             yScale: nCard.pressed ? 0.97 : 1.0
-                            Behavior on xScale { NumberAnimation { duration: Style.motion.fast; easing.type: Style.motion.easeOut } }
-                            Behavior on yScale { NumberAnimation { duration: Style.motion.fast; easing.type: Style.motion.easeOut } }
+                            Behavior on xScale { NumberAnimation { duration: Motion.fast; easing.type: Motion.easeOut } }
+                            Behavior on yScale { NumberAnimation { duration: Motion.fast; easing.type: Motion.easeOut } }
                         }
 
                         onClicked: {

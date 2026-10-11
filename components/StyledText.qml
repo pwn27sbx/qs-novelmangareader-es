@@ -1,5 +1,5 @@
 import QtQuick
-import qs.colors
+import qs.app
 import qs.Commons
 
 // Base text element for the shell. The colour and family are defaulted; size

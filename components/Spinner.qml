@@ -1,6 +1,6 @@
 import QtQuick
 import QtQuick.Shapes
-import qs.colors
+import qs.app
 import qs.Commons
 
 // The indeterminate loading ring: an arc that grows and shrinks as it chases
@@ -11,7 +11,7 @@ Rectangle {
     id: root
 
     // One full turn of the ring.
-    property int duration: Style.motion.loop
+    property int duration: Motion.loop
     property alias running: spin.running
     property color arcColor: Colors.primary
 
@@ -57,7 +57,7 @@ Rectangle {
         duration: root.duration
         loops: Animation.Infinite
         running: root.visible
-        easing.type: Style.motion.linear
+        easing.type: Motion.linear
     }
 
     SequentialAnimation {
@@ -69,7 +69,7 @@ Rectangle {
             target: arc; property: "sweepAngle"
             from: 30; to: 250
             duration: root.duration * 0.9
-            easing.type: Style.motion.easeInOut
+            easing.type: Motion.easeInOut
         }
         // …then shrink: the tail catches up with a fixed head.
         ParallelAnimation {
@@ -77,13 +77,13 @@ Rectangle {
                 target: arc; property: "startAngle"
                 from: -90; to: 130
                 duration: root.duration * 0.9
-                easing.type: Style.motion.easeInOut
+                easing.type: Motion.easeInOut
             }
             NumberAnimation {
                 target: arc; property: "sweepAngle"
                 from: 250; to: 30
                 duration: root.duration * 0.9
-                easing.type: Style.motion.easeInOut
+                easing.type: Motion.easeInOut
             }
         }
         ScriptAction {

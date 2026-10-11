@@ -1,7 +1,7 @@
 pragma ComponentBehavior: Bound
 
 import QtQuick
-import qs.colors
+import qs.app
 import qs.Commons
 
 // Placeholder page of prose while a chapter loads: a heading, the accent rule
@@ -28,7 +28,7 @@ Rectangle {
     clip: true
     opacity: root.active ? 1 : 0
     visible: root.opacity > 0
-    Behavior on opacity { NumberAnimation { duration: Style.motion.slow; easing.type: Style.motion.easeOut } }
+    Behavior on opacity { NumberAnimation { duration: Motion.slow; easing.type: Motion.easeOut } }
 
     Column {
         id: page
@@ -100,7 +100,7 @@ Rectangle {
                         SkeletonPulse {
                             target: bar
                             delay: (para.firstLine + line.index) * 60
-                            period: Style.motion.loop
+                            period: Motion.loop
                             low: 0.35
                             running: root.visible
                         }

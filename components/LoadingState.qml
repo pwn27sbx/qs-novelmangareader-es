@@ -1,5 +1,5 @@
 import QtQuick
-import qs.colors
+import qs.app
 import qs.Commons
 
 // A full-area "working on it" overlay: the spinner with a small caption and an
@@ -20,7 +20,7 @@ Rectangle {
     color: Colors.background
     opacity: root.active ? 1 : 0
     visible: root.opacity > 0
-    Behavior on opacity { NumberAnimation { duration: Style.motion.slow; easing.type: Style.motion.easeOut } }
+    Behavior on opacity { NumberAnimation { duration: Motion.slow; easing.type: Motion.easeOut } }
 
     // Swallow clicks so nothing behind reacts while this is up.
     MouseArea { anchors.fill: parent; enabled: root.active }
@@ -34,7 +34,7 @@ Rectangle {
             width: root.spinnerSize
             border.width: 2.5
             arcColor: root.arcColor
-            duration: Style.motion.loop
+            duration: Motion.loop
         }
 
         Column {

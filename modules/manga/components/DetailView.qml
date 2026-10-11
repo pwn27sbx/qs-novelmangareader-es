@@ -1,7 +1,7 @@
 import QtQuick
 import QtQuick.Controls
 import QtQuick.Layouts
-import qs.colors
+import qs.app
 import qs.Commons
 import qs.services
 import qs.components
@@ -9,7 +9,7 @@ import qs.components
 Item {
     id: detailView
 
-    readonly property string fontDisplay: Style.font.displayFamily
+    readonly property string fontDisplay: Style.font.family
     readonly property string fontBody:    Style.font.family
 
     signal backRequested()
@@ -87,7 +87,7 @@ Item {
                         anchors.centerIn: parent
                         width: 34; height: 34; radius: height / 2
                         color: backArea.containsMouse ? Colors.surface_container : "transparent"
-                        Behavior on color { ColorAnimation { duration: Style.motion.base } }
+                        Behavior on color { ColorAnimation { duration: Motion.base } }
                     }
                     Text {
                         anchors.centerIn: parent
@@ -118,7 +118,7 @@ Item {
                         color: detailView._inLibrary ? Colors.primary_container : Colors.surface_container
                         border.color: detailView._inLibrary ? Colors.primary : Colors.outline_variant
                         border.width: 1
-                        Behavior on color { ColorAnimation { duration: Style.motion.base } }
+                        Behavior on color { ColorAnimation { duration: Motion.base } }
                     }
 
                     Row {
@@ -130,7 +130,7 @@ Item {
                             text: detailView._inLibrary ? "✓" : "+"
                             font.pixelSize: Style.font.bodySmall; font.bold: true
                             color: detailView._inLibrary ? Colors.on_primary_container : Colors.on_surface_variant
-                            Behavior on color { ColorAnimation { duration: Style.motion.base } }
+                            Behavior on color { ColorAnimation { duration: Motion.base } }
                         }
                         StyledText {
                             id: libBtnLabel
@@ -139,7 +139,7 @@ Item {
                             font.family: detailView.fontBody
                             font.pixelSize: Style.font.bodySmall; font.letterSpacing: 0.3
                             color: detailView._inLibrary ? Colors.on_primary_container : Colors.on_surface_variant
-                            Behavior on color { ColorAnimation { duration: Style.motion.base } }
+                            Behavior on color { ColorAnimation { duration: Motion.base } }
                         }
                     }
 
@@ -188,7 +188,7 @@ Item {
             Layout.fillWidth: true
             Layout.preferredHeight: Manga.currentManga !== null ? 160 : 0
             clip: true
-            Behavior on Layout.preferredHeight { NumberAnimation { duration: Style.motion.slow; easing.type: Style.motion.easeOut } }
+            Behavior on Layout.preferredHeight { NumberAnimation { duration: Motion.slow; easing.type: Motion.easeOut } }
 
             // Blurred cover background
             Image {
@@ -341,7 +341,7 @@ Item {
                     color: Colors.surface_container
                     border.width: 1
                     border.color: chapterSearch.activeFocus ? Colors.primary : Colors.withAlpha(Colors.outline, 0.2)
-                    Behavior on border.color { ColorAnimation { duration: Style.motion.base } }
+                    Behavior on border.color { ColorAnimation { duration: Motion.base } }
 
                     RowLayout {
                         anchors { fill: parent; leftMargin: Style.spacing.xxl; rightMargin: Style.spacing.sm }
@@ -388,7 +388,7 @@ Item {
                                 color: clearArea.containsMouse
                                     ? Style.hoverFillFor(Colors.on_surface)
                                     : "transparent"
-                                Behavior on color { ColorAnimation { duration: Style.motion.fast } }
+                                Behavior on color { ColorAnimation { duration: Motion.fast } }
                             }
                             StyledText {
                                 anchors.centerIn: parent
@@ -416,7 +416,7 @@ Item {
                             ? Colors.primary_container
                             : Colors.withAlpha(Colors.primary_container, 0.6)
                         border.color: Colors.primary; border.width: 1
-                        Behavior on color { ColorAnimation { duration: Style.motion.base } }
+                        Behavior on color { ColorAnimation { duration: Motion.base } }
                     }
                     StyledText {
                         anchors.centerIn: parent
@@ -477,7 +477,7 @@ Item {
                         : (chapterRowAreaRect.pressed
                             ? Colors.surface_container_high
                             : (chapterRowAreaRect.hovered ? Colors.surface_container : "transparent"))
-                    Behavior on color { ColorAnimation { duration: Style.motion.fast } }
+                    Behavior on color { ColorAnimation { duration: Motion.fast } }
 
                     Rectangle {
                         anchors {
@@ -529,7 +529,7 @@ Item {
                         Text {
                             text: "›"; font.pixelSize: 20; color: Colors.outline // style-ignore — bespoke size
                             opacity: chapterRowAreaRect.hovered ? 0.9 : 0.4
-                            Behavior on opacity { NumberAnimation { duration: Style.motion.fast } }
+                            Behavior on opacity { NumberAnimation { duration: Motion.fast } }
                         }
                     }
 

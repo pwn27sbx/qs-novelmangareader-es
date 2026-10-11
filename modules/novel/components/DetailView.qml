@@ -1,7 +1,7 @@
 import QtQuick
 import QtQuick.Controls
 import QtQuick.Layouts
-import qs.colors
+import qs.app
 import qs.Commons
 import qs.services
 import qs.components
@@ -9,7 +9,7 @@ import qs.components
 Item {
     id: detailView
 
-    readonly property string fontDisplay: Style.font.displayFamily
+    readonly property string fontDisplay: Style.font.family
     readonly property string fontBody:    Style.font.family
 
     signal backRequested()
@@ -138,7 +138,7 @@ Item {
                     Rectangle {
                         anchors.centerIn: parent; width: 34; height: 34; radius: height / 2
                         color: backArea.containsMouse ? Colors.surface_container : "transparent"
-                        Behavior on color { ColorAnimation { duration: Style.motion.base } }
+                        Behavior on color { ColorAnimation { duration: Motion.base } }
                     }
                     Text { anchors.centerIn: parent; text: "←"; font.pixelSize: Style.font.iconLarge; color: Colors.on_surface_variant }
                     MouseArea {
@@ -164,7 +164,7 @@ Item {
                         color: detailView._inLibrary ? Colors.primary_container : Colors.surface_container
                         border.color: detailView._inLibrary ? Colors.primary : Colors.outline_variant
                         border.width: 1
-                        Behavior on color { ColorAnimation { duration: Style.motion.base } }
+                        Behavior on color { ColorAnimation { duration: Motion.base } }
                     }
 
                     Row {
@@ -174,14 +174,14 @@ Item {
                             text: detailView._inLibrary ? "✓" : "+"
                             font.pixelSize: Style.font.bodySmall; font.bold: true
                             color: detailView._inLibrary ? Colors.on_primary_container : Colors.on_surface_variant
-                            Behavior on color { ColorAnimation { duration: Style.motion.base } }
+                            Behavior on color { ColorAnimation { duration: Motion.base } }
                         }
                         StyledText {
                             id: libBtnLabel; anchors.verticalCenter: parent.verticalCenter
                             text: I18n.t("tab.library"); font.family: detailView.fontBody
                             font.pixelSize: Style.font.bodySmall; font.letterSpacing: 0.3
                             color: detailView._inLibrary ? Colors.on_primary_container : Colors.on_surface_variant
-                            Behavior on color { ColorAnimation { duration: Style.motion.base } }
+                            Behavior on color { ColorAnimation { duration: Motion.base } }
                         }
                     }
 
@@ -207,7 +207,7 @@ Item {
             Layout.fillWidth: true
             Layout.preferredHeight: Novel.currentNovel !== null ? 160 : 0
             clip: true
-            Behavior on Layout.preferredHeight { NumberAnimation { duration: Style.motion.slow; easing.type: Style.motion.easeOut } }
+            Behavior on Layout.preferredHeight { NumberAnimation { duration: Motion.slow; easing.type: Motion.easeOut } }
 
             // Blurred cover background
             Image {
@@ -420,7 +420,7 @@ Item {
                     border.color: chapterSearch.activeFocus
                         ? Colors.primary
                         : Colors.withAlpha(Colors.outline, 0.2)
-                    Behavior on border.color { ColorAnimation { duration: Style.motion.base } }
+                    Behavior on border.color { ColorAnimation { duration: Motion.base } }
 
                     RowLayout {
                         anchors { fill: parent; leftMargin: Style.spacing.xxl; rightMargin: Style.spacing.sm }
@@ -461,7 +461,7 @@ Item {
                                 color: clearArea.containsMouse
                                     ? Style.hoverFillFor(Colors.on_surface)
                                     : "transparent"
-                                Behavior on color { ColorAnimation { duration: Style.motion.fast } }
+                                Behavior on color { ColorAnimation { duration: Motion.fast } }
                             }
                             Text {
                                 anchors.centerIn: parent
@@ -488,7 +488,7 @@ Item {
                             ? Colors.primary_container
                             : Colors.withAlpha(Colors.primary_container, 0.6)
                         border.color: Colors.primary; border.width: 1
-                        Behavior on color { ColorAnimation { duration: Style.motion.base } }
+                        Behavior on color { ColorAnimation { duration: Motion.base } }
                     }
                     StyledText {
                         anchors.centerIn: parent
@@ -553,7 +553,7 @@ Item {
                         width: retryLabel.implicitWidth + 32; height: 32
                         radius: height / 2
                         color: retryArea.containsMouse ? Colors.primary : Colors.primary_container
-                        Behavior on color { ColorAnimation { duration: Style.motion.base } }
+                        Behavior on color { ColorAnimation { duration: Motion.base } }
 
                         Text {
                             id: retryLabel; anchors.centerIn: parent
@@ -594,7 +594,7 @@ Item {
                         ? Style.selectedFillFor(Colors.primary)
                         : (rowAreaRect.pressed ? Colors.surface_container_high
                             : (rowAreaRect.hovered ? Colors.surface_container : "transparent"))
-                    Behavior on color { ColorAnimation { duration: Style.motion.fast } }
+                    Behavior on color { ColorAnimation { duration: Motion.fast } }
 
                     Rectangle {
                         anchors { bottom: parent.bottom; left: parent.left; right: parent.right; leftMargin: Style.space(72); rightMargin: Style.space(16) }
@@ -639,7 +639,7 @@ Item {
                         Text {
                             text: "›"; font.pixelSize: 20; color: Colors.outline // style-ignore — bespoke size
                             opacity: rowAreaRect.hovered ? 0.9 : 0.4
-                            Behavior on opacity { NumberAnimation { duration: Style.motion.fast } }
+                            Behavior on opacity { NumberAnimation { duration: Motion.fast } }
                         }
                     }
 

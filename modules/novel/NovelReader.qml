@@ -1,7 +1,7 @@
 import QtQuick
 import QtQuick.Controls
 import QtQuick.Layouts
-import qs.colors
+import qs.app
 import qs.Commons
 import qs.services
 import qs.modules.novel.components
@@ -17,7 +17,7 @@ Item {
     implicitWidth: fullscreen ? (parent && parent.parent ? parent.parent.width : 1200) : 600
     visible: false
 
-    Behavior on implicitWidth { NumberAnimation { duration: Style.motion.slow; easing.type: Style.motion.easeOut } }
+    Behavior on implicitWidth { NumberAnimation { duration: Motion.slow; easing.type: Motion.easeOut } }
 
     readonly property string fontBody: Style.font.family
 
@@ -84,7 +84,7 @@ Item {
                             color: tabTap.containsMouse && !active
                                 ? Style.hoverFillFor(Colors.primary)
                                 : "transparent"
-                            Behavior on color { ColorAnimation { duration: Style.motion.fast } }
+                            Behavior on color { ColorAnimation { duration: Motion.fast } }
                         }
 
                         Column {
@@ -94,7 +94,7 @@ Item {
                                 text: modelData.icon; font.pixelSize: Style.font.subtitle
                                 color: active ? Colors.primary : Colors.on_surface_variant
                                 opacity: active ? 1 : 0.5
-                                Behavior on color { ColorAnimation { duration: Style.motion.base } }
+                                Behavior on color { ColorAnimation { duration: Motion.base } }
                             }
                             StyledText {
                                 anchors.horizontalCenter: parent.horizontalCenter
@@ -102,7 +102,7 @@ Item {
                                 font.pixelSize: Style.font.caption; font.letterSpacing: 0.6
                                 color: active ? Colors.primary : Colors.on_surface_variant
                                 opacity: active ? 1 : 0.5
-                                Behavior on color { ColorAnimation { duration: Style.motion.base } }
+                                Behavior on color { ColorAnimation { duration: Motion.base } }
                             }
                         }
 
@@ -110,7 +110,7 @@ Item {
                         Rectangle {
                             anchors { bottom: parent.bottom; horizontalCenter: parent.horizontalCenter }
                             width: active ? 28 : 0; height: 2; radius: height / 2; color: Colors.primary
-                            Behavior on width { NumberAnimation { duration: Style.motion.slow; easing.type: Style.motion.easeOut } }
+                            Behavior on width { NumberAnimation { duration: Motion.slow; easing.type: Motion.easeOut } }
                         }
 
                         MouseArea {
@@ -131,7 +131,7 @@ Item {
                     anchors.fill: parent
                     visible: root.browseStack === 0
                     opacity: visible ? 1 : 0
-                    Behavior on opacity { NumberAnimation { duration: Style.motion.slow; easing.type: Style.motion.easeOut } }
+                    Behavior on opacity { NumberAnimation { duration: Motion.slow; easing.type: Motion.easeOut } }
 
                     onNovelSelected: function(novelId) {
                         root.browseStack = 1
@@ -143,7 +143,7 @@ Item {
                     anchors.fill: parent
                     visible: root.browseStack === 1
                     opacity: visible ? 1 : 0
-                    Behavior on opacity { NumberAnimation { duration: Style.motion.slow; easing.type: Style.motion.easeOut } }
+                    Behavior on opacity { NumberAnimation { duration: Motion.slow; easing.type: Motion.easeOut } }
 
                     onBackRequested:    { root.browseStack = 0 }
                     onChapterSelected:  { root.browseStack = 2 }
@@ -154,7 +154,7 @@ Item {
                     anchors.fill: parent
                     visible: root.browseStack === 2
                     opacity: visible ? 1 : 0
-                    Behavior on opacity { NumberAnimation { duration: Style.motion.slow; easing.type: Style.motion.easeOut } }
+                    Behavior on opacity { NumberAnimation { duration: Motion.slow; easing.type: Motion.easeOut } }
 
                     isFullscreen: root.fullscreen
                     onToggleFullscreen: root.fullscreen = !root.fullscreen
@@ -171,7 +171,7 @@ Item {
                     anchors.fill: parent
                     visible: root.libraryStack === 0
                     opacity: visible ? 1 : 0
-                    Behavior on opacity { NumberAnimation { duration: Style.motion.slow; easing.type: Style.motion.easeOut } }
+                    Behavior on opacity { NumberAnimation { duration: Motion.slow; easing.type: Motion.easeOut } }
 
                     onNovelSelected: function(novelId) {
                         root.libraryStack = 1
@@ -183,7 +183,7 @@ Item {
                     anchors.fill: parent
                     visible: root.libraryStack === 1
                     opacity: visible ? 1 : 0
-                    Behavior on opacity { NumberAnimation { duration: Style.motion.slow; easing.type: Style.motion.easeOut } }
+                    Behavior on opacity { NumberAnimation { duration: Motion.slow; easing.type: Motion.easeOut } }
 
                     onBackRequested:   { root.libraryStack = 0 }
                     onChapterSelected: { root.libraryStack = 2 }
@@ -194,7 +194,7 @@ Item {
                     anchors.fill: parent
                     visible: root.libraryStack === 2
                     opacity: visible ? 1 : 0
-                    Behavior on opacity { NumberAnimation { duration: Style.motion.slow; easing.type: Style.motion.easeOut } }
+                    Behavior on opacity { NumberAnimation { duration: Motion.slow; easing.type: Motion.easeOut } }
 
                     isFullscreen: root.fullscreen
                     onToggleFullscreen: root.fullscreen = !root.fullscreen

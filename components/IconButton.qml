@@ -1,5 +1,5 @@
 import QtQuick
-import qs.colors
+import qs.app
 
 // Round icon-only button that tints its background on hover.
 ClickableRect {

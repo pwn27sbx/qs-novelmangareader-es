@@ -1,5 +1,5 @@
 import QtQuick
-import qs.colors
+import qs.app
 import qs.Commons
 
 // The "▶ Ch. 12" / "▶ Not started" strip along the bottom of a CoverCard.

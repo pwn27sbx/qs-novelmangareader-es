@@ -1,5 +1,5 @@
 import QtQuick
-import qs.colors
+import qs.app
 
 // Hairline separator.
 //

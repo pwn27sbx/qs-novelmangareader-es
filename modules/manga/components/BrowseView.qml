@@ -2,7 +2,7 @@ import QtQuick
 import QtQuick.Controls
 import QtQuick.Layouts
 import Quickshell
-import qs.colors
+import qs.app
 import qs.Commons
 import qs.services
 import qs.components
@@ -11,7 +11,7 @@ Item {
     id: browseView
 
     // ── Exposed API ──────────────────────────────────────────────────────────
-    readonly property string fontDisplay: Style.font.displayFamily
+    readonly property string fontDisplay: Style.font.family
     readonly property string fontBody:    Style.font.family
 
     // Emitted when the user taps a manga card
@@ -71,7 +71,7 @@ Item {
                     visible: false
                     border.color: searchField.activeFocus ? Colors.primary : Colors.outline_variant
                     border.width: searchField.activeFocus ? 1.5 : 1
-                    Behavior on border.width { NumberAnimation { duration: Style.motion.fast } }
+                    Behavior on border.width { NumberAnimation { duration: Motion.fast } }
 
                     TextInput {
                         id: searchField
@@ -109,7 +109,7 @@ Item {
                         width: 22; height: 22
                         visible: searchField.text.length > 0
                         opacity: visible ? 1 : 0
-                        Behavior on opacity { NumberAnimation { duration: Style.motion.fast } }
+                        Behavior on opacity { NumberAnimation { duration: Motion.fast } }
 
                         Rectangle {
                             anchors.centerIn: parent
@@ -145,14 +145,14 @@ Item {
                         anchors.centerIn: parent
                         width: 34; height: 34; radius: height / 2
                         color: searchBar.visible ? Colors.primary_container : "transparent"
-                        Behavior on color { ColorAnimation { duration: Style.motion.base } }
+                        Behavior on color { ColorAnimation { duration: Motion.base } }
                     }
                     StyledText {
                         anchors.centerIn: parent
                         text: "⌕"
                         font.pixelSize: 19 // style-ignore — bespoke size
                         color: searchBar.visible ? Colors.on_primary_container : Colors.on_surface_variant
-                        Behavior on color { ColorAnimation { duration: Style.motion.base } }
+                        Behavior on color { ColorAnimation { duration: Motion.base } }
                     }
                     MouseArea {
                         anchors.fill: parent
@@ -215,7 +215,7 @@ Item {
                             ? Colors.primary
                             : Colors.outline_variant
                         border.width: 1
-                        Behavior on color { ColorAnimation { duration: Style.motion.base } }
+                        Behavior on color { ColorAnimation { duration: Motion.base } }
 
                         StyledText {
                             id: chipLabel
@@ -227,7 +227,7 @@ Item {
                             color: browseView.currentTagId === tagId
                                 ? Colors.on_primary
                                 : Colors.on_surface_variant
-                            Behavior on color { ColorAnimation { duration: Style.motion.base } }
+                            Behavior on color { ColorAnimation { duration: Motion.base } }
                         }
                     }
 
@@ -347,7 +347,7 @@ Item {
                             asynchronous: true
                             cache: true
                             opacity: status === Image.Ready ? 1 : 0
-                            Behavior on opacity { NumberAnimation { duration: Style.motion.slow } }
+                            Behavior on opacity { NumberAnimation { duration: Motion.slow } }
 
                             // Type badge
                             Rectangle {
@@ -415,7 +415,7 @@ Item {
                             opacity: card.pressed
                                 ? Style.pressedFillAlpha
                                 : (card.hovered ? Style.hoverFillAlpha : 0)
-                            Behavior on opacity { NumberAnimation { duration: Style.motion.base } }
+                            Behavior on opacity { NumberAnimation { duration: Motion.base } }
                         }
 
                         // Scale effect on hover
@@ -424,8 +424,8 @@ Item {
                             origin.y: card.height / 2
                             xScale: card.pressed ? 0.97 : 1.0
                             yScale: card.pressed ? 0.97 : 1.0
-                            Behavior on xScale { NumberAnimation { duration: Style.motion.fast; easing.type: Style.motion.easeOut } }
-                            Behavior on yScale { NumberAnimation { duration: Style.motion.fast; easing.type: Style.motion.easeOut } }
+                            Behavior on xScale { NumberAnimation { duration: Motion.fast; easing.type: Motion.easeOut } }
+                            Behavior on yScale { NumberAnimation { duration: Motion.fast; easing.type: Motion.easeOut } }
                         }
 
                         onClicked: {

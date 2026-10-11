@@ -1,7 +1,7 @@
 import QtQuick
 import QtQuick.Controls
 import QtQuick.Layouts
-import qs.colors
+import qs.app
 import qs.Commons
 import qs.services
 import qs.components
@@ -9,7 +9,7 @@ import qs.components
 Item {
     id: readerView
 
-    readonly property string fontDisplay: Style.font.displayFamily
+    readonly property string fontDisplay: Style.font.family
     readonly property string fontBody:    Style.font.family
 
     signal backRequested()
@@ -35,7 +35,7 @@ Item {
         anchors { top: parent.top; left: parent.left; right: parent.right }
         height: 54; color: Qt.rgba(0.08, 0.07, 0.06, 0.97); z: 10
         opacity: readerView.headerVisible ? 1 : 0
-        Behavior on opacity { NumberAnimation { duration: Style.motion.slow; easing.type: Style.motion.easeOut } }
+        Behavior on opacity { NumberAnimation { duration: Motion.slow; easing.type: Motion.easeOut } }
 
         Rectangle {
             anchors { bottom: parent.bottom; left: parent.left; right: parent.right }
@@ -51,7 +51,7 @@ Item {
                 Rectangle {
                     anchors.centerIn: parent; width: 34; height: 34; radius: height / 2
                     color: backHover.containsMouse ? Qt.rgba(1,1,1,0.1) : "transparent"
-                    Behavior on color { ColorAnimation { duration: Style.motion.base } }
+                    Behavior on color { ColorAnimation { duration: Motion.base } }
                 }
                 Text { anchors.centerIn: parent; text: "←"; font.pixelSize: Style.font.iconLarge; color: Qt.rgba(1,1,1,0.7) }
                 MouseArea {
@@ -81,7 +81,7 @@ Item {
                 Rectangle {
                     anchors.centerIn: parent; width: 30; height: 30; radius: height / 2
                     color: fsMinusHover.containsMouse ? Qt.rgba(1,1,1,0.1) : "transparent"
-                    Behavior on color { ColorAnimation { duration: Style.motion.fast } }
+                    Behavior on color { ColorAnimation { duration: Motion.fast } }
                 }
                 Text { anchors.centerIn: parent; text: "A−"; font.pixelSize: Style.font.caption; color: Qt.rgba(1,1,1,0.55) }
                 MouseArea {
@@ -95,7 +95,7 @@ Item {
                 Rectangle {
                     anchors.centerIn: parent; width: 30; height: 30; radius: height / 2
                     color: fsPlusHover.containsMouse ? Qt.rgba(1,1,1,0.1) : "transparent"
-                    Behavior on color { ColorAnimation { duration: Style.motion.fast } }
+                    Behavior on color { ColorAnimation { duration: Motion.fast } }
                 }
                 Text { anchors.centerIn: parent; text: "A+"; font.pixelSize: Style.font.bodySmall; color: Qt.rgba(1,1,1,0.55) }
                 MouseArea {
@@ -109,7 +109,7 @@ Item {
                 Rectangle {
                     anchors.centerIn: parent; width: 30; height: 30; radius: height / 2
                     color: fullscreenHover.containsMouse ? Qt.rgba(1,1,1,0.1) : "transparent"
-                    Behavior on color { ColorAnimation { duration: Style.motion.fast } }
+                    Behavior on color { ColorAnimation { duration: Motion.fast } }
                 }
                 Text {
                     anchors.centerIn: parent
@@ -147,7 +147,7 @@ Item {
                 (textScroll.contentY + textScroll.height) / textScroll.contentHeight)
                 : parent.width
             height: parent.height; color: Colors.primary
-            Behavior on width { NumberAnimation { duration: Style.motion.fast } }
+            Behavior on width { NumberAnimation { duration: Motion.fast } }
         }
     }
 
@@ -156,7 +156,7 @@ Item {
         anchors.fill: parent; color: "#1a1714"; z: 8
         opacity: Novel.isFetchingChapter ? 1 : 0
         visible: opacity > 0
-        Behavior on opacity { NumberAnimation { duration: Style.motion.slow; easing.type: Style.motion.easeOut } }
+        Behavior on opacity { NumberAnimation { duration: Motion.slow; easing.type: Motion.easeOut } }
 
         SkeletonText {
             anchors.fill: parent
@@ -200,7 +200,7 @@ Item {
         contentWidth: width
         contentHeight: textColumn.implicitHeight + 80
         clip: true; boundsBehavior: Flickable.StopAtBounds
-        Behavior on anchors.topMargin { NumberAnimation { duration: Style.motion.slow; easing.type: Style.motion.easeOut } }
+        Behavior on anchors.topMargin { NumberAnimation { duration: Motion.slow; easing.type: Motion.easeOut } }
 
         MouseArea {
             anchors.fill: parent; propagateComposedEvents: true
@@ -272,7 +272,7 @@ Item {
             Item {
                 width: parent.width / 3; height: parent.height
                 opacity: readerView._hasPrev ? 1.0 : 0.25
-                Behavior on opacity { NumberAnimation { duration: Style.motion.base } }
+                Behavior on opacity { NumberAnimation { duration: Motion.base } }
 
                 Rectangle {
                     id: prevBtn
@@ -280,7 +280,7 @@ Item {
                     width: prevBtnRow.implicitWidth + 28; height: 36; radius: height / 2
                     color: prevNavArea.containsMouse && readerView._hasPrev
                         ? Qt.rgba(1,1,1,0.12) : Qt.rgba(1,1,1,0.06)
-                    Behavior on color { ColorAnimation { duration: Style.motion.fast } }
+                    Behavior on color { ColorAnimation { duration: Motion.fast } }
 
                     Row {
                         id: prevBtnRow; anchors.centerIn: parent; spacing: Style.space(5)
@@ -311,7 +311,7 @@ Item {
             Item {
                 width: parent.width / 3; height: parent.height
                 opacity: readerView._hasNext ? 1.0 : 0.25
-                Behavior on opacity { NumberAnimation { duration: Style.motion.base } }
+                Behavior on opacity { NumberAnimation { duration: Motion.base } }
 
                 Rectangle {
                     id: nextBtn
@@ -320,7 +320,7 @@ Item {
                     color: nextNavArea.containsMouse && readerView._hasNext
                         ? Colors.withAlpha(Colors.primary, 0.45)
                         : Colors.withAlpha(Colors.primary, 0.22)
-                    Behavior on color { ColorAnimation { duration: Style.motion.fast } }
+                    Behavior on color { ColorAnimation { duration: Motion.fast } }
 
                     Row {
                         id: nextBtnRow; anchors.centerIn: parent; spacing: Style.space(5)

@@ -1,6 +1,6 @@
 import QtQuick
 import QtQuick.Controls
-import qs.colors
+import qs.app
 
 // The thin translucent scrollbar used by every list and grid in the shell.
 ScrollBar {

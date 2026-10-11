@@ -1,5 +1,6 @@
 import QtQuick
 import qs.Commons
+import qs.app
 
 // The breathing used by the skeleton placeholders: fades `target` down and
 // back up forever, starting after `delay` so neighbouring blocks ripple as a
@@ -11,7 +12,7 @@ SequentialAnimation {
     property Item target
     property int delay: 0
     property real low: 0.4
-    property int period: Style.motion.loop
+    property int period: Motion.loop
 
     loops: 1
 
@@ -21,12 +22,12 @@ SequentialAnimation {
         NumberAnimation {
             target: root.target; property: "opacity"
             to: root.low; duration: root.period / 2
-            easing.type: Style.motion.easeInOut
+            easing.type: Motion.easeInOut
         }
         NumberAnimation {
             target: root.target; property: "opacity"
             to: 1; duration: root.period / 2
-            easing.type: Style.motion.easeInOut
+            easing.type: Motion.easeInOut
         }
     }
 

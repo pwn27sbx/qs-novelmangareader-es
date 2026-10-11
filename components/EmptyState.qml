@@ -1,5 +1,5 @@
 import QtQuick
-import qs.colors
+import qs.app
 import qs.Commons
 
 // Centred "nothing here yet" placeholder: large glyph, headline, hint line.

@@ -1,7 +1,7 @@
 import QtQuick
 import QtQuick.Controls
 import QtQuick.Layouts
-import qs.colors
+import qs.app
 import qs.Commons
 import qs.services
 import Quickshell.Io
@@ -10,7 +10,7 @@ import qs.components
 Item {
     id: detailView
 
-    readonly property string fontDisplay: Style.font.displayFamily
+    readonly property string fontDisplay: Style.font.family
     readonly property string fontBody:    Style.font.family
 
     signal backRequested()
@@ -77,7 +77,7 @@ Item {
                     Rectangle {
                         anchors.centerIn: parent; width: 34; height: 34; radius: height / 2
                         color: backArea.containsMouse ? Colors.surface_container : "transparent"
-                        Behavior on color { ColorAnimation { duration: Style.motion.base } }
+                        Behavior on color { ColorAnimation { duration: Motion.base } }
                     }
                     Text {
                         anchors.centerIn: parent
@@ -107,7 +107,7 @@ Item {
                         color: detailView._inLibrary ? Colors.primary_container : Colors.surface_container
                         border.color: detailView._inLibrary ? Colors.primary : Colors.outline_variant
                         border.width: 1
-                        Behavior on color { ColorAnimation { duration: Style.motion.base } }
+                        Behavior on color { ColorAnimation { duration: Motion.base } }
                     }
                     Row {
                         anchors.centerIn: parent; spacing: Style.space(5)
@@ -118,7 +118,7 @@ Item {
                             font.pixelSize: Style.font.bodySmall; font.bold: true
                             color: detailView._inLibrary
                                 ? Colors.on_primary_container : Colors.on_surface_variant
-                            Behavior on color { ColorAnimation { duration: Style.motion.base } }
+                            Behavior on color { ColorAnimation { duration: Motion.base } }
                         }
                         StyledText {
                             id: libBtnLabel
@@ -128,7 +128,7 @@ Item {
                             font.pixelSize: Style.font.bodySmall; font.letterSpacing: 0.3
                             color: detailView._inLibrary
                                 ? Colors.on_primary_container : Colors.on_surface_variant
-                            Behavior on color { ColorAnimation { duration: Style.motion.base } }
+                            Behavior on color { ColorAnimation { duration: Motion.base } }
                         }
                     }
                     MouseArea {
@@ -270,7 +270,7 @@ Item {
                         : (epRowAreaRect.pressed
                             ? Colors.surface_container_high
                             : (epRowAreaRect.hovered ? Colors.surface_container : "transparent"))
-                    Behavior on color { ColorAnimation { duration: Style.motion.fast } }
+                    Behavior on color { ColorAnimation { duration: Motion.fast } }
 
                     Rectangle {
                         anchors {
@@ -310,8 +310,8 @@ Item {
                             text: "▶"; font.pixelSize: Style.font.subtitle
                             color: epRowAreaRect.hovered ? Colors.primary : Colors.outline
                             opacity: epRowAreaRect.hovered ? 0.9 : 0.35
-                            Behavior on opacity { NumberAnimation { duration: Style.motion.fast } }
-                            Behavior on color   { ColorAnimation  { duration: Style.motion.fast } }
+                            Behavior on opacity { NumberAnimation { duration: Motion.fast } }
+                            Behavior on color   { ColorAnimation  { duration: Motion.fast } }
                         }
                     }
 

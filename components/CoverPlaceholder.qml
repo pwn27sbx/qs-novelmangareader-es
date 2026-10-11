@@ -1,5 +1,5 @@
 import QtQuick
-import qs.colors
+import qs.app
 
 // What a cover shows until its image arrives: a flat tile that breathes while
 // the image is loading and settles to a still glyph if it fails. Anchor it

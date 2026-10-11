@@ -1,7 +1,7 @@
 pragma ComponentBehavior: Bound
 
 import QtQuick
-import qs.colors
+import qs.app
 import qs.Commons
 
 // Placeholder rows for a chapter / episode list while it's fetched: a number
@@ -20,7 +20,7 @@ Rectangle {
     clip: true
     opacity: root.active ? 1 : 0
     visible: root.opacity > 0
-    Behavior on opacity { NumberAnimation { duration: Style.motion.slow; easing.type: Style.motion.easeOut } }
+    Behavior on opacity { NumberAnimation { duration: Motion.slow; easing.type: Motion.easeOut } }
 
     Column {
         anchors { left: parent.left; right: parent.right }

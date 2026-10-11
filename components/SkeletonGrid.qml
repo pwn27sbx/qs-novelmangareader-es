@@ -2,7 +2,7 @@ pragma ComponentBehavior: Bound
 
 import QtQuick
 import qs.Commons
-import qs.colors
+import qs.app
 
 // Placeholder poster grid shown while a cover grid's first page loads. Lays
 // out like the real grid (same columns, card ratio and inset) so the covers
@@ -28,7 +28,7 @@ Rectangle {
     clip: true
     opacity: root.active ? 1 : 0
     visible: root.opacity > 0
-    Behavior on opacity { NumberAnimation { duration: Style.motion.slow; easing.type: Style.motion.easeOut } }
+    Behavior on opacity { NumberAnimation { duration: Motion.slow; easing.type: Motion.easeOut } }
 
     Grid {
         x: root.padding

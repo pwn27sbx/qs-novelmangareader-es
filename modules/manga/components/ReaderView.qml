@@ -1,7 +1,7 @@
 import QtQuick
 import QtQuick.Controls
 import QtQuick.Layouts
-import qs.colors
+import qs.app
 import qs.Commons
 import qs.services
 import qs.components
@@ -10,7 +10,7 @@ Item {
     id: readerView
 
     // ── Exposed API ──────────────────────────────────────────────────────────
-    readonly property string fontDisplay: Style.font.displayFamily
+    readonly property string fontDisplay: Style.font.family
     readonly property string fontBody:    Style.font.family
 
     // Emitted when the user navigates back
@@ -35,7 +35,7 @@ Item {
         color: Qt.rgba(0.05, 0.05, 0.08, 0.95)
         z: 10
         opacity: readerView.headerVisible ? 1 : 0
-        Behavior on opacity { NumberAnimation { duration: Style.motion.slow; easing.type: Style.motion.easeOut } }
+        Behavior on opacity { NumberAnimation { duration: Motion.slow; easing.type: Motion.easeOut } }
 
         // Bottom hairline
         Rectangle {
@@ -58,7 +58,7 @@ Item {
                     color: readerBackArea.containsMouse
                         ? Qt.rgba(1, 1, 1, 0.1)
                         : "transparent"
-                    Behavior on color { ColorAnimation { duration: Style.motion.base } }
+                    Behavior on color { ColorAnimation { duration: Motion.base } }
                 }
                 StyledText {
                     anchors.centerIn: parent
@@ -165,7 +165,7 @@ Item {
         boundsBehavior: Flickable.StopAtBounds
         model: Manga.chapterPages
         spacing: Style.spacing.xs
-        Behavior on anchors.topMargin { NumberAnimation { duration: Style.motion.slow; easing.type: Style.motion.easeOut } }
+        Behavior on anchors.topMargin { NumberAnimation { duration: Motion.slow; easing.type: Motion.easeOut } }
 
         // Tap anywhere to toggle header
         MouseArea {
@@ -191,7 +191,7 @@ Item {
                 asynchronous: true
                 cache: true
                 opacity: status === Image.Ready ? 1 : 0
-                Behavior on opacity { NumberAnimation { duration: Style.motion.slow } }
+                Behavior on opacity { NumberAnimation { duration: Motion.slow } }
 
             }
 
@@ -214,7 +214,7 @@ Item {
                         border.width: 2
                         border.color: Qt.rgba(1, 1, 1, 0.08)
                         arcColor: Qt.rgba(1, 1, 1, 0.45)
-                        duration: Style.motion.loop
+                        duration: Motion.loop
                     }
                     StyledText {
                         anchors.horizontalCenter: parent.horizontalCenter
@@ -244,7 +244,7 @@ Item {
                             width: parent.width * pageImg.progress
                             height: parent.height; radius: height / 2
                             color: Colors.primary
-                            Behavior on width { NumberAnimation { duration: Style.motion.base } }
+                            Behavior on width { NumberAnimation { duration: Motion.base } }
                         }
                     }
                 }
@@ -278,7 +278,7 @@ Item {
                 : 0
             height: parent.height
             color: Colors.primary
-            Behavior on width { NumberAnimation { duration: Style.motion.slow; easing.type: Style.motion.easeOut } }
+            Behavior on width { NumberAnimation { duration: Motion.slow; easing.type: Motion.easeOut } }
         }
     }
 }

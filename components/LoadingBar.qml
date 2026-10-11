@@ -1,5 +1,5 @@
 import QtQuick
-import qs.colors
+import qs.app
 import qs.Commons
 
 // A thin indeterminate strip: a short bar sliding across a faint track. For
@@ -15,7 +15,7 @@ Item {
     clip: true
     opacity: root.active ? 1 : 0
     visible: root.opacity > 0
-    Behavior on opacity { NumberAnimation { duration: Style.motion.slow } }
+    Behavior on opacity { NumberAnimation { duration: Motion.slow } }
 
     Rectangle {
         anchors.fill: parent
@@ -32,10 +32,10 @@ Item {
         XAnimator on x {
             from: -bar.width
             to: root.width
-            duration: Style.motion.loop
+            duration: Motion.loop
             loops: Animation.Infinite
             running: root.visible
-            easing.type: Style.motion.easeInOut
+            easing.type: Motion.easeInOut
         }
     }
 }

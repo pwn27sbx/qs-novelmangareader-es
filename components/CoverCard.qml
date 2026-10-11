@@ -1,6 +1,6 @@
 import QtQuick
 import qs.Commons
-import qs.colors
+import qs.app
 
 // The poster tile shared by the manga / anime / novel grids: cover art with a
 // placeholder and bottom fade, a two-line title bar, and press/hover feedback.
@@ -39,7 +39,7 @@ ClickableRect {
         asynchronous: true
         cache: true
         opacity: status === Image.Ready ? 1 : 0
-        Behavior on opacity { NumberAnimation { duration: Style.motion.slow } }
+        Behavior on opacity { NumberAnimation { duration: Motion.slow } }
 
         Rectangle {
             anchors { bottom: parent.bottom; left: parent.left; right: parent.right }
@@ -86,7 +86,7 @@ ClickableRect {
         radius: root.radius
         color: Colors.primary
         opacity: root.pressed ? Style.pressedFillAlpha : (root.hovered ? Style.hoverFillAlpha : 0)
-        Behavior on opacity { NumberAnimation { duration: Style.motion.base } }
+        Behavior on opacity { NumberAnimation { duration: Motion.base } }
     }
 
     transform: Scale {
@@ -94,7 +94,7 @@ ClickableRect {
         origin.y: root.height / 2
         xScale: root.pressed ? 0.97 : 1.0
         yScale: root.pressed ? 0.97 : 1.0
-        Behavior on xScale { NumberAnimation { duration: Style.motion.fast; easing.type: Style.motion.easeOut } }
-        Behavior on yScale { NumberAnimation { duration: Style.motion.fast; easing.type: Style.motion.easeOut } }
+        Behavior on xScale { NumberAnimation { duration: Motion.fast; easing.type: Motion.easeOut } }
+        Behavior on yScale { NumberAnimation { duration: Motion.fast; easing.type: Motion.easeOut } }
     }
 }
