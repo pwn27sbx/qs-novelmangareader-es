@@ -259,7 +259,56 @@ function tData(lang, value) {
     return value;
 }
 
+// ── Language resolution & settings (WU-11) ─────────────────────────────────
+
+// "es_419" / "es-419" / "en_US.UTF-8" -> "es" / "es" / "en".
+function normalizeLang(code) {
+    return String(code === undefined || code === null ? "" : code)
+        .split(/[_.@-]/)[0]
+        .toLowerCase();
+}
+
+// UI language precedence: QS_LANG (env) -> settings.json -> LANG -> "en".
+function resolveLang(envLang, settingsLang, systemLang) {
+    var env = normalizeLang(envLang);
+    if (env) {
+        return env;
+    }
+    var settings = normalizeLang(settingsLang);
+    if (settings) {
+        return settings;
+    }
+    var system = normalizeLang(systemLang);
+    return system === "" ? "en" : system;
+}
+
+// Language stored in settings.json: "en" | "es" | "" (unset / invalid).
+function settingsLanguage(text) {
+    try {
+        var data = JSON.parse(text);
+        var code = normalizeLang(data && data.language);
+        return (code === "en" || code === "es") ? code : "";
+    } catch (e) {
+        return "";
+    }
+}
+
+// Serialised settings.json contents for a language.
+function settingsJson(lang) {
+    return JSON.stringify({ language: normalizeLang(lang) === "es" ? "es" : "en" }, null, 2) + "\n";
+}
+
 // Exposed for the Node test runner only; QML's import ignores `module`.
 if (typeof module !== "undefined" && module.exports) {
-    module.exports = { tables: tables, display: display, t: t, tn: tn, tData: tData };
+    module.exports = {
+        tables: tables,
+        display: display,
+        t: t,
+        tn: tn,
+        tData: tData,
+        normalizeLang: normalizeLang,
+        resolveLang: resolveLang,
+        settingsLanguage: settingsLanguage,
+        settingsJson: settingsJson
+    };
 }

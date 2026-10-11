@@ -1,39 +1,38 @@
 pragma Singleton
 import QtQuick
 import Quickshell
+import Quickshell.Io
 import "i18n.js" as Core
 
-// Central i18n singleton. Follows the repo's Quickshell module pattern
-// (pragma Singleton + Singleton {} + `import qs.services`), so there is NO
-// qmldir involved. The translation tables and t()/tn() logic live in
-// services/i18n.js (pure JS, unit-tested by tests/i18n.test.js).
+// Central i18n singleton. Quickshell module pattern (pragma Singleton +
+// Singleton {} + `import qs.services`), so there is NO qmldir involved.
+// Tables / t() / tn() / tData() live in services/i18n.js (unit-tested by
+// tests/i18n.test.js).
 //
-// Usage from a view:
-//     text: I18n.t("tab.browse")
-//     text: I18n.t("last.ep", { 1: modelData.number })
-//     text: I18n.tn("count.chapter", model.count)
+// UI language precedence: QS_LANG (env) -> settings.json -> LANG -> "en".
+// By default the UI follows the system locale; the small panel toggle writes
+// <config>/qs-novelmangareader/settings.json and changes `lang` LIVE.
 //
-// This singleton must NOT import qs.services nor reference Anime/Manga/Novel
-// (avoids a dependency cycle — see plan §14.3).
+// The CONTENT language is separate — QS_CONTENT_LANG, see content_lang.py.
+//
+// Must NOT import qs.services nor reference Anime/Manga/Novel (plan §14.3).
 Singleton {
     id: root
 
-    // UI language: QS_LANG (explicit override) -> derived from LANG (es_* ->
-    // "es") -> "en". The UI follows the system locale: on this machine
-    // (LANG=en_US.UTF-8) it is ENGLISH by default. Force Spanish with
-    // QS_LANG=es. Normalised to a bare code so "es_419"/"en_US.UTF-8" resolve.
-    //
-    // This is the UI language ONLY. The language of the CONTENT the app fetches
-    // (anime subtitles, MangaDex chapters) is a separate preference —
-    // QS_CONTENT_LANG, default "es"; see scripts/content_lang.py.
-    //
-    // Fixed at startup: t()/tn() are functions, so a runtime language change
-    // is not reflected live. The language is chosen at launch (plan §C2).
-    readonly property string lang: {
-        const raw = Quickshell.env("QS_LANG") || Quickshell.env("LANG") || ""
-        const code = raw.split(/[_.@-]/)[0].toLowerCase()
-        return code === "" ? "en" : code
+    readonly property string settingsDir: {
+        const base = Quickshell.env("XDG_CONFIG_HOME") || (Quickshell.env("HOME") + "/.config")
+        return base + "/qs-novelmangareader"
     }
+    readonly property string settingsPath: root.settingsDir + "/settings.json"
+
+    // Highest priority: explicit env override (never persisted back).
+    readonly property string envLang: Core.normalizeLang(Quickshell.env("QS_LANG"))
+    // Loaded from settings.json; "" until loaded or when unset/invalid.
+    property string settingsLang: ""
+    readonly property string systemLang: Core.normalizeLang(Quickshell.env("LANG"))
+
+    // Reactive UI language: the panel toggle changes it live via setLanguage().
+    property string lang: Core.resolveLang(root.envLang, root.settingsLang, root.systemLang)
 
     function t(key, params) {
         return Core.t(lang, key, params)
@@ -47,5 +46,43 @@ Singleton {
     // "Movie"); unknown values are returned unchanged.
     function tData(value) {
         return Core.tData(lang, value)
+    }
+
+    // Switch language live and persist it to settings.json.
+    function setLanguage(code) {
+        const next = Core.normalizeLang(code) === "es" ? "es" : "en"
+        root.lang = next
+        root.settingsLang = next
+        settingsWriter.setText(Core.settingsJson(next))
+        settingsWriter.save()
+    }
+
+    function toggleLanguage() {
+        root.setLanguage(root.lang === "es" ? "en" : "es")
+    }
+
+    // Read settings.json at startup.
+    FileView {
+        id: settingsReader
+        path: root.settingsPath
+        onLoaded: root.settingsLang = Core.settingsLanguage(settingsReader.text())
+        onLoadFailed: root.settingsLang = ""
+    }
+
+    // Write settings.json on toggle.
+    FileView {
+        id: settingsWriter
+        path: root.settingsPath
+    }
+
+    // The config dir may not exist on a fresh setup; create it before writing.
+    Process {
+        id: ensureDir
+        command: ["mkdir", "-p", root.settingsDir]
+    }
+
+    Component.onCompleted: {
+        ensureDir.running = true
+        settingsReader.reload()
     }
 }

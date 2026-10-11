@@ -58,8 +58,13 @@ Item {
                 onClicked: root.minimize()
             }
 
+            LanguageToggle {
+                id: languageToggle
+                anchors { right: minimizeButton.left; rightMargin: 4; verticalCenter: parent.verticalCenter }
+            }
+
             Row {
-                anchors { left: parent.left; top: parent.top; bottom: parent.bottom; right: minimizeButton.left; rightMargin: 8 }
+                anchors { left: parent.left; top: parent.top; bottom: parent.bottom; right: languageToggle.left; rightMargin: 8 }
 
                 Repeater {
                     model: [

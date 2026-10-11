@@ -83,6 +83,35 @@ test("tData() matches known values case-insensitively", () => {
     assert.equal(i18n.tData("es", "COMPLETED"), "Completada");
 });
 
+test("normalizeLang() reduces locale strings to a bare code", () => {
+    assert.equal(i18n.normalizeLang("es_419"), "es");
+    assert.equal(i18n.normalizeLang("es-419"), "es");
+    assert.equal(i18n.normalizeLang("en_US.UTF-8"), "en");
+    assert.equal(i18n.normalizeLang(""), "");
+    assert.equal(i18n.normalizeLang(null), "");
+});
+
+test("resolveLang() precedence: env -> settings -> system -> en", () => {
+    assert.equal(i18n.resolveLang("es", "en", "en_US.UTF-8"), "es");
+    assert.equal(i18n.resolveLang("", "es", "en_US.UTF-8"), "es");
+    assert.equal(i18n.resolveLang("", "", "es_ES.UTF-8"), "es");
+    assert.equal(i18n.resolveLang("", "", "en_US.UTF-8"), "en");
+    assert.equal(i18n.resolveLang("", "", ""), "en");
+});
+
+test("settingsLanguage() reads the language key safely", () => {
+    assert.equal(i18n.settingsLanguage('{"language":"es"}'), "es");
+    assert.equal(i18n.settingsLanguage('{"language":"ES"}'), "es");
+    assert.equal(i18n.settingsLanguage('{"language":"fr"}'), "");
+    assert.equal(i18n.settingsLanguage('{"other":true}'), "");
+    assert.equal(i18n.settingsLanguage("not json"), "");
+});
+
+test("settingsJson() serialises a language", () => {
+    assert.deepEqual(JSON.parse(i18n.settingsJson("es")), { language: "es" });
+    assert.deepEqual(JSON.parse(i18n.settingsJson("fr")), { language: "en" });
+});
+
 test("es and en expose the exact same key set", () => {
     const es = Object.keys(i18n.tables.es).sort();
     const en = Object.keys(i18n.tables.en).sort();
