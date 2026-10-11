@@ -16,6 +16,9 @@ import time
 import requests
 from flask import Flask, jsonify, request
 
+import jkanime_source
+import titles
+
 import subtitles
 
 app = Flask(__name__)
@@ -302,6 +305,36 @@ def _hianime_embed(meta: dict, ep_no: str, mode: str) -> str | None:
     return base64.b64decode(hash_m.group(1)).decode() if hash_m else None
 
 
+def _is_spanish_label(label: str) -> bool:
+    low = (label or "").lower()
+    return "spanish" in low or "español" in low or "espanol" in low or "castellano" in low
+
+
+def _has_spanish_subtitle(links: list) -> bool:
+    return any(_is_spanish_label(link.get("subtitle_label", "")) for link in (links or []))
+
+
+def _jkanime_fallback(meta: dict, ep_no: str) -> list:
+    """JKAnime (Spanish) stream links for a show, matched by title, or []."""
+    for name in (meta.get("englishName"), meta.get("name")):
+        if not name:
+            continue
+        try:
+            results = jkanime_source.search(name)
+        except Exception:  # noqa: BLE001 — a flaky source must not break the chain
+            continue
+        slug = next((r["id"] for r in results if titles.titles_match(name, r.get("name", ""))), "")
+        if not slug:
+            continue
+        try:
+            links = jkanime_source.links(slug, ep_no)
+        except Exception:  # noqa: BLE001
+            links = []
+        if links:
+            return links
+    return []
+
+
 def get_episode_links(show_id: str, ep_no: str, mode: str = "sub") -> dict:
     """
     Resolve stream links for one episode.
@@ -316,6 +349,13 @@ def get_episode_links(show_id: str, ep_no: str, mode: str = "sub") -> dict:
         embed = _hianime_embed(meta, ep_no, mode)
         if embed:
             links = _zoko_links(embed)
+
+    # Spanish-first chain: if the hianime source has no Spanish subtitle track,
+    # fall back to JKAnime (Spanish-subtitled streams).
+    if not _has_spanish_subtitle(links):
+        jkanime_links = _jkanime_fallback(meta, ep_no)
+        if jkanime_links:
+            links = jkanime_links
 
     if not links:
         return {"error": f"No {mode} stream found for episode {ep_no}"}
@@ -676,6 +716,14 @@ def search_route():
         results = search_anime(q, mode)
     except Exception as e:
         return jsonify({"error": str(e)}), 500
+    # Spanish-first chain: hianime (allanime) first; if it has nothing, JKAnime.
+    if not results:
+        try:
+            results = jkanime_source.search(q)
+            for item in results:
+                item["id"] = "jkanime:" + item["id"]
+        except Exception:  # noqa: BLE001 — the fallback must not break search
+            results = []
     return jsonify({"query": q, "mode": mode, "count": len(results), "results": results})
 
 
@@ -690,7 +738,10 @@ def episodes_route():
     if not show_id:
         return jsonify({"error": "Missing required param: id"}), 400
     try:
-        eps = episodes_list(show_id, mode)
+        if show_id.startswith("jkanime:"):
+            eps = jkanime_source.episodes(show_id.split(":", 1)[1])
+        else:
+            eps = episodes_list(show_id, mode)
     except Exception as e:
         return jsonify({"error": str(e)}), 500
     return jsonify({"id": show_id, "mode": mode, "count": len(eps), "episodes": eps})
@@ -714,7 +765,14 @@ def links_route():
         return jsonify({"error": "Missing required param: ep"}), 400
 
     try:
-        data = get_episode_links(show_id, ep_no, mode)
+        if show_id.startswith("jkanime:"):
+            all_links = jkanime_source.links(show_id.split(":", 1)[1], ep_no)
+            if not all_links:
+                return jsonify({"error": f"No {mode} stream found for episode {ep_no}"}), 404
+            data = {"show_id": show_id, "episode": ep_no, "mode": mode,
+                    "providers": {"JKAnime": all_links}, "all_links": all_links}
+        else:
+            data = get_episode_links(show_id, ep_no, mode)
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 

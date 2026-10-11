@@ -1,0 +1,28 @@
+{
+  "current_page": 1,
+  "data": [
+    {
+      "id": 34477,
+      "number": 1,
+      "title": "Boruto: Naruto Next Generations - 1",
+      "image": "jkvideo_fb07ff9e9b8310d8da7ccb370c611f29.jpg",
+      "timestamp": "2017-04-05 08:07:48"
+    },
+    {
+      "id": 34526,
+      "number": 2,
+      "title": "Boruto: Naruto Next Generations - 2",
+      "image": "jkvideo_42f67ee6edf8958816e38b124609c38f.jpg",
+      "timestamp": "2017-04-12 08:05:58"
+    },
+    {
+      "id": 34586,
+      "number": 3,
+      "title": "Boruto: Naruto Next Generations - 3",
+      "image": "jkvideo_d484f834e49392464d233d217e6b28f7.jpg",
+      "timestamp": "2017-04-19 08:13:04"
+    }
+  ],
+  "last_page": 1,
+  "per_page": 16
+}
