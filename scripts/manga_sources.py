@@ -233,16 +233,21 @@ def map_info(manga, feed):
     }
 
 
-def map_pages(at_home, data_saver=True):
+def map_pages(at_home, data_saver=True, chapter_id=None):
     base = (at_home.get("baseUrl") or "").rstrip("/")
     chapter = at_home.get("chapter") or {}
     chapter_hash = chapter.get("hash") or ""
     mode = "data-saver" if data_saver else "data"
     files = chapter.get("dataSaver" if data_saver else "data") or []
-    return [
-        {"page": index + 1, "img": proxy_url(f"{base}/{mode}/{chapter_hash}/{name}")}
-        for index, name in enumerate(files)
-    ]
+    pages = []
+    for index, name in enumerate(files):
+        img = proxy_url(f"{base}/{mode}/{chapter_hash}/{name}")
+        if chapter_id:
+            # Carry the chapter/page so the proxy can rebuild the URL from a
+            # fresh node if this one 404s.
+            img += f"&chapter={urllib.parse.quote(chapter_id, safe='')}&page={index + 1}"
+        pages.append({"page": index + 1, "img": img})
+    return pages
 
 
 # ── HTTP (rate limited + cached) ───────────────────────────────────────────
@@ -268,6 +273,46 @@ def _cached(key, ttl, fn):
     with _cache_lock:
         _cache[key] = (value, time.monotonic() + ttl)
     return value
+
+
+# ── At-home (CDN node) cache — short TTL, refreshed on a page 404 ──────────
+# MangaDex's at-home nodes rotate and intermittently 404, so the response is
+# cached briefly (respects the ~40 req/min limit) and re-requested fresh when a
+# page fails.
+_at_home = {}
+_retry_refresh = {}
+_at_home_lock = threading.Lock()
+TTL_ATHOME = 300  # 5 min
+
+
+def at_home(chapter_id, force=False):
+    now = time.monotonic()
+    with _at_home_lock:
+        entry = _at_home.get(chapter_id)
+        if entry and not force and now < entry[1]:
+            return entry[0]
+    data = _http_json(f"/at-home/server/{chapter_id}", [], athome=True)
+    with _at_home_lock:
+        _at_home[chapter_id] = (data, now + TTL_ATHOME, now)
+    return data
+
+
+def at_home_fresh(chapter_id, min_age=20.0):
+    """A fresh at-home (new node) after a page 404.
+
+    Throttled by ``min_age`` so a burst of page 404s on the same chapter causes
+    at most one new at-home request (the first 404 always refreshes).
+    """
+    now = time.monotonic()
+    with _at_home_lock:
+        if now - _retry_refresh.get(chapter_id, 0.0) < min_age:
+            entry = _at_home.get(chapter_id)
+            if entry:
+                return entry[0]
+    data = at_home(chapter_id, force=True)
+    with _at_home_lock:
+        _retry_refresh[chapter_id] = now
+    return data
 
 
 def _http_json(path, params, athome=False):
@@ -346,11 +391,9 @@ def info(manga_id, langs=None):
 
 
 def pages(chapter_id, data_saver=True):
-    # MangaDex's at-home response is temporary — the CDN node and the file URLs
-    # are meant to be used immediately, so fetch it fresh on every chapter open
-    # instead of caching it (a stale baseUrl/hash yields 404s on the images).
-    data = _http_json(f"/at-home/server/{chapter_id}", [], athome=True)
-    return map_pages(data, data_saver)
+    # Short-cached at-home; if a page 404s the proxy refreshes it and retries.
+    data = at_home(chapter_id)
+    return map_pages(data, data_saver, chapter_id)
 
 
 def _list_params(langs, order, offset=0):

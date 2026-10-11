@@ -37,6 +37,7 @@ except ImportError:
     print("[manga-server] curl_cffi not found, falling back to requests (may timeout on Cloudflare)")
 
 import manga_chain
+import manga_sources
 
 PORT        = 5150
 BASE        = "https://weebcentral.com"
@@ -636,7 +637,33 @@ def _send_image(handler, body, ctype):
 
 # ── Image proxy ─────────────────────────────────────────────────────────────
 
-def proxy_image(handler, img_url):
+def _retry_mangadex_page(chapter, page, old_url):
+    """A fallback URL for a MangaDex page that 404'd, or "".
+
+    MangaDex's at-home node rarely changes, so first try a rebuilt URL from a
+    refreshed at-home; if the node is the same, fall back to the canonical
+    origin (uploads.mangadex.org) which serves the same /data-saver path.
+    """
+    try:
+        data = manga_sources.at_home_fresh(chapter)
+        pages = manga_sources.map_pages(data, True, chapter)
+        index = int(page) - 1
+        if 0 <= index < len(pages):
+            rebuilt = unquote(pages[index]["img"].split("url=", 1)[1].split("&", 1)[0])
+            if rebuilt and rebuilt != old_url:
+                return rebuilt
+    except Exception:  # noqa: BLE001 — never let the retry break the proxy
+        pass
+    try:
+        path = urlparse(old_url).path
+        if path.startswith("/data-saver/") or path.startswith("/data/"):
+            return "https://uploads.mangadex.org" + path
+    except Exception:  # noqa: BLE001
+        pass
+    return ""
+
+
+def proxy_image(handler, img_url, chapter=None, page=None):
     cached = _img_get(img_url)
     if cached:
         _send_image(handler, *cached)
@@ -647,6 +674,18 @@ def proxy_image(handler, img_url):
             body, ctype = _raw_get(img_url)
     except Exception as e:  # noqa: BLE001 — upstream 4xx/5xx or connection error
         upstream = getattr(getattr(e, "response", None), "status_code", None)
+        if upstream == 404 and chapter and page:
+            # The at-home node rotated/failed: refresh it and retry once.
+            retry_url = _retry_mangadex_page(chapter, page, img_url)
+            if retry_url and retry_url != img_url:
+                try:
+                    with _img_sem:
+                        body, ctype = _raw_get(retry_url)
+                    _img_put(img_url, body, ctype)
+                    _send_image(handler, body, ctype)
+                    return
+                except Exception:  # noqa: BLE001 — fall through to the error
+                    pass
         handler.send_error(upstream if upstream and 400 <= upstream < 500 else 502)
         return
 
@@ -733,7 +772,7 @@ class Handler(BaseHTTPRequestHandler):
                 img_url = unquote(param("url"))
                 if not img_url:
                     return self._error("missing url", 400)
-                proxy_image(self, img_url)
+                proxy_image(self, img_url, param("chapter") or None, param("page") or None)
             elif p == "/favorites":
                 self._json(fav_list())
             elif p == "/favorites/check":

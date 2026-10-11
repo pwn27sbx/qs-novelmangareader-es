@@ -119,24 +119,46 @@ class ProxyTest(unittest.TestCase):
         self.assertIn("url=https%3A%2F%2Fx%2Fa%20b.jpg", url)
 
 
-class PagesFreshnessTest(unittest.TestCase):
-    def test_pages_does_not_cache_at_home(self):
-        # The at-home response is temporary; pages() must fetch it fresh each
-        # time (a cached baseUrl/hash yields 404s on the images).
-        calls = []
-        original = manga_sources._http_json
+class AtHomeCacheTest(unittest.TestCase):
+    def setUp(self):
+        manga_sources._at_home.clear()
+        manga_sources._retry_refresh.clear()
+        self.calls = []
+        self.original = manga_sources._http_json
 
         def fake(path, params, athome=False):
-            calls.append(path)
-            return {"baseUrl": "https://cdn.example", "chapter": {"hash": "h", "dataSaver": ["a.jpg"], "data": ["a.jpg"]}}
+            self.calls.append(path)
+            return {"baseUrl": "https://cdn.example",
+                    "chapter": {"hash": "h", "dataSaver": ["a.jpg"], "data": ["a.jpg"]}}
 
         manga_sources._http_json = fake
-        try:
-            manga_sources.pages("cid")
-            manga_sources.pages("cid")
-        finally:
-            manga_sources._http_json = original
-        self.assertEqual(len(calls), 2)
+
+    def tearDown(self):
+        manga_sources._http_json = self.original
+        manga_sources._at_home.clear()
+        manga_sources._retry_refresh.clear()
+
+    def test_pages_uses_short_cache(self):
+        manga_sources.pages("cid")
+        manga_sources.pages("cid")
+        self.assertEqual(len(self.calls), 1)  # cached within the short TTL
+
+    def test_at_home_fresh_refreshes_the_node(self):
+        manga_sources.pages("cid")  # populate cache
+        manga_sources.at_home_fresh("cid", min_age=0)
+        self.assertEqual(len(self.calls), 2)  # forced a new at-home request
+
+    def test_at_home_fresh_is_throttled_after_the_first_refresh(self):
+        manga_sources.pages("cid")
+        manga_sources.at_home_fresh("cid", min_age=60)   # first 404 -> refresh
+        manga_sources.at_home_fresh("cid", min_age=60)   # burst -> reuse
+        self.assertEqual(len(self.calls), 2)
+
+    def test_map_pages_carries_chapter_and_page(self):
+        data = {"baseUrl": "https://cdn.example", "chapter": {"hash": "h", "dataSaver": ["a.jpg"]}}
+        pages = manga_sources.map_pages(data, True, "the-chapter")
+        self.assertIn("chapter=the-chapter", pages[0]["img"])
+        self.assertIn("page=1", pages[0]["img"])
 
 
 if __name__ == "__main__":
