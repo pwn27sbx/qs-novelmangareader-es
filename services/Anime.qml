@@ -3,6 +3,7 @@ import QtQuick
 import Quickshell
 import Quickshell.Io
 import qs.services
+import "anime_links.js" as AnimeLinks
 
 Singleton {
     id: root
@@ -396,49 +397,11 @@ Singleton {
 
     function _parseStreamLinks(json) {
         try {
-            const data = JSON.parse(json)
-            if (data.error) { linksError = data.error; isFetchingLinks = false; return }
-
-            const validLinks = (data.all_links || []).filter(function(l) {
-                return !l.error && l.url && l.url.length > 0
-            })
-
-            streamLinks = validLinks.map(function(l) {
-                return {
-                    url:      l.url      || "",
-                    quality:  l.quality  || "?",
-                    type:     l.type     || "mp4",
-                    provider: l.provider || "",
-                    referer:  l.referer  || "",
-                    subtitle: l.subtitle || "",
-                    subtitle_label: l.subtitle_label || ""
-                }
-            })
-
-            if (streamLinks.length === 0) {
-                // All providers failed — surface a meaningful error instead of
-                // silently doing nothing.
-                linksError = I18n.t("anime.noStream")
-                isFetchingLinks = false
-                return
-            }
-
-            var sel = data.selected
-            if (sel && sel.error) sel = null
-            if (sel && (!sel.url || sel.url.length === 0)) sel = null
-
-            selectedLink = sel ? {
-                url:      sel.url      || "",
-                quality:  sel.quality  || "?",
-                type:     sel.type     || "mp4",
-                provider: sel.provider || "",
-                referer:  sel.referer  || "",
-                subtitle: sel.subtitle || "",
-                subtitle_label: sel.subtitle_label || ""
-            } : streamLinks[0]
-
-            currentSubtitleLabel = selectedLink.subtitle_label || ""
-            linksError = ""
+            const parsed = AnimeLinks.parseStreamLinks(json)
+            streamLinks = parsed.streamLinks
+            selectedLink = parsed.selectedLink
+            currentSubtitleLabel = parsed.subtitleLabel
+            linksError = parsed.empty ? I18n.t("anime.noStream") : (parsed.error || "")
         } catch (e) {
             linksError = I18n.t("error.parse", { 1: e })
             console.error("[ServiceAnime]", e)
