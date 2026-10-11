@@ -7,7 +7,7 @@
 | Repo de trabajo | `~/Projects/forks/qs-novelmangareader-es` |
 | Upstream | `dhrruvsharma/qs-novelmangareader` (GPL-3.0) |
 | Inicio | 2026-10-11 |
-| Estado | **WU-5 completo** · GATE §15.1 cerrado |
+| Estado | **Fase 1 completa (WU-0..WU-6)** · GATE §15.1 cerrado |
 | Plan fuente | `2026-10-11-plan-localizacion-es-qs-novelmangareader.md` (§0–§16) |
 | Handoff | `2026-10-11-handoff-orquestador-qs-novelmangareader-es.md` |
 
@@ -85,7 +85,7 @@ Tener la interfaz de la app Quickshell `qs-novelmangareader` **en español latin
 - [x] **WU-2** — Envolver comunes + anime. *(F1-3, F1-4)*
 - [x] **WU-3** — Envolver manga. *(F1-5)*
 - [x] **WU-5** — Lint anti-strings sin `I18n.t` + test de paridad de claves `es`↔`en`. *(F1-8)*
-- [ ] **WU-6** — QA visual integral (3 módulos × vistas). *(F1-9, read-only)*
+- [x] **WU-6** — QA visual integral (3 módulos × vistas). *(F1-9, read-only)*
 - [ ] **WU-7** — Subtítulos ES (**CONDICIONADO**: requiere confirmar campo de idioma). *(F1.5-1, §13.3/§14.2)*
 - [ ] **WU-8** — MangaDex ES (`es-la`), mismo contrato JSON; tests con fixtures. *(F1.5-2, §15.5)*
 - [ ] **WU-9** — Instalador / CLI / README. *(F2)*
@@ -185,7 +185,18 @@ Tener la interfaz de la app Quickshell `qs-novelmangareader` **en español latin
 
 ---
 
-## Bitácora de work-units
+## QA de Fase 1 (WU-6) — resultados
+
+Automática (agente):
+- `node --test` → **11/11** (incluye paridad `es`↔`en` y los 2 guards de lint).
+- `node tools/lint-i18n.js` → **OK** (sin literales EN crudos; sin claves inexistentes).
+- Carga real `qs -p <repo>` con `QS_LANG=es` y `QS_LANG=en`, togglando los 3 paneles por IPC (`animePlayer`/`mangaReader`/`novelReader`) → **sin errores de QML, binding, `undefined` ni I18n**.
+- Sin procesos huérfanos tras las pruebas.
+- **Paridad EN (spot-check):** los valores `en` de `manga.noPages`, `manga.invalidResponse`, `anime.noStream`, `novel.listIncomplete`, `novel.loadFailed`, `anime.library.title`, `manga.search` coinciden **verbatim** con `c3ebeca`.
+
+Pendiente (humano): la QA **visual** real (acentos `á é í ó ú ñ ¿ ¡`, desbordes por longitud ES ~15–20% mayor, tabs/botones de ancho fijo) la debe confirmar el dueño abriendo la app. El agente no puede ver píxeles; no se declara como verificado.
+
+
 
 | WU | Commit | Fecha | Estado |
 |---|---|---|---|
@@ -194,10 +205,11 @@ Tener la interfaz de la app Quickshell `qs-novelmangareader` **en español latin
 | WU-2 | `5048592` | 2026-10-11 | ✅ completo |
 | WU-3 | `84ad035` | 2026-10-11 | ✅ completo |
 | WU-4 | `c4e359b` | 2026-10-11 | ✅ completo |
-| WU-5 | `—` (se completa al cierre) | 2026-10-11 | ✅ completo |
+| WU-5 | `17eabfc` | 2026-10-11 | ✅ completo |
+| WU-6 | `—` (commit de cierre de Fase 1) | 2026-10-11 | ✅ completo |
 
 ---
 
 ## Próximo paso
 
-WU-6: QA visual integral (3 módulos × vistas, acentos, desbordes) + carga real con `QS_LANG=es`. **RITMO FLOW: sin parar por WU.**
+Fase 1 completa. Siguiente (con validación individual del dueño): **WU-7** (subtítulos ES, condicionado al campo de idioma §14.2), **WU-8** (MangaDex `es-la`, §15.5), **WU-9** (instalador/CLI/README), **WU-10** (ani-cli, opcional). Además: QA visual humana y ajuste de desbordes.
