@@ -19,6 +19,7 @@ import os
 import content_lang
 import inmanga_source
 import manga_sources
+import titles
 
 NO_SPANISH_MESSAGE = "Sin capítulos en español"
 
@@ -65,12 +66,19 @@ def _prefix_info(name, data):
 
 
 def _first_match(module, title):
+    """Best matching series id in `module` for `title`, or "".
+
+    Only a title that actually matches is accepted, so a fall-through never
+    adopts an unrelated series.
+    """
     try:
         result = module.search(title, None, 0, "Best Match")
     except Exception:  # noqa: BLE001 — a flaky source must not break the chain
         return ""
-    results = result.get("results") or []
-    return results[0].get("id", "") if results else ""
+    for item in result.get("results") or []:
+        if titles.titles_match(title, item.get("title", "")):
+            return item.get("id", "")
+    return ""
 
 
 def search(query, mtype=None, offset=0, sort="Best Match"):

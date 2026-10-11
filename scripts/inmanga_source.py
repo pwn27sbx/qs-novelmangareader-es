@@ -20,6 +20,8 @@ import time
 import urllib.parse
 import urllib.request
 
+import titles
+
 BASE = "https://inmanga.com"
 IMG_CDN = "https://cdn1.intomanga.com/i/m"
 PROXY_PORT = 5150
@@ -204,6 +206,18 @@ def parse_info(detail_html, chapters_raw, manga_uuid):
 
 # ── public API (mirrors manga_server.py) ───────────────────────────────────
 
+def filter_by_query(results, query):
+    """Keep only items whose title matches the query.
+
+    The search endpoint is served by filter[queryString], but the site has
+    intermittently answered with the whole catalogue regardless of the query;
+    this client-side guard keeps the query authoritative.
+    """
+    if not query:
+        return results
+    return [item for item in results if titles.titles_match(query, item.get("title", ""))]
+
+
 def _search_html(query, offset, sortby):
     data = {
         "filter[queryString]": query,
@@ -219,7 +233,7 @@ def _search_html(query, offset, sortby):
 def search(query, mtype=None, offset=0, sort="Best Match"):
     key = f"in-search:{query}:{offset}:{sort}"
     html = _cached(key, TTL_SEARCH, lambda: _search_html(query, offset, -1))
-    results = parse_search(html)
+    results = filter_by_query(parse_search(html), query)
     return {"results": results, "hasMore": len(results) >= PAGE_LIMIT, "nextOffset": offset + len(results)}
 
 

@@ -91,6 +91,17 @@ class ChainTest(unittest.TestCase):
         data = manga_chain.info("mangadex:x")
         self.assertEqual(data.get("error"), "Sin capítulos en español")
 
+    def test_fallthrough_rejects_non_matching_title(self):
+        # The fall-through source answers with an unrelated series: it must NOT
+        # be adopted; the chain reports "no Spanish" instead.
+        class Wrong(FakeSource):
+            def search(self, query, mtype=None, offset=0, sort="Best Match"):
+                return {"results": [{"id": "x", "title": "Aoi - Hikaru"}], "hasMore": False, "nextOffset": 0}
+
+        self.set_modules(FakeSource(chapters=False), Wrong(found=True, chapters=True))
+        data = manga_chain.info("mangadex:x")
+        self.assertEqual(data.get("error"), "Sin capítulos en español")
+
     def test_pages_routes_by_prefix(self):
         self.set_modules(FakeSource(), FakeSource())
         pages = manga_chain.pages("inmanga:manga/CH")

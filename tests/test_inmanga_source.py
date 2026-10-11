@@ -72,5 +72,21 @@ class ParseInfoTest(unittest.TestCase):
         self.assertGreaterEqual(len(info["chapters"]), 1)
 
 
+class FilterByQueryTest(unittest.TestCase):
+    def setUp(self):
+        self.items = inmanga_source.parse_search(load("search.html"))
+
+    def test_relevant_query_kept(self):
+        filtered = inmanga_source.filter_by_query(self.items, "One Piece")
+        self.assertTrue(filtered)
+        for item in filtered:
+            self.assertIn("one piece", item["title"].lower())
+
+    def test_irrelevant_query_dropped(self):
+        # Simulates the site answering with the whole catalogue: the client
+        # filter must drop everything that does not match the query.
+        self.assertEqual(inmanga_source.filter_by_query(self.items, "Solo Leveling"), [])
+
+
 if __name__ == "__main__":
     unittest.main()
