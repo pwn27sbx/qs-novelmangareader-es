@@ -67,7 +67,17 @@ var tables = {
         "manga.loadingPages": "cargando páginas",
         "manga.invalidResponse": "Respuesta no válida",
         "manga.noPages": "No se encontraron páginas para este capítulo",
-        "manga.pageFailed": "no se pudo cargar"
+        "manga.pageFailed": "no se pudo cargar",
+
+        // ── Novel ───────────────────────────────────────────────────────
+        "panel.novel": "novelas",
+        "novel.search": "Buscar novelas…",
+        "novel.filter.hot": "Tendencias",
+        "novel.filter.latest": "Recientes",
+        "novel.library.hint": "Abre cualquier novela y toca  + Biblioteca",
+        "novel.listIncomplete": "· lista incompleta — toca para cargar el resto",
+        "novel.nextChapter": "Siguiente capítulo",
+        "novel.loadFailed": "No se pudo cargar esta novela"
     },
 
     en: {
@@ -127,7 +137,17 @@ var tables = {
         "manga.loadingPages": "loading pages",
         "manga.invalidResponse": "Invalid response",
         "manga.noPages": "No pages found for this chapter",
-        "manga.pageFailed": "failed to load"
+        "manga.pageFailed": "failed to load",
+
+        // ── Novel ───────────────────────────────────────────────────────
+        "panel.novel": "novels",
+        "novel.search": "Search novels…",
+        "novel.filter.hot": "Hot",
+        "novel.filter.latest": "Latest",
+        "novel.library.hint": "Open any novel and tap  + Library",
+        "novel.listIncomplete": "· list incomplete — tap to load the rest",
+        "novel.nextChapter": "Next Chapter",
+        "novel.loadFailed": "Couldn't load this novel"
     }
 };
 

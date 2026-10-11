@@ -177,7 +177,7 @@ Item {
                         }
                         StyledText {
                             id: libBtnLabel; anchors.verticalCenter: parent.verticalCenter
-                            text: "Library"; font.family: detailView.fontBody
+                            text: I18n.t("tab.library"); font.family: detailView.fontBody
                             font.pixelSize: 11; font.letterSpacing: 0.3
                             color: detailView._inLibrary ? Colors.on_primary_container : Colors.on_surface_variant
                             Behavior on color { ColorAnimation { duration: 180 } }
@@ -310,7 +310,7 @@ Item {
                 anchors { fill: parent; leftMargin: 16; rightMargin: 16 }
 
                 Text {
-                    text: Novel.currentNovel ? Novel.currentNovel.chapters.length + " chapters" : ""
+                    text: Novel.currentNovel ? I18n.tn("count.chapter", Novel.currentNovel.chapters.length) : ""
                     font.family: detailView.fontBody; font.pixelSize: 11
                     font.letterSpacing: 1; color: Colors.on_surface_variant; opacity: 0.75
                 }
@@ -318,7 +318,7 @@ Item {
                 // The site stopped answering partway through the list
                 Text {
                     visible: Novel.currentNovel !== null && Novel.currentNovel.partial
-                    text: "· list incomplete — tap to load the rest"
+                    text: I18n.t("novel.listIncomplete")
                     font.family: detailView.fontBody; font.pixelSize: 10
                     color: Colors.tertiary
                     MouseArea {
@@ -343,7 +343,7 @@ Item {
                         id: lastReadTxt; anchors.centerIn: parent
                         text: {
                             var e = Novel.currentNovel ? Novel.getLibraryEntry(Novel.currentNovel.id) : null
-                            return e ? "Last: Ch. " + e.lastReadChapterNum : ""
+                            return e ? I18n.t("last.ch", { 1: e.lastReadChapterNum }) : ""
                         }
                         font.family: detailView.fontBody; font.pixelSize: 9
                         font.letterSpacing: 0.8; color: Colors.primary
@@ -368,7 +368,7 @@ Item {
                 spacing: 8
 
                 Button {
-                    text: "Continue"
+                    text: I18n.t("action.continue")
                     font.family: detailView.fontBody; font.pixelSize: 12; font.bold: true
                     contentItem: StyledText {
                         text: parent.text; font: parent.font
@@ -381,7 +381,7 @@ Item {
                 }
 
                 Button {
-                    text: "Next Chapter"
+                    text: I18n.t("novel.nextChapter")
                     font.family: detailView.fontBody; font.pixelSize: 12; font.bold: true
                     contentItem: StyledText {
                         text: parent.text; font: parent.font
@@ -441,7 +441,7 @@ Item {
 
                             StyledText {
                                 anchors.verticalCenter: parent.verticalCenter
-                                text: "Filter chapters…"
+                                text: I18n.t("filterChapters")
                                 font.family: detailView.fontBody; font.pixelSize: 12
                                 color: Colors.on_surface_variant; opacity: 0.45
                                 visible: chapterSearch.text === "" && !chapterSearch.activeFocus
@@ -501,7 +501,7 @@ Item {
 
                         ToolTip.visible: containsMouse
                         ToolTip.delay: 600
-                        ToolTip.text: detailView._sortAscending ? "Sort: Ascending" : "Sort: Descending"
+                        ToolTip.text: detailView._sortAscending ? I18n.t("sort.ascending") : I18n.t("sort.descending")
                     }
                 }
             }
@@ -542,7 +542,7 @@ Item {
                     Text {
                         anchors.horizontalCenter: parent.horizontalCenter
                         width: 280; horizontalAlignment: Text.AlignHCenter
-                        text: "Couldn't load this novel\n" + Novel.detailError
+                        text: I18n.t("novel.loadFailed") + "\n" + Novel.detailError
                         color: Colors.on_surface_variant
                         font.family: detailView.fontBody; font.pixelSize: 12
                         wrapMode: Text.Wrap; lineHeight: 1.4
@@ -556,7 +556,7 @@ Item {
 
                         Text {
                             id: retryLabel; anchors.centerIn: parent
-                            text: "Retry"
+                            text: I18n.t("action.retry")
                             font.family: detailView.fontBody; font.pixelSize: 12; font.bold: true
                             color: retryArea.containsMouse ? Colors.on_primary : Colors.on_primary_container
                         }
@@ -611,7 +611,7 @@ Item {
 
                             StyledText {
                                 id: chPillTxt; anchors.centerIn: parent
-                                text: "Ch." + detailView.formatChapter(modelData.chapter)
+                                text: I18n.t("ch", { 1: detailView.formatChapter(modelData.chapter) })
                                 font.family: detailView.fontBody; font.pixelSize: 9
                                 font.bold: true; font.letterSpacing: 0.5
                                 color: isLastRead ? Colors.on_primary : Colors.on_primary_container
@@ -623,7 +623,7 @@ Item {
 
                             StyledText {
                                 width: parent.width
-                                text: modelData.title || ("Chapter " + detailView.formatChapter(modelData.chapter))
+                                text: modelData.title || I18n.t("chapter", { 1: detailView.formatChapter(modelData.chapter) })
                                 font.family: detailView.fontBody; font.pixelSize: 12
                                 color: Colors.on_surface; elide: Text.ElideRight
                             }

@@ -96,7 +96,7 @@ Item {
 
                     StyledText {
                         anchors { verticalCenter: parent.verticalCenter; left: parent.left; leftMargin: 16 }
-                        text: "Search novels…"
+                        text: I18n.t("novel.search")
                         color: Colors.on_surface_variant; font.family: browseView.fontBody
                         font.pixelSize: 13; visible: searchField.text.length === 0; opacity: 0.6
                     }
@@ -330,8 +330,8 @@ Item {
                 boundsBehavior: Flickable.StopAtBounds
 
                 model: ListModel {
-                    ListElement { label: "Hot";    fid: "hot"    }
-                    ListElement { label: "Latest"; fid: "latest" }
+                    ListElement { labelKey: "novel.filter.hot";    fid: "hot"    }
+                    ListElement { labelKey: "novel.filter.latest"; fid: "latest" }
                 }
 
                 delegate: Item {
@@ -347,7 +347,7 @@ Item {
                         Behavior on color { ColorAnimation { duration: 180 } }
 
                         StyledText {
-                            id: chipLbl; anchors.centerIn: parent; text: label
+                            id: chipLbl; anchors.centerIn: parent; text: I18n.t(labelKey)
                             font.family: browseView.fontBody; font.pixelSize: 12
                             font.letterSpacing: 0.6
                             color: browseView.currentFilter === fid ? Colors.on_primary : Colors.on_surface_variant

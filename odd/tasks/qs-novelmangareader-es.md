@@ -7,7 +7,7 @@
 | Repo de trabajo | `~/Projects/forks/qs-novelmangareader-es` |
 | Upstream | `dhrruvsharma/qs-novelmangareader` (GPL-3.0) |
 | Inicio | 2026-10-11 |
-| Estado | **WU-3 completo** · GATE §15.1 cerrado |
+| Estado | **WU-4 completo** · GATE §15.1 cerrado |
 | Plan fuente | `2026-10-11-plan-localizacion-es-qs-novelmangareader.md` (§0–§16) |
 | Handoff | `2026-10-11-handoff-orquestador-qs-novelmangareader-es.md` |
 
@@ -73,6 +73,8 @@ Tener la interfaz de la app Quickshell `qs-novelmangareader` **en español latin
 - **WU-3 — chips Manga/Manhwa/Manhua:** se guardan como `labelKey` literal (p. ej. `"Manga"`) y el delegate hace `I18n.t(labelKey)`; al no existir la clave, el core devuelve la propia clave → se muestran sin traducir sin caso especial.
 - **WU-3 — clave extra `manga.pageFailed`** ("no se pudo cargar"/"failed to load"): el sufijo de error por página no estaba en §6.3; se añadió para no dejar EN crudo.
 - **WU-3 — `count.chapter`** corrige singular ("1 capítulo" en vez de "1 capítulos"); en EN también ("1 chapter"). Mejora intencional; notar por si querés EN byte-idéntico.
+- **WU-4 — §6.4 tiene un error:** `Ongoing` (`BrowseView:462`) es un **dato** de estado (`modelData.status === "Ongoing"`), y `All` (`Novel.qml:21`) es un **sentinel** de la API (`status` param), NO labels de UI. No se tradujeron; se eliminaron las claves muertas `novel.filter.ongoing`/`novel.filter.all`.
+- **WU-4 — wordmark "N"/"ovel"**: marca, se mantiene (igual que "A"/"nime", "M"/"anga").
 
 > Orden de ejecución recomendado (novela diferida): `WU-0 → 1 → 2 → 3 → 5 → 6 → [7 cond.] → 8 → 9 → [10 opc.] → [4 si aplica]`.
 
@@ -86,7 +88,7 @@ Tener la interfaz de la app Quickshell `qs-novelmangareader` **en español latin
 - [ ] **WU-8** — MangaDex ES (`es-la`), mismo contrato JSON; tests con fixtures. *(F1.5-2, §15.5)*
 - [ ] **WU-9** — Instalador / CLI / README. *(F2)*
 - [ ] **WU-10** — Fallback anime con `ani-cli` (`ANI_CLI_PLAYER=debug`), opcional. *(F3-2)*
-- [ ] **WU-4** — Envolver novela (**DIFERIDO AL FINAL**, omitible). *(F1-6)*
+- [x] **WU-4** — Envolver novela (**DIFERIDO AL FINAL**, omitible). *(F1-6)*
 
 ---
 
@@ -188,10 +190,11 @@ Tener la interfaz de la app Quickshell `qs-novelmangareader` **en español latin
 | WU-0 | `eb39f81` | 2026-10-11 | ✅ completo |
 | WU-1 | `3f8cdc4` | 2026-10-11 | ✅ completo |
 | WU-2 | `5048592` | 2026-10-11 | ✅ completo |
-| WU-3 | `—` (se completa al cierre) | 2026-10-11 | ✅ completo |
+| WU-3 | `84ad035` | 2026-10-11 | ✅ completo |
+| WU-4 | `—` (se completa al cierre) | 2026-10-11 | ✅ completo |
 
 ---
 
 ## Próximo paso
 
-WU-4: envolver novela — `modules/novel/**`, `services/Novel.qml` (el dueño no usa novelas; va último entre módulos). Luego WU-5 (lint), WU-6 (QA). **RITMO FLOW: sin parar por WU.**
+WU-5: lint anti-literales + test de paridad de claves. Luego WU-6 (QA integral). **RITMO FLOW: sin parar por WU.**

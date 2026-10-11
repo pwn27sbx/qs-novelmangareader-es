@@ -24,8 +24,8 @@ Item {
             visible: Novel.libraryList.length === 0 && Novel.libraryLoaded
 
             EmptyState {
-                title: "Your library is empty"
-                subtitle: "Open any novel and tap  + Library"
+                title: I18n.t("empty.library")
+                subtitle: I18n.t("novel.library.hint")
                 displayFont: libraryView.fontDisplay
                 bodyFont: libraryView.fontBody
             }
@@ -74,8 +74,8 @@ Item {
                         bodyFont: libraryView.fontBody
                         started: modelData.lastReadChapterNum
                         label: modelData.lastReadChapterNum
-                                ? "Ch. " + modelData.lastReadChapterNum
-                                : "Not started"
+                                ? I18n.t("ch", { 1: modelData.lastReadChapterNum })
+                                : I18n.t("state.notStarted")
                     }
 
                     onClicked: {

@@ -128,7 +128,7 @@ Item {
                 Text {
                     id: wcTxt; anchors.centerIn: parent
                     text: Novel.currentChapter !== null
-                        ? (Math.round(Novel.currentChapter.wordCount / 100) / 10) + "k words" : ""
+                        ? I18n.t("words", { 1: (Math.round(Novel.currentChapter.wordCount / 100) / 10) }) : ""
                     font.family: readerView.fontBody; font.pixelSize: 10
                     font.letterSpacing: 0.4; color: Qt.rgba(1,1,1,0.45)
                 }
@@ -284,7 +284,7 @@ Item {
                     Row {
                         id: prevBtnRow; anchors.centerIn: parent; spacing: 5
                         Text { anchors.verticalCenter: parent.verticalCenter; text: "‹"; font.pixelSize: 18; color: Qt.rgba(1,1,1,0.7) }
-                        Text { anchors.verticalCenter: parent.verticalCenter; text: "Prev"; font.family: readerView.fontBody; font.pixelSize: 12; color: Qt.rgba(1,1,1,0.7) }
+                        Text { anchors.verticalCenter: parent.verticalCenter; text: I18n.t("action.prev"); font.family: readerView.fontBody; font.pixelSize: 12; color: Qt.rgba(1,1,1,0.7) }
                     }
                 }
 
@@ -323,7 +323,7 @@ Item {
 
                     Row {
                         id: nextBtnRow; anchors.centerIn: parent; spacing: 5
-                        Text { anchors.verticalCenter: parent.verticalCenter; text: "Next"; font.family: readerView.fontBody; font.pixelSize: 12; color: Qt.rgba(1,1,1,0.92) }
+                        Text { anchors.verticalCenter: parent.verticalCenter; text: I18n.t("action.next"); font.family: readerView.fontBody; font.pixelSize: 12; color: Qt.rgba(1,1,1,0.92) }
                         Text { anchors.verticalCenter: parent.verticalCenter; text: "›"; font.pixelSize: 18; color: Qt.rgba(1,1,1,0.92) }
                     }
                 }

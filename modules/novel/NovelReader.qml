@@ -62,8 +62,8 @@ Item {
 
                 Repeater {
                     model: [
-                        { label: "Browse",  icon: "⊞" },
-                        { label: "Library", icon: "⊟" }
+                        { label: I18n.t("tab.browse"),  icon: "⊞" },
+                        { label: I18n.t("tab.library"), icon: "⊟" }
                     ]
 
                     delegate: Item {
@@ -200,6 +200,6 @@ Item {
     }
 
     PanelDecor {
-        title: "novels"
+        title: I18n.t("panel.novel")
     }
 }

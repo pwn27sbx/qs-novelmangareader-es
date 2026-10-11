@@ -271,7 +271,7 @@ Singleton {
         currentSearchText = ""
         currentGenre = ""
         Http.get(root.apiUrl + "/hot", function(err, body) {
-            if (err) { novelError = "Request failed: " + err; isFetchingNovel = false; return }
+            if (err) { novelError = I18n.t("error.request", { 1: err }); isFetchingNovel = false; return }
             _parseNovelResults(body, true)
         })
     }
@@ -283,7 +283,7 @@ Singleton {
         isFetchingNovel = true
         novelError = ""
         Http.get(root.apiUrl + "/latest?page=" + latestPage, function(err, body) {
-            if (err) { novelError = "Request failed: " + err; isFetchingNovel = false; return }
+            if (err) { novelError = I18n.t("error.request", { 1: err }); isFetchingNovel = false; return }
             _parseNovelResults(body, false)
         })
     }
@@ -300,7 +300,7 @@ Singleton {
         if (genre)  url += "&genre="  + encodeURIComponent(genre)
         if (status && status !== "All") url += "&status=" + encodeURIComponent(status)
         Http.get(url, function(err, body) {
-            if (err) { novelError = "Request failed: " + err; isFetchingNovel = false; return }
+            if (err) { novelError = I18n.t("error.request", { 1: err }); isFetchingNovel = false; return }
             _parseNovelResults(body, false)
         })
     }
@@ -317,7 +317,7 @@ Singleton {
             if (currentStatus && currentStatus !== "All")
                 url += "&status=" + encodeURIComponent(currentStatus)
             Http.get(url, function(err, body) {
-                if (err) { novelError = "Request failed: " + err; isFetchingNovel = false; return }
+                if (err) { novelError = I18n.t("error.request", { 1: err }); isFetchingNovel = false; return }
                 _parseNovelResults(body, false)
             })
         } else {
@@ -347,7 +347,7 @@ Singleton {
             hasMoreNovels = isHot ? false : (data.hasMore || false)
             novelError = ""
         } catch (e) {
-            novelError = "Parse error: " + e
+            novelError = I18n.t("error.parse", { 1: e })
             console.error("[ServiceNovel]", e)
         }
         isFetchingNovel = false
@@ -362,7 +362,7 @@ Singleton {
         detailError = ""
         const url = root.apiUrl + "/info?id=" + encodeURIComponent(novelId)
         Http.get(url, function(err, body) {
-            if (err) { detailError = "Request failed: " + err; isFetchingDetail = false; return }
+            if (err) { detailError = I18n.t("error.request", { 1: err }); isFetchingDetail = false; return }
             _parseNovelDetail(body)
         })
     }
@@ -391,7 +391,7 @@ Singleton {
             }
             detailError = ""
         } catch (e) {
-            detailError = "Parse error: " + e
+            detailError = I18n.t("error.parse", { 1: e })
             console.error("[ServiceNovel]", e)
         }
         isFetchingDetail = false
@@ -406,7 +406,7 @@ Singleton {
         chapterError = ""
         const url = root.apiUrl + "/chapter?id=" + encodeURIComponent(chapterId)
         Http.get(url, function(err, body) {
-            if (err) { chapterError = "Request failed: " + err; isFetchingChapter = false; return }
+            if (err) { chapterError = I18n.t("error.request", { 1: err }); isFetchingChapter = false; return }
             _parseChapter(body)
         })
     }
@@ -425,7 +425,7 @@ Singleton {
             }
             chapterError = ""
         } catch (e) {
-            chapterError = "Parse error: " + e
+            chapterError = I18n.t("error.parse", { 1: e })
             console.error("[ServiceNovel]", e)
         }
         isFetchingChapter = false
