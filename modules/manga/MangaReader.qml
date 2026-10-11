@@ -6,6 +6,7 @@ import qs.Commons
 import qs.services
 import qs.modules.manga.components
 import qs.components
+import qs.Ui
 
 Item {
     id: root
@@ -43,14 +44,9 @@ Item {
 
         Rectangle {
             Layout.fillWidth: true
-            height: 44
+            height: 36
             color: Colors.surface_container_low
             z: 10
-
-            Rectangle {
-                anchors { bottom: parent.bottom; left: parent.left; right: parent.right }
-                height: 1; color: Colors.outline_variant; opacity: 0.4
-            }
 
             IconButton {
                 id: minimizeButton
@@ -64,75 +60,18 @@ Item {
                 anchors { right: minimizeButton.left; rightMargin: Style.spacing.sm; verticalCenter: parent.verticalCenter }
             }
 
-            Row {
+            ButtonGroup {
                 id: tabRow
                 objectName: "tabRow"
-                anchors { left: parent.left; top: parent.top; bottom: parent.bottom; right: languageToggle.left; rightMargin: Style.spacing.lg }
-
-                Repeater {
-                    id: tabsRepeater
-                    model: [
-                        { label: I18n.t("tab.browse"),  icon: "⊞" },
-                        { label: I18n.t("tab.library"), icon: "⊟" }
-                    ]
-
-                    delegate: Item {
-                        width: tabRow.width / Math.max(1, tabsRepeater.count)
-                        height: parent.height
-
-                        readonly property bool active: root.tabIndex === index
-
-                        Rectangle {
-                            anchors.fill: parent
-                            color: tabArea.containsMouse && !active
-                                ? Style.hoverFillFor(Colors.primary)
-                                : "transparent"
-                            Behavior on color { ColorAnimation { duration: Motion.fast } }
-                        }
-
-                        Column {
-                            anchors.centerIn: parent
-                            spacing: Style.spacing.xxs
-
-                            StyledText {
-                                anchors.horizontalCenter: parent.horizontalCenter
-                                text: modelData.icon
-                                font.pixelSize: Style.font.subtitle
-                                color: active ? Colors.primary : Colors.on_surface_variant
-                                opacity: active ? 1 : 0.5
-                                Behavior on color { ColorAnimation { duration: Motion.base } }
-                            }
-                            StyledText {
-                                anchors.horizontalCenter: parent.horizontalCenter
-                                text: modelData.label
-                                font.family: root.fontBody
-                                font.pixelSize: Style.font.caption
-                                font.letterSpacing: 0.6
-                                color: active ? Colors.primary : Colors.on_surface_variant
-                                opacity: active ? 1 : 0.5
-                                Behavior on color { ColorAnimation { duration: Motion.base } }
-                            }
-                        }
-
-                        Rectangle {
-                            anchors {
-                                bottom: parent.bottom
-                                horizontalCenter: parent.horizontalCenter
-                            }
-                            width: active ? 28 : 0
-                            height: 2; radius: height / 2 // style-ignore — line
-                            color: Colors.primary
-                            Behavior on width { NumberAnimation { duration: Motion.slow; easing.type: Motion.easeOut } }
-                        }
-
-                        MouseArea {
-                            id: tabArea
-                            anchors.fill: parent
-                            hoverEnabled: true
-                            onClicked: root.tabIndex = index
-                        }
-                    }
-                }
+                anchors { left: parent.left; leftMargin: Style.spacing.md; verticalCenter: parent.verticalCenter }
+                options: [
+                    { value: "0", label: I18n.t("tab.browse") },
+                    { value: "1", label: I18n.t("tab.library") }
+                ]
+                value: String(root.tabIndex)
+                background: "transparent"
+                fontSize: Style.font.bodySmall
+                onChanged: function(v) { root.tabIndex = parseInt(v) }
             }
         }
 
