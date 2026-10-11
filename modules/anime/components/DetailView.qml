@@ -34,7 +34,7 @@ Item {
             "mpv",
             "--fs",
             "--force-window=yes",
-            "--title=" + (title || "Anime"),
+            "--title=" + (title || I18n.t("anime.mpvTitle")),
             "--no-terminal"
         ]
 
@@ -122,7 +122,7 @@ Item {
                         StyledText {
                             id: libBtnLabel
                             anchors.verticalCenter: parent.verticalCenter
-                            text: "Library"
+                            text: I18n.t("tab.library")
                             font.family: detailView.fontBody
                             font.pixelSize: 11; font.letterSpacing: 0.3
                             color: detailView._inLibrary
@@ -153,8 +153,8 @@ Item {
 
                 StyledText {
                     text: Anime.currentAnime
-                        ? (Anime.currentAnime.episodes
-                        ? Anime.currentAnime.episodes.length : 0) + " episodes"
+                        ? I18n.tn("count.episode", Anime.currentAnime.episodes
+                            ? Anime.currentAnime.episodes.length : 0)
                         : ""
                     font.family: detailView.fontBody
                     font.pixelSize: 11; font.letterSpacing: 1
@@ -179,7 +179,7 @@ Item {
                         text: {
                             var e = Anime.currentAnime
                                 ? Anime.getLibraryEntry(Anime.currentAnime.id) : null
-                            return e ? "Last: Ep. " + e.lastWatchedEpNum : ""
+                            return e ? I18n.t("last.ep", { 1: e.lastWatchedEpNum }) : ""
                         }
                         font.family: detailView.fontBody
                         font.pixelSize: 9; font.letterSpacing: 0.8; color: Colors.primary
@@ -208,8 +208,8 @@ Item {
                 anchors.fill: parent; z: 6
                 active: Anime.isFetchingLinks
                 color: Colors.withAlpha(Colors.background, 0.88)
-                label: "fetching stream"
-                detail: Anime.currentEpisode ? "Episode " + Anime.currentEpisode : ""
+                label: I18n.t("anime.fetching")
+                detail: Anime.currentEpisode ? I18n.t("episode", { 1: Anime.currentEpisode }) : ""
                 bodyFont: detailView.fontBody
             }
 
@@ -279,7 +279,7 @@ Item {
 
                             StyledText {
                                 id: epPillText; anchors.centerIn: parent
-                                text: "Ep." + (modelData.number || "?")
+                                text: I18n.t("ep", { 1: modelData.number || "?" })
                                 font.family: detailView.fontBody
                                 font.pixelSize: 9; font.bold: true; font.letterSpacing: 0.5
                                 color: isLastWatched ? Colors.on_primary : Colors.on_primary_container
@@ -288,7 +288,7 @@ Item {
 
                         Text {
                             Layout.fillWidth: true
-                            text: "Episode " + (modelData.number || "")
+                            text: I18n.t("episode", { 1: modelData.number || "" })
                             font.family: detailView.fontBody
                             font.pixelSize: 12; color: Colors.on_surface; elide: Text.ElideRight
                         }
@@ -343,7 +343,7 @@ Item {
 
             var title = Anime.currentAnime
                 ? (Anime.currentAnime.englishName || Anime.currentAnime.name)
-                + " — Ep." + Anime.currentEpisode
+                + " — " + I18n.t("ep", { 1: Anime.currentEpisode })
                 : ""
             detailView._playWithMpv(lnk.url, lnk.referer, lnk.subtitle, title)
             Anime.clearStreamLinks()

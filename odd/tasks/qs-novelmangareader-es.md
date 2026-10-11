@@ -7,7 +7,7 @@
 | Repo de trabajo | `~/Projects/forks/qs-novelmangareader-es` |
 | Upstream | `dhrruvsharma/qs-novelmangareader` (GPL-3.0) |
 | Inicio | 2026-10-11 |
-| Estado | **WU-0 completo** · GATE §15.1 cerrado |
+| Estado | **WU-2 completo** · GATE §15.1 cerrado |
 | Plan fuente | `2026-10-11-plan-localizacion-es-qs-novelmangareader.md` (§0–§16) |
 | Handoff | `2026-10-11-handoff-orquestador-qs-novelmangareader-es.md` |
 
@@ -61,13 +61,21 @@ Tener la interfaz de la app Quickshell `qs-novelmangareader` **en español latin
 
 ---
 
-## Checklist de tareas
+## Decisiones de implementación (registradas por WU)
+
+- **WU-1 — núcleo i18n en JS puro.** Las tablas y `t()`/`tn()` viven en `services/i18n.js` (JS puro, sin QML); `services/I18n.qml` es un wrapper delgado (`lang`, `t`, `tn`). Motivo: test unitario determinista con `node --test`, sin sesión Wayland (§15.7). El plan D2 ponía las tablas dentro del singleton; se extraen por testabilidad, conservando la intención (clave en inglés, tabla central, interpolación, sin `qmldir`). El singleton **no** importa `qs.services` (§14.3).
+- **WU-1 — comando de tests canónico:** `node --test` (auto-descubre `**/*.test.js`). `node --test tests/` (dir suelto) no funciona en Node 26.
+- **WU-2 — `LoadingBar`/`PanelDecor` no tienen strings de UI.** El "more is on its way" de §6.1 es un **comentario**, no un caption → no se tocaron, no se creó la clave.
+- **WU-2 — `ListElement` no admite llamadas a funciones.** Los filtros (manga/anime) usan `ListModel`: se guarda la **clave** en el rol `labelKey` y el delegate hace `text: I18n.t(labelKey)`. Los tabs de `AnimePanel` son array JS y se traducen inline (`I18n.t("tab.browse")`).
+- **WU-2 — `LoadingState` default `label: ""`**: los 2 call sites pasan `label:`; se eliminó el literal inglés `"loading"` para no acoplar `components/` a `qs.services` (§14.3).
+- **WU-2 — errores del backend `data.error`**: se dejan **verbatim** (EN) por §6.8/§14.1; la mejora opcional `I18n.t("error.server", …)` se descartó por ahora para no alterar la salida en EN (DoD #4).
+- **WU-2 — normalización cosmética EN:** `"Ep."+n` y `"Ep. "+n` → clave única `ep` = `"Ep. %1"` (unifica "Ep.3"/"Ep. 3"). Cambio solo de un espacio; pendiente de tu OK si querés EN byte-idéntico.
 
 > Orden de ejecución recomendado (novela diferida): `WU-0 → 1 → 2 → 3 → 5 → 6 → [7 cond.] → 8 → 9 → [10 opc.] → [4 si aplica]`.
 
 - [x] **WU-0** — Setup: clonar fork, `upstream`, rama `i18n-es`, feature doc + espejo Engram. *(F1-1)*
-- [ ] **WU-1** — Núcleo i18n: `services/I18n.qml` (`pragma Singleton` + `Singleton{}`), `t()` + `tn()` (plurales), sin `qmldir`. *(F1-2, F1-7, §15.4)*
-- [ ] **WU-2** — Envolver comunes + anime. *(F1-3, F1-4)*
+- [x] **WU-1** — Núcleo i18n: `services/I18n.qml` (`pragma Singleton` + `Singleton{}`), `t()` + `tn()` (plurales), sin `qmldir`. *(F1-2, F1-7, §15.4)*
+- [x] **WU-2** — Envolver comunes + anime. *(F1-3, F1-4)*
 - [ ] **WU-3** — Envolver manga. *(F1-5)*
 - [ ] **WU-5** — Lint anti-strings sin `I18n.t` + test de paridad de claves `es`↔`en`. *(F1-8)*
 - [ ] **WU-6** — QA visual integral (3 módulos × vistas). *(F1-9, read-only)*
@@ -175,9 +183,10 @@ Tener la interfaz de la app Quickshell `qs-novelmangareader` **en español latin
 | WU | Commit | Fecha | Estado |
 |---|---|---|---|
 | WU-0 | `eb39f81` | 2026-10-11 | ✅ completo |
+| WU-1 | `3f8cdc4` | 2026-10-11 | ✅ completo |
 
 ---
 
 ## Próximo paso
 
-WU-1: crear `services/I18n.qml` con `pragma Singleton` + `Singleton {}`, `t(key, params)` y `tn(key, n, params)`. **Esperar confirmación del dueño antes de arrancar.**
+WU-3: envolver manga — `modules/manga/**`, `services/Manga.qml`. Ruta planificada: delegado (writer) o inline. Luego WU-4 (novela), WU-5 (lint), WU-6 (QA). **RITMO FLOW: sin parar por WU.**

@@ -35,12 +35,9 @@ Item {
                 Row {
                     spacing: 0; Layout.fillWidth: true
 
-                    Text {
-                        text: "A"; font.family: libraryView.fontDisplay
-                        font.pixelSize: 22; font.letterSpacing: 1; color: Colors.primary
-                    }
                     StyledText {
-                        text: "nime Library"; font.family: libraryView.fontDisplay
+                        text: I18n.t("anime.library.title")
+                        font.family: libraryView.fontDisplay
                         font.pixelSize: 22; font.letterSpacing: 1
                         color: Colors.on_surface; opacity: 0.85
                     }
@@ -70,8 +67,8 @@ Item {
             visible: Anime.libraryList.length === 0 && Anime.libraryLoaded
 
             EmptyState {
-                title: "Your library is empty"
-                subtitle: "Open any anime and tap  + Library"
+                title: I18n.t("empty.library")
+                subtitle: I18n.t("anime.library.hint")
                 displayFont: libraryView.fontDisplay
                 bodyFont: libraryView.fontBody
             }
@@ -149,8 +146,8 @@ Item {
                         bodyFont: libraryView.fontBody
                         started: entry.lastWatchedEpNum
                         label: entry.lastWatchedEpNum
-                            ? "Ep. " + entry.lastWatchedEpNum
-                            : "Not started"
+                            ? I18n.t("ep", { 1: entry.lastWatchedEpNum })
+                            : I18n.t("state.notStarted")
                     }
 
                     onClicked: {

@@ -19,17 +19,37 @@ var tables = {
         "state.notStarted": "Sin empezar",
         "empty.library": "Tu biblioteca está vacía",
         "action.retry": "Reintentar",
+        "action.prev": "Anterior",
+        "action.next": "Siguiente",
+        "action.continue": "Continuar",
         "error.request": "La solicitud falló: %1",
         "error.parse": "Error de análisis: %1",
         "error.server": "Error del servidor: %1",
 
         // ── Interpolation / counts (plan §6, F1-7) ──────────────────────
+        "ep": "Ep. %1",
+        "episode": "Episodio %1",
         "last.ep": "Último: Ep. %1",
         "last.ch": "Último: Cap. %1",
         "page": "pág. %1",
         "words": "%1 mil palabras",
         "count.episode": { one: "%1 episodio", other: "%1 episodios" },
-        "count.chapter": { one: "%1 capítulo", other: "%1 capítulos" }
+        "count.chapter": { one: "%1 capítulo", other: "%1 capítulos" },
+
+        // ── Anime ───────────────────────────────────────────────────────
+        "panel.anime": "anime",
+        "anime.search": "Buscar anime…",
+        "anime.filter.popular": "Popular",
+        "anime.filter.latest": "Recientes",
+        "anime.filter.japan": "Japón",
+        "anime.filter.china": "China",
+        "anime.filter.korea": "Corea",
+        "anime.library.title": "Biblioteca de anime",
+        "anime.library.hint": "Abre cualquier anime y toca  + Biblioteca",
+        "anime.fetching": "cargando el video",
+        "anime.noStream": "No se encontró una transmisión para este episodio",
+        "anime.epCount": "%1 ep",
+        "anime.mpvTitle": "Anime"
     },
 
     en: {
@@ -41,17 +61,37 @@ var tables = {
         "state.notStarted": "Not started",
         "empty.library": "Your library is empty",
         "action.retry": "Retry",
+        "action.prev": "Prev",
+        "action.next": "Next",
+        "action.continue": "Continue",
         "error.request": "Request failed: %1",
         "error.parse": "Parse error: %1",
         "error.server": "Server error: %1",
 
         // ── Interpolation / counts (plan §6, F1-7) ──────────────────────
+        "ep": "Ep. %1",
+        "episode": "Episode %1",
         "last.ep": "Last: Ep. %1",
         "last.ch": "Last: Ch. %1",
         "page": "p. %1",
         "words": "%1k words",
         "count.episode": { one: "%1 episode", other: "%1 episodes" },
-        "count.chapter": { one: "%1 chapter", other: "%1 chapters" }
+        "count.chapter": { one: "%1 chapter", other: "%1 chapters" },
+
+        // ── Anime ───────────────────────────────────────────────────────
+        "panel.anime": "anime",
+        "anime.search": "Search anime…",
+        "anime.filter.popular": "Popular",
+        "anime.filter.latest": "Latest",
+        "anime.filter.japan": "Japan",
+        "anime.filter.china": "China",
+        "anime.filter.korea": "Korea",
+        "anime.library.title": "Anime Library",
+        "anime.library.hint": "Open any anime and tap  + Library",
+        "anime.fetching": "fetching stream",
+        "anime.noStream": "No working stream found for this episode",
+        "anime.epCount": "%1 ep",
+        "anime.mpvTitle": "Anime"
     }
 };
 

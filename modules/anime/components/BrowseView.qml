@@ -51,7 +51,7 @@ Item {
                         color: Colors.primary
                     }
                     StyledText {
-                        text: "nime"
+                        text: "nime" // i18n-ignore — brand wordmark (with the "A" above)
                         font.family: browseView.fontDisplay
                         font.pixelSize: 24; font.letterSpacing: 1
                         color: Colors.on_surface; opacity: 0.85
@@ -90,7 +90,7 @@ Item {
 
                     StyledText {
                         anchors { verticalCenter: parent.verticalCenter; left: parent.left; leftMargin: 14 }
-                        text: "Search anime…"
+                        text: I18n.t("anime.search")
                         color: Colors.on_surface_variant
                         font.family: browseView.fontBody
                         font.pixelSize: 13
@@ -228,11 +228,11 @@ Item {
                 boundsBehavior: Flickable.StopAtBounds
 
                 model: ListModel {
-                    ListElement { label: "Popular"; view: "popular"; country: "ALL" }
-                    ListElement { label: "Latest";  view: "latest";  country: "ALL" }
-                    ListElement { label: "Japan";   view: "latest";  country: "JP"  }
-                    ListElement { label: "China";   view: "latest";  country: "CN"  }
-                    ListElement { label: "Korea";   view: "latest";  country: "KR"  }
+                    ListElement { labelKey: "anime.filter.popular"; view: "popular"; country: "ALL" }
+                    ListElement { labelKey: "anime.filter.latest";  view: "latest";  country: "ALL" }
+                    ListElement { labelKey: "anime.filter.japan";   view: "latest";  country: "JP"  }
+                    ListElement { labelKey: "anime.filter.china";   view: "latest";  country: "CN"  }
+                    ListElement { labelKey: "anime.filter.korea";   view: "latest";  country: "KR"  }
                 }
 
                 delegate: Item {
@@ -255,7 +255,7 @@ Item {
                         StyledText {
                             id: chipLbl
                             anchors.centerIn: parent
-                            text: label
+                            text: I18n.t(labelKey)
                             font.family: browseView.fontBody
                             font.pixelSize: 11; font.letterSpacing: 0.5
                             color: active ? Colors.on_primary : Colors.on_surface_variant
@@ -424,7 +424,7 @@ Item {
                                         var avail = modelData.availableEpisodes
                                         var n = Anime.currentMode === "dub"
                                             ? avail.dub : avail.sub
-                                        return n + " ep"
+                                        return I18n.t("anime.epCount", { 1: n })
                                     }
                                     font.family: browseView.fontBody
                                     font.pixelSize: 8; font.letterSpacing: 0.5
