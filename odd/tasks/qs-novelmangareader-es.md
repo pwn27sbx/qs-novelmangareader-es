@@ -7,7 +7,7 @@
 | Repo de trabajo | `~/Projects/forks/qs-novelmangareader-es` |
 | Upstream | `dhrruvsharma/qs-novelmangareader` (GPL-3.0) |
 | Inicio | 2026-10-11 |
-| Estado | **Fase 1 completa + WU-6b/6c** · UI sigue al sistema (EN por defecto) · GATE §15.1 cerrado |
+| Estado | **Fase 1 completa + WU-6b/6c + WU-7** · UI sigue al sistema (EN) · contenido ES · GATE §15.1 cerrado |
 | Plan fuente | `2026-10-11-plan-localizacion-es-qs-novelmangareader.md` (§0–§16) |
 | Handoff | `2026-10-11-handoff-orquestador-qs-novelmangareader-es.md` |
 
@@ -93,6 +93,8 @@ Dos preferencias **independientes**:
 - **WU-6b — `I18n.tData(value)`**: mapea status/type conocidos (Ongoing/OnGoing→"En curso", Completed→"Completada", Hiatus→"En pausa", Cancelled→"Cancelada", Movie→"Película", Special→"Especial"; TV/OVA/ONA iguales en ambos idiomas), con **fallback al valor original** y coincidencia **case-insensitive**. Aplicado en 5 badges (anime type; manga type+status; novel status×2). Guard de test en `tests/i18n.test.js`.
 - **WU-6c (corregido) — la UI sigue al sistema:** el resolver de `services/I18n.qml` es `QS_LANG` (override) → derivado de `LANG` → `en`. En la máquina del dueño (`LANG=en_US.UTF-8`) la UI queda **en inglés por defecto**; español de UI con `QS_LANG=es`. **No se hardcodea `QS_LANG` en ningún lado**; el wrapper `bin/qs-novelmangareader` no se toca (pasa el entorno tal cual). Verificado: sin `QS_LANG` → `en`/`Browse`; `QS_LANG=es` → `es`/`Explorar`.
 - **WU-6c (corregido) — idioma de contenido separado:** el idioma del **contenido** (subtítulos WU-7, MangaDex WU-8) es independiente de la UI → `QS_CONTENT_LANG` (default `es`, acepta lista `es-419,es`). Implementado en `scripts/content_lang.py` (ver sección «Idioma de UI vs contenido»).
+- **WU-7 — gate subtítulos (VERIFICADO en vivo):** cada entrada de `cfg["subtitles"]` trae `{default, label, lang, src}`. `label` nombra el idioma; **`lang` es constante `"en"`** (inútil) → se elige por `label` (case-insensitive). Hipótesis "idioma en el nombre del `src`" = **falsa** (hashes aleatorios).
+- **WU-7 — implementación:** `scripts/subtitles.py` (`pick_subtitle()`, stdlib, sin flask, testeable) elige según `content_langs()`; para `es`/`es-419` prefiere la pista **no-Castilian** (genérica/LatAm) y cae a Castilian si es la única; sin español → pista `default` (English). `anime_server.py:_zoko_links()` lo usa y añade `subtitle_label` al link. Tests: `tests/test_anime_subtitles.py` (11 casos). En vivo: FMA:B (18 pistas) → "Spanish (Spanish - [Full])"; `en`→English; `pt,es`→Portuguese.
 - **WU-4 — wordmark "N"/"ovel"**: marca, se mantiene (igual que "A"/"nime", "M"/"anga").
 - **WU-5 — lint:** `tools/lint-i18n.js` (a) falla si un prop de texto tiene literal EN crudo fuera de `I18n.t`/`tn`; (b) falla si una clave usada en QML no existe en la tabla. Se integra como `tests/lint.test.js`.
 - **WU-5 — reglas del lint:** los bloques `text: { … }` se evalúan solo en su expresión `return` (evita falsos positivos por comparaciones de datos como `mode === "dub"`); las líneas con `// i18n-ignore` se saltan (wordmarks de marca). Comandos: `node --test` y `node tools/lint-i18n.js`.
@@ -107,7 +109,7 @@ Dos preferencias **independientes**:
 - [x] **WU-6** — QA visual integral (3 módulos × vistas). *(F1-9, read-only)*
 - [x] **WU-6b** — Fix (revisión del orquestador): traducir **datos** status/type mostrados en badges. *(gap de WU-4/WU-6)*
 - [x] **WU-6c** — Idioma: la **UI sigue al sistema** (`QS_LANG`→`LANG`→`en`; en esta máquina EN por defecto; español con `QS_LANG=es`). El **contenido** usa una preferencia aparte (`QS_CONTENT_LANG`, default `es`).
-- [ ] **WU-7** — Subtítulos ES (**CONDICIONADO**: requiere confirmar campo de idioma). *(F1.5-1, §13.3/§14.2)*
+- [x] **WU-7** — Subtítulos ES por `label` (gate aprobado; `lang` es constante "en"). `scripts/subtitles.py` + tests. *(F1.5-1)*
 - [ ] **WU-8** — MangaDex ES (`es-la`), mismo contrato JSON; tests con fixtures. *(F1.5-2, §15.5)*
 - [ ] **WU-9** — Instalador / CLI / README. *(F2)*
 - [ ] **WU-10** — Fallback anime con `ani-cli` (`ANI_CLI_PLAYER=debug`), opcional. *(F3-2)*
@@ -125,7 +127,7 @@ Dos preferencias **independientes**:
 | WU-3 | `modules/manga/**`, `services/Manga.qml` |
 | WU-5 | `scripts/` o `tools/` (lint), `tests/` |
 | WU-6 | — (read-only) |
-| WU-7 | `scripts/anime_server.py` |
+| WU-7 | `scripts/anime_server.py`, `scripts/subtitles.py` |
 | WU-8 | `scripts/manga_server.py` + nuevo provider MangaDex (`scripts/`), selección de fuente |
 | WU-9 | `install.sh`, `scripts/install-common.sh`, `bin/qs-novelmangareader`, `README.md` |
 | WU-10 | provider de anime (`scripts/`) |
@@ -142,7 +144,7 @@ Dos preferencias **independientes**:
 - **WU-3**: manga 100% en ES.
 - **WU-5**: lint falla si hay literal EN crudo en `text:/label:/title:/subtitle:/placeholderText:` sin `I18n.t`; test detecta claves huérfanas.
 - **WU-6**: 3 módulos × vistas sin desbordes; acentos `á é í ó ú ñ ¿ ¡` correctos.
-- **WU-7**: si existe pista `es`, se elige; si no, `default` (solo si se confirma el campo de idioma).
+- **WU-7**: elige por `label` (case-insensitive) según `QS_CONTENT_LANG`; español genérico/LatAm sobre Castilian; sin español → pista `default`. ✅ verificado en vivo.
 - **WU-8**: lee capítulos `es-la` con el mismo contrato JSON; tests sin red real.
 - **WU-9**: mensajes en ES; tokens de comando intactos.
 - **WU-10**: si el scraper principal falla, usa `ANI_CLI_PLAYER=debug`.
@@ -168,7 +170,7 @@ Dos preferencias **independientes**:
 | WU-3 | QA visual manga |
 | WU-5 | correr lint (verde); test de claves |
 | WU-6 | recorrido completo en vivo con `XDG_DATA_HOME` temporal |
-| WU-7 | gate previo: verificar campo de idioma; test con `cfg` de ejemplo |
+| WU-7 | fixtures unittest (es-419/es-ES/pt/en-default/sin-es) + verificación en vivo del blob real |
 | WU-8 | tests con fixtures JSON grabadas; contrato JSON idéntico |
 | WU-9 | `--help`; instalar en `HOME` temporal |
 | WU-10 | prueba con scraper principal simulado caído |
@@ -188,7 +190,7 @@ Dos preferencias **independientes**:
 | WU-3 | delegado (writer) | 2+ archivos no triviales (manga) |
 | WU-5 | inline o delegado | script de lint + test; 1–2 archivos nuevos |
 | WU-6 | inline (read-only) | QA acotada |
-| WU-7 | delegado | cambio en `anime_server.py` + test; gate previo |
+| WU-7 | inline | gate previo (read-only) + 1 archivo nuevo (`subtitles.py`) + wiring |
 | WU-8 | delegado (writer) + verificador | provider nuevo, riesgo medio (WU cambia comportamiento) |
 | WU-9 | delegado (writer) | 4 archivos no triviales |
 | WU-10 | delegado | provider nuevo |
@@ -230,9 +232,10 @@ Pendiente (humano): la QA **visual** real (acentos `á é í ó ú ñ ¿ ¡`, de
 | WU-6 | `edf2203` | 2026-10-11 | ✅ completo |
 | WU-6b | `8d1c35e` | 2026-10-11 | ✅ completo |
 | WU-6c | `533ec29` (UI) + `43cc008` (contenido) | 2026-10-11 | ✅ completo |
+| WU-7 | `—` (se completa al cierre) | 2026-10-11 | ✅ completo |
 
 ---
 
 ## Próximo paso
 
-Fase 1 completa. Siguiente (con validación individual del dueño): **WU-7** (subtítulos ES, condicionado al campo de idioma §14.2), **WU-8** (MangaDex `es-la`, §15.5), **WU-9** (instalador/CLI/README), **WU-10** (ani-cli, opcional). Además: QA visual humana y ajuste de desbordes.
+WU-7 completo (subtítulos ES). Siguiente (con validación individual del dueño): **WU-8** (MangaDex `es-la`, usará `content_langs()`; §15.5), **WU-9** (instalador/CLI/README), **WU-10** (ani-cli, opcional). Además: QA visual humana y ajuste de desbordes.

@@ -16,6 +16,8 @@ import time
 import requests
 from flask import Flask, jsonify, request
 
+import subtitles
+
 app = Flask(__name__)
 
 AGENT = "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:109.0) Gecko/20100101 Firefox/121.0"
@@ -213,9 +215,14 @@ def _zoko_links(embed_url: str) -> list[dict]:
     if ".m3u8" not in master:
         return []
 
-    # Several subtitle languages can be listed; the site marks English as default
-    subtitle = next((s.get("src") for s in cfg.get("subtitles") or [] if s.get("default")), None)
+    # Prefer a subtitle track in the content language (QS_CONTENT_LANG, default
+    # "es"); the embed's `lang` field is always "en", so match the human-readable
+    # `label`. Falls back to the default (English) track when none matches.
+    chosen = subtitles.pick_subtitle(cfg.get("subtitles"))
+    subtitle = chosen.get("src") if chosen else None
     extra = {"referer": referer, **({"subtitle": subtitle} if subtitle else {})}
+    if chosen and chosen.get("label"):
+        extra["subtitle_label"] = chosen["label"]
 
     links = []
     try:
