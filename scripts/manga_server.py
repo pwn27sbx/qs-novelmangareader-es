@@ -36,8 +36,7 @@ except ImportError:
     _USE_CFFI = False
     print("[manga-server] curl_cffi not found, falling back to requests (may timeout on Cloudflare)")
 
-import content_lang
-import manga_sources
+import manga_chain
 
 PORT        = 5150
 BASE        = "https://weebcentral.com"
@@ -692,23 +691,25 @@ class Handler(BaseHTTPRequestHandler):
 
         try:
             p = parsed.path
-            # Source selection: QS_MANGA_SOURCE, else MangaDex (Spanish
-            # chapters) when the content language is Spanish, else WeebCentral.
-            use_mangadex = manga_sources.active_source() == "mangadex"
+            # Source selection: QS_MANGA_SOURCE, else the Spanish chain
+            # (MangaDex -> InManga) when the content language is Spanish, else
+            # WeebCentral (this scraper, English).
+            chain = manga_chain.active_chain()
+            use_chain = bool(chain) and chain[0] != "weebcentral"
 
             if p == "/hot":
-                self._json(manga_sources.hot() if use_mangadex else hot_updates())
+                self._json(manga_chain.hot() if use_chain else hot_updates())
             elif p == "/latest":
                 page = int(param("page", "1"))
-                self._json(manga_sources.latest(page) if use_mangadex else latest_updates(page))
+                self._json(manga_chain.latest(page) if use_chain else latest_updates(page))
             elif p == "/search":
                 q = param("q")
                 if not q:
                     return self._error("missing q", 400)
-                if use_mangadex:
-                    self._json(manga_sources.search(q, param("type") or None,
-                                                    int(param("offset", "0")),
-                                                    param("sort", "Best Match")))
+                if use_chain:
+                    self._json(manga_chain.search(q, param("type") or None,
+                                                   int(param("offset", "0")),
+                                                   param("sort", "Best Match")))
                 else:
                     self._json(search(q, param("type") or None,
                                       int(param("offset", "0")),
@@ -717,12 +718,12 @@ class Handler(BaseHTTPRequestHandler):
                 mid = param("id")
                 if not mid:
                     return self._error("missing id", 400)
-                self._json(manga_sources.info(mid) if use_mangadex else info(mid))
+                self._json(manga_chain.info(mid) if use_chain else info(mid))
             elif p == "/pages":
                 cid = param("chapterId")
                 if not cid:
                     return self._error("missing chapterId", 400)
-                self._json(manga_sources.pages(cid) if use_mangadex else pages(cid))
+                self._json(manga_chain.pages(cid) if use_chain else pages(cid))
             elif p == "/image":
                 img_url = unquote(param("url"))
                 if not img_url:
