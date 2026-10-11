@@ -114,18 +114,24 @@ function collectFiles(args) {
     return files;
 }
 
+function check(args) {
+    const files = collectFiles(args || []);
+    return { files: files.length, violations: files.flatMap(scanFile) };
+}
+
 function main() {
-    const files = collectFiles(process.argv.slice(2));
-    const violations = files.flatMap(scanFile);
+    const { files, violations } = check(process.argv.slice(2));
     if (violations.length === 0) {
-        console.log(`lint-style: OK (${files.length} files, 0 raw tokens)`);
+        console.log(`lint-style: OK (${files} files, 0 raw tokens)`);
         return 0;
     }
     for (const v of violations) {
         console.log(`${v.file}:${v.line}: ${v.prop}: ${v.value}  → use Style.*`);
     }
-    console.log(`lint-style: ${violations.length} raw token(s) in ${files.length} files`);
+    console.log(`lint-style: ${violations.length} raw token(s) in ${files} files`);
     return 1;
 }
 
-process.exit(main());
+if (require.main === module) process.exit(main());
+
+module.exports = { check, collectFiles, scanFile };

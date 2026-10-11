@@ -6,7 +6,7 @@
 | Rama | `i18n-es` (rama de trabajo del fork; sin `origin`) |
 | Repo de trabajo | `~/Projects/forks/qs-novelmangareader-es` |
 | Inicio | 2026-10-11 |
-| Estado | **En curso** |
+| Estado | **Completo (R1.0–R1.7)** |
 | Plan fuente | `/home/pwnsxb/Documents/Plans/2026-10-11-plan-rediseno-ui-qs-novelmangareader.md` (§7 R1, §9 cobertura) |
 | Review fuente | `/home/pwnsxb/Documents/Plans/2026-10-11-review-qs-novelmangareader-es.md` |
 
@@ -121,14 +121,27 @@ Unificar la UI sobre un **sistema de tokens** (`qs.Commons.Style`) espejo de Oma
 | Tarea | Commit | Estado |
 |---|---|---|
 | R1.0 | `0ab04ed` | ✅ completo |
-| R1.1 | `23145c6` | ✅ completo |
-| R1.2 | — | ✅ completo (lint components 0) |
-| R1.3 | — | ✅ completo (lint anime 0) |
-| R1.4 | — | ✅ completo (lint manga 0) |
-| R1.5 | — | ✅ completo (lint novel 0) |
-| R1.6 | — | ✅ completo (no-op: shell.qml + widget ya usan Style) |
-| R1.7 | — | pendiente (lint tool `877fa4a` ya listo) |
+| R1.1 | `23145c6` (+ radio fijable `1734bd3`) | ✅ completo |
+| R1.2 | `90ae429` | ✅ completo (lint components 0) |
+| R1.3 | `5805aa8` | ✅ completo (lint anime 0) |
+| R1.4 | `da8d6cb` | ✅ completo (lint manga 0) |
+| R1.5 | `23294a7` | ✅ completo (lint novel 0) |
+| R1.6 | — (no-op) | ✅ completo (shell.qml + widget ya usan Style) |
+| R1.7 | — | ✅ completo (lint tool `877fa4a`, flag `54cac9a`; shim borrado + test) |
+
+### Evidencia de verificación (cierre R1)
+
+- **Lint "cero números crudos"**: `node tools/lint-style.js` → `lint-style: OK (35 files, 0 raw tokens)`. Baseline inicial: 565.
+- **Radio = Hyprland (vivo)**: `hyprctl -j getoption decoration:rounding` = **0**; `Style.cornerRadius` (binding vivo a `hyprlandCornerRadius`) = 0. Cualquier cambio de rounding lo sigue tras recargar el panel. `gapsOut` = mitad de `general:gaps_out` (0).
+- **3 módulos consistentes**: anime (4 archivos, 128 usos `Style.*`) · manga (5, 161) · novel (5, 216); todos importan `qs.Commons`; 0 crudos por módulo.
+- **Tests**: `node --test` → **29/29** (incluye el nuevo `tests/lint-style.test.js`).
+- **Carga real**: `qs -p <repo>` sin errores de QML/binding; sin procesos huérfanos.
+- **`DesktopTheme`** eliminado (`services/DesktopTheme.qml`), 0 referencias.
+
+### Excepciones documentadas (`// style-ignore`)
+
+Solo tamaños de glifo fuera de la escala de Omarchy (7/8/9/15/19/20/22/30/32), anotados en línea con motivo. Ninguna excepción de radio/spacing/duration. Los overrides de color del lector (chrome/scrim/`Qt.rgba`) quedan para la fase de lectores (R3).
 
 ## Próximo paso
 
-R1.1 — crear `Commons/Style.qml` + `Commons/qmldir` y retirar `DesktopTheme.qml`.
+R1 cerrada. Revisión RDD del **R1 completo** pendiente (declinada por candidato en el slice intermedio, por decisión del dueño). Siguiente fase: **R2 — Panel + navegación** (tarjeta flotante con `gapsOut` + radio, tabs/back/breadcrumb, foco/teclado, iconografía, roles de color). Nota de diseño: hoy `cornerRadius = 0` (Hyprland) → la app queda cuadrada; con R2 la tarjeta flotante tomará el radio vivo.
