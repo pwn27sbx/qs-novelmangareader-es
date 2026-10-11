@@ -31,56 +31,91 @@ Item {
         anchors.fill: parent
         spacing: Style.space(0)
 
-        // ── Filter chips ──────────────────────────────────────────────────────
+        // ── Filter bar (joined segmented control) ─────────────────────────────
         Rectangle {
             Layout.fillWidth: true
             height: 48
-            color: Colors.surface_container_low
-            clip: true
+            color: "transparent"
 
             Rectangle {
-                anchors { top: parent.top; left: parent.left; right: parent.right }
-                height: 1; color: Colors.outline_variant; opacity: 0.25
-            }
-
-            ListView {
-                id: chipList
+                id: filterBar
                 anchors {
                     fill: parent
-                    topMargin: Style.spacing.md; bottomMargin: Style.spacing.md
-                    leftMargin: Style.spacing.xxl; rightMargin: Style.spacing.xxl
+                    leftMargin: Style.spacing.md; rightMargin: Style.spacing.md
+                    topMargin: Style.spacing.sm; bottomMargin: Style.spacing.sm
                 }
-                orientation: ListView.Horizontal
-                spacing: Style.space(7); clip: true
-                boundsBehavior: Flickable.StopAtBounds
+                radius: Style.cornerRadius
+                color: Util.alpha(Color.foreground, 0.05)
+                border.width: 1
+                border.color: Util.alpha(Color.foreground, 0.1)
 
-                model: ListModel {
-                    ListElement { labelKey: "anime.filter.popular"; view: "popular"; country: "ALL" }
-                    ListElement { labelKey: "anime.filter.latest";  view: "latest";  country: "ALL" }
-                    ListElement { labelKey: "anime.filter.japan";   view: "latest";  country: "JP"  }
-                    ListElement { labelKey: "anime.filter.china";   view: "latest";  country: "CN"  }
-                    ListElement { labelKey: "anime.filter.korea";   view: "latest";  country: "KR"  }
-                }
+                Row {
+                    id: segRow
+                    anchors { fill: parent; margins: Style.spacing.hairline }
+                    spacing: Style.space(0)
 
-                delegate: SegmentChip {
-                    required property string labelKey
-                    required property string view
-                    required property string country
-                    text: I18n.t(labelKey)
-                    active: Anime.currentView === view && Anime.currentCountry === country
-                    fontFamily: browseView.fontBody
-                    onClicked: {
-                        browseView.searchCleared()
-                        Anime.currentCountry = country
-                        if (view === "popular") Anime.fetchPopular(true)
-                        else Anime.fetchLatest(true)
+                    Repeater {
+                        id: segRepeater
+                        model: ListModel {
+                            ListElement { labelKey: "anime.filter.popular"; view: "popular"; country: "ALL" }
+                            ListElement { labelKey: "anime.filter.latest";  view: "latest";  country: "ALL" }
+                            ListElement { labelKey: "anime.filter.japan";   view: "latest";  country: "JP"  }
+                            ListElement { labelKey: "anime.filter.china";   view: "latest";  country: "CN"  }
+                            ListElement { labelKey: "anime.filter.korea";   view: "latest";  country: "KR"  }
+                        }
+
+                        delegate: Item {
+                            required property string labelKey
+                            required property string view
+                            required property string country
+                            required property int index
+                            readonly property bool active:
+                                Anime.currentView === view && Anime.currentCountry === country
+
+                            width: segRow.width / Math.max(1, segRepeater.count)
+                            height: segRow.height
+
+                            Rectangle {
+                                anchors.fill: parent
+                                color: active ? Util.alpha(Color.accent, 0.15) : "transparent"
+                                topLeftRadius: index === 0 ? Style.cornerRadius : 0
+                                bottomLeftRadius: index === 0 ? Style.cornerRadius : 0
+                                topRightRadius: index === segRepeater.count - 1 ? Style.cornerRadius : 0
+                                bottomRightRadius: index === segRepeater.count - 1 ? Style.cornerRadius : 0
+                            }
+
+                            Rectangle {
+                                visible: index > 0
+                                width: Style.spacing.hairline
+                                height: parent.height
+                                anchors { left: parent.left; verticalCenter: parent.verticalCenter }
+                                color: Util.alpha(Color.foreground, 0.1)
+                            }
+
+                            Text {
+                                anchors.centerIn: parent
+                                textFormat: Text.PlainText
+                                text: I18n.t(labelKey)
+                                color: active ? Color.accent : Color.foreground
+                                opacity: active ? 1.0 : 0.5
+                                font.family: browseView.fontBody
+                                font.pixelSize: Style.font.body
+                                font.bold: active
+                            }
+
+                            MouseArea {
+                                anchors.fill: parent
+                                cursorShape: Qt.PointingHandCursor
+                                onClicked: {
+                                    browseView.searchCleared()
+                                    Anime.currentCountry = country
+                                    if (view === "popular") Anime.fetchPopular(true)
+                                    else Anime.fetchLatest(true)
+                                }
+                            }
+                        }
                     }
                 }
-            }
-
-            Rectangle {
-                anchors { bottom: parent.bottom; left: parent.left; right: parent.right }
-                height: 1; color: Colors.outline_variant; opacity: 0.3
             }
         }
 
