@@ -1,6 +1,6 @@
 import QtQuick
 import qs.colors
-import qs.services as Services
+import qs.Commons
 
 // The "▶ Ch. 12" / "▶ Not started" strip along the bottom of a CoverCard.
 // `started` drives the whole read/unread treatment (colour + opacity).
@@ -19,7 +19,7 @@ Rectangle {
     anchors { bottom: parent.bottom; left: parent.left; right: parent.right }
     height: 30
     color: Colors.surface_container_high
-    radius: Services.DesktopTheme.rad(12)
+    radius: Style.cornerRadius
 
     // Square off the top corners so only the card's bottom edge stays rounded.
     Rectangle {

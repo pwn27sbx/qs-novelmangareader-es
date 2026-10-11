@@ -1,5 +1,5 @@
 import QtQuick
-import qs.services as Services
+import qs.Commons
 import qs.colors
 
 // The poster tile shared by the manga / anime / novel grids: cover art with a
@@ -19,7 +19,7 @@ ClickableRect {
     property int footerHeight: 0
 
     anchors.margins: 5
-    radius: Services.DesktopTheme.rad(12)
+    radius: Style.cornerRadius
     color: Colors.surface_container
     clip: true
 

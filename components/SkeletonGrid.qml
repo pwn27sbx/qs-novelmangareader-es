@@ -1,7 +1,7 @@
 pragma ComponentBehavior: Bound
 
 import QtQuick
-import qs.services as Services
+import qs.Commons
 import qs.colors
 
 // Placeholder poster grid shown while a cover grid's first page loads. Lays
@@ -50,7 +50,7 @@ Rectangle {
                 Rectangle {
                     id: card
                     anchors { fill: parent; margins: 5 }
-                    radius: Services.DesktopTheme.rad(12)
+                    radius: Style.cornerRadius
                     color: Colors.surface_container
 
                     // Cover

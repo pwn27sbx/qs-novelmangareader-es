@@ -1,5 +1,5 @@
 import QtQuick
-import qs.services as Services
+import qs.Commons
 
 // A Rectangle that knows whether the pointer is over it. Replaces the
 // `Rectangle { ... MouseArea { id: ma; hoverEnabled: true } }` +
@@ -22,14 +22,9 @@ Rectangle {
     signal entered
     signal exited
 
-    // A desktop theme squares these off (or, Astral, rounds them into
-    // capsules) while it's on, restoring the caller's radius when it's off.
-    Binding {
-        target: root
-        property: "radius"
-        value: Services.DesktopTheme.roundControls ? Math.min(root.height / 2, 22) : Services.DesktopTheme.controlRadius
-        when: Services.DesktopTheme.controlRadius >= 0 || Services.DesktopTheme.roundControls
-    }
+    // One radius everywhere, mirrored from Hyprland. A call site may override
+    // it (e.g. a circular button sets `radius: width / 2`).
+    radius: Style.cornerRadius
 
     MouseArea {
         id: mouse

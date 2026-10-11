@@ -1,22 +1,23 @@
 pragma Singleton
 import QtQuick
 import Quickshell
-import qs.colors
+import qs.Commons
 
-// Stand-in for the desktop-theme registry of the rice these packages come
-// from. They only ask it for corner radii, a font and an accent; with no
-// theme to apply, every radius stays as written, text keeps the default
-// font and the accent is the palette's.
+// Deprecated shim, kept only while the remaining module views finish migrating
+// onto `Commons/Style.qml`. The desktop-theme registry this stood in for never
+// existed in the standalone packages, so every radius now delegates to the
+// shared token and is therefore already unified. This file is deleted once no
+// view references it (R1.7).
 Singleton {
     readonly property bool enabled: false
     readonly property string theme: ""
     readonly property real controlRadius: -1
     readonly property bool roundControls: false
-    readonly property string font: ""
-    readonly property color accent: Colors.primary
-    readonly property color accent2: Colors.tertiary
+    readonly property string font: Style.font.family
+    readonly property color accent: Style.accent
+    readonly property color accent2: Style.accent
 
     function rad(normal) {
-        return normal;
+        return Style.cornerRadius;
     }
 }
