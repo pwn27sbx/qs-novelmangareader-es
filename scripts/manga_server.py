@@ -36,6 +36,9 @@ except ImportError:
     _USE_CFFI = False
     print("[manga-server] curl_cffi not found, falling back to requests (may timeout on Cloudflare)")
 
+import content_lang
+import manga_sources
+
 PORT        = 5150
 BASE        = "https://weebcentral.com"
 COVER_SMALL = "https://temp.compsci88.com/cover/small"
@@ -689,28 +692,37 @@ class Handler(BaseHTTPRequestHandler):
 
         try:
             p = parsed.path
+            # Source selection: QS_MANGA_SOURCE, else MangaDex (Spanish
+            # chapters) when the content language is Spanish, else WeebCentral.
+            use_mangadex = manga_sources.active_source() == "mangadex"
 
             if p == "/hot":
-                self._json(hot_updates())
+                self._json(manga_sources.hot() if use_mangadex else hot_updates())
             elif p == "/latest":
-                self._json(latest_updates(int(param("page", "1"))))
+                page = int(param("page", "1"))
+                self._json(manga_sources.latest(page) if use_mangadex else latest_updates(page))
             elif p == "/search":
                 q = param("q")
                 if not q:
                     return self._error("missing q", 400)
-                self._json(search(q, param("type") or None,
-                                  int(param("offset", "0")),
-                                  param("sort", "Latest Updates")))
+                if use_mangadex:
+                    self._json(manga_sources.search(q, param("type") or None,
+                                                    int(param("offset", "0")),
+                                                    param("sort", "Best Match")))
+                else:
+                    self._json(search(q, param("type") or None,
+                                      int(param("offset", "0")),
+                                      param("sort", "Latest Updates")))
             elif p == "/info":
                 mid = param("id")
                 if not mid:
                     return self._error("missing id", 400)
-                self._json(info(mid))
+                self._json(manga_sources.info(mid) if use_mangadex else info(mid))
             elif p == "/pages":
                 cid = param("chapterId")
                 if not cid:
                     return self._error("missing chapterId", 400)
-                self._json(pages(cid))
+                self._json(manga_sources.pages(cid) if use_mangadex else pages(cid))
             elif p == "/image":
                 img_url = unquote(param("url"))
                 if not img_url:

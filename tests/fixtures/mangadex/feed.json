@@ -1,0 +1,30 @@
+{
+  "result": "ok",
+  "response": "collection",
+  "data": [
+    {
+      "id": "874e0e07-5e93-4f6f-a5d2-632f4916f13d",
+      "type": "chapter",
+      "attributes": {
+        "chapter": "297",
+        "title": "Hacia Al Futuro",
+        "translatedLanguage": "es",
+        "pages": 21,
+        "externalUrl": null,
+        "publishAt": "2025-03-29T01:03:50+00:00",
+        "volume": null
+      },
+      "relationships": [
+        {
+          "type": "scanlation_group",
+          "attributes": {
+            "name": "El Scan Semanal "
+          }
+        }
+      ]
+    }
+  ],
+  "limit": 40,
+  "offset": 0,
+  "total": 124
+}
