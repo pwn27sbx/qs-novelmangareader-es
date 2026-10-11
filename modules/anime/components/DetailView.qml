@@ -161,6 +161,17 @@ Item {
                     color: Colors.on_surface_variant; opacity: 0.75
                 }
 
+                // Which subtitle track was picked (from the resolved stream)
+                StyledText {
+                    visible: Anime.currentSubtitleLabel.length > 0
+                    text: I18n.t("anime.subtitles", { 1: Anime.currentSubtitleLabel })
+                    font.family: detailView.fontBody
+                    font.pixelSize: 10; font.letterSpacing: 0.3
+                    color: Colors.tertiary
+                    elide: Text.ElideRight
+                    Layout.maximumWidth: 220
+                }
+
                 Item { Layout.fillWidth: true }
 
                 // Last-watched badge

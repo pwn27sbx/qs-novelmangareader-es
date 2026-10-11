@@ -56,6 +56,7 @@ var tables = {
         "anime.fetching": "cargando el video",
         "anime.noStream": "No se encontró una transmisión para este episodio",
         "anime.epCount": "%1 ep",
+        "anime.subtitles": "Subtítulos: %1",
         "anime.mpvTitle": "Anime",
 
         // ── Manga ───────────────────────────────────────────────────────
@@ -126,6 +127,7 @@ var tables = {
         "anime.fetching": "fetching stream",
         "anime.noStream": "No working stream found for this episode",
         "anime.epCount": "%1 ep",
+        "anime.subtitles": "Subtitles: %1",
         "anime.mpvTitle": "Anime",
 
         // ── Manga ───────────────────────────────────────────────────────

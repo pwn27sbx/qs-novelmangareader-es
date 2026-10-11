@@ -50,7 +50,7 @@ _LABEL_KEYWORDS = {
 
 def base_lang(tag):
     """Bare language code of a tag: "es-419" -> "es", "pt_BR" -> "pt"."""
-    return re.split(r"[-_]", (tag or "").strip().lower(), 1)[0]
+    return re.split(r"[-_]", (tag or "").strip().lower(), maxsplit=1)[0]
 
 
 def label_keyword(tag):

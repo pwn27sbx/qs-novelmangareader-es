@@ -29,6 +29,7 @@ Singleton {
     property bool isFetchingLinks: false
     property string linksError: ""
     property string currentEpisode: ""
+    property string currentSubtitleLabel: ""
 
     // ── Library ───────────────────────────────────────────────────────────────
     // Each entry: { id, name, englishName, thumbnail, score,
@@ -380,6 +381,7 @@ Singleton {
         selectedLink = null
         linksError = ""
         currentEpisode = String(episodeNum)
+        currentSubtitleLabel = ""
 
         const q = quality || "best"
         const url = root.apiUrl + "/links?id=" + encodeURIComponent(showId)
@@ -408,7 +410,8 @@ Singleton {
                     type:     l.type     || "mp4",
                     provider: l.provider || "",
                     referer:  l.referer  || "",
-                    subtitle: l.subtitle || ""
+                    subtitle: l.subtitle || "",
+                    subtitle_label: l.subtitle_label || ""
                 }
             })
 
@@ -430,9 +433,11 @@ Singleton {
                 type:     sel.type     || "mp4",
                 provider: sel.provider || "",
                 referer:  sel.referer  || "",
-                subtitle: sel.subtitle || ""
+                subtitle: sel.subtitle || "",
+                subtitle_label: sel.subtitle_label || ""
             } : streamLinks[0]
 
+            currentSubtitleLabel = selectedLink.subtitle_label || ""
             linksError = ""
         } catch (e) {
             linksError = I18n.t("error.parse", { 1: e })
