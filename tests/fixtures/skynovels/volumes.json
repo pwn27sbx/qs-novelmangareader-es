@@ -1,0 +1,20 @@
+{
+  "volumes": [
+    {
+      "id": 289,
+      "vlm_title": "Volumen 1",
+      "nvl_id": 1,
+      "user_id": null,
+      "chapters_count": 213,
+      "chapters": []
+    },
+    {
+      "id": 294,
+      "vlm_title": "Volumen 2",
+      "nvl_id": 1,
+      "user_id": 15969,
+      "chapters_count": 269,
+      "chapters": []
+    }
+  ]
+}
