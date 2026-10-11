@@ -18,13 +18,17 @@ import "i18n.js" as Core
 Singleton {
     id: root
 
-    // Language: QS_LANG wins; otherwise derived from LANG (es_* -> "es").
-    // Normalised to a bare code so "es_ES", "es-419" and "en_US.UTF-8" all
-    // resolve. Unknown codes fall back to English tables inside the core.
+    // UI language: QS_LANG (explicit override) -> derived from LANG (es_* ->
+    // "es") -> "en". The UI follows the system locale: on this machine
+    // (LANG=en_US.UTF-8) it is ENGLISH by default. Force Spanish with
+    // QS_LANG=es. Normalised to a bare code so "es_419"/"en_US.UTF-8" resolve.
+    //
+    // This is the UI language ONLY. The language of the CONTENT the app fetches
+    // (anime subtitles, MangaDex chapters) is a separate preference —
+    // QS_CONTENT_LANG, default "es"; see scripts/content_lang.py.
     //
     // Fixed at startup: t()/tn() are functions, so a runtime language change
-    // is not reflected live. This is acceptable — the language is chosen at
-    // launch (documented limitation, plan §C2).
+    // is not reflected live. The language is chosen at launch (plan §C2).
     readonly property string lang: {
         const raw = Quickshell.env("QS_LANG") || Quickshell.env("LANG") || ""
         const code = raw.split(/[_.@-]/)[0].toLowerCase()
