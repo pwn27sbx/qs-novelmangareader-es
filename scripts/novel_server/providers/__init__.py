@@ -19,6 +19,7 @@ provider name so that favorites and downloads never collide across sources:
 Helper functions strip/add the prefix transparently.
 """
 
+import os
 import threading
 
 from .freewebnovel import FreeWebNovelProvider
@@ -33,8 +34,26 @@ _REGISTRY: dict[str, type[NovelProvider]] = {
     "skynovels": SkynovelsProvider,
 }
 
-_lock   = threading.Lock()
-_active: NovelProvider = FreeWebNovelProvider()   # default on startup
+
+def _default_provider_name(raw=None) -> str:
+    """Provider used on startup, from the content language (QS_CONTENT_LANG).
+
+    Spanish (the default) → SkyNovels (Spanish chapters); otherwise the English
+    FreeWebNovel. Mirrors the manga chain's language choice.
+    """
+    if raw is None:
+        raw = os.environ.get("QS_CONTENT_LANG")
+    if raw is None or str(raw).strip() == "":
+        raw = "es"
+    for tag in str(raw).split(","):
+        base = tag.strip().lower().replace("_", "-").split("-", 1)[0]
+        if base == "es":
+            return "skynovels"
+    return "freewebnovel"
+
+
+_lock = threading.Lock()
+_active: NovelProvider = _REGISTRY[_default_provider_name()]()   # default on startup
 
 
 # ── Public API ─────────────────────────────────────────────────────────────
