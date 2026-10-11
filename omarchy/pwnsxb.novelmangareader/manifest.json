@@ -1,0 +1,29 @@
+{
+  "schemaVersion": 1,
+  "id": "pwnsxb.novelmangareader",
+  "name": "Novel/Manga Reader",
+  "version": "1.0.0",
+  "author": "pwnsxb",
+  "license": "GPL-3.0-or-later",
+  "description": "One bar icon that opens the Anime, Manga or Novel panel of qs-novelmangareader.",
+  "kinds": [
+    "bar-widget"
+  ],
+  "activation": "on-demand",
+  "entryPoints": {
+    "barWidget": "Panel.qml"
+  },
+  "barWidget": {
+    "displayName": "Reader",
+    "description": "Open the Anime, Manga or Novel panel.",
+    "category": "Media",
+    "aliases": [
+      "reader",
+      "novelmanga",
+      "qs-novelmangareader"
+    ],
+    "allowMultiple": false,
+    "defaults": {},
+    "schema": []
+  }
+}
