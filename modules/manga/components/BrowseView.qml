@@ -66,7 +66,7 @@ Item {
                     id: searchBar
                     Layout.fillWidth: true
                     height: 38
-                    radius: height / 2
+                    radius: Style.cornerRadius
                     color: Colors.surface_container
                     visible: false
                     border.color: searchField.activeFocus ? Colors.primary : Colors.outline_variant
@@ -113,7 +113,7 @@ Item {
 
                         Rectangle {
                             anchors.centerIn: parent
-                            width: 18; height: 18; radius: height / 2
+                            width: 18; height: 18; radius: Style.cornerRadius
                             color: Colors.surface_container_highest
                         }
                         StyledText {
@@ -143,7 +143,7 @@ Item {
 
                     Rectangle {
                         anchors.centerIn: parent
-                        width: 34; height: 34; radius: height / 2
+                        width: 34; height: 34; radius: Style.cornerRadius
                         color: searchBar.visible ? Colors.primary_container : "transparent"
                         Behavior on color { ColorAnimation { duration: Motion.base } }
                     }
@@ -207,7 +207,7 @@ Item {
                         anchors.centerIn: parent
                         implicitWidth: chipLabel.implicitWidth + 28
                         height: 30
-                        radius: height / 2
+                        radius: Style.cornerRadius
                         color: browseView.currentTagId === tagId
                             ? Colors.primary
                             : Colors.surface_container
@@ -354,7 +354,7 @@ Item {
                                 visible: modelData.type && modelData.type.length > 0
                                 anchors { top: parent.top; right: parent.right; topMargin: Style.spacing.lg; rightMargin: Style.spacing.lg }
                                 height: 20
-                                radius: height / 2
+                                radius: Style.cornerRadius
                                 width: typeText.implicitWidth + 14
                                 color: Qt.rgba(0, 0, 0, 0.7)
 

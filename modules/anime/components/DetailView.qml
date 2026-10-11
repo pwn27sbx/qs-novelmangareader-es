@@ -75,7 +75,7 @@ Item {
                     width: 44; height: 44
 
                     Rectangle {
-                        anchors.centerIn: parent; width: 34; height: 34; radius: height / 2
+                        anchors.centerIn: parent; width: 34; height: 34; radius: Style.cornerRadius
                         color: backArea.containsMouse ? Colors.surface_container : "transparent"
                         Behavior on color { ColorAnimation { duration: Motion.base } }
                     }
@@ -103,7 +103,7 @@ Item {
                     width: libBtnLabel.implicitWidth + 28; height: 32
 
                     Rectangle {
-                        anchors.fill: parent; radius: height / 2
+                        anchors.fill: parent; radius: Style.cornerRadius
                         color: detailView._inLibrary ? Colors.primary_container : Colors.surface_container
                         border.color: detailView._inLibrary ? Colors.primary : Colors.outline_variant
                         border.width: 1
@@ -182,7 +182,7 @@ Item {
                     visible: _entry !== null && _entry !== undefined
                         && _entry.lastWatchedEpNum !== ""
                         && _entry.lastWatchedEpNum !== undefined
-                    height: 20; width: lastWatchedText.implicitWidth + 18; radius: height / 2
+                    height: 20; width: lastWatchedText.implicitWidth + 18; radius: Style.cornerRadius
                     color: Style.selectedFillFor(Colors.primary)
                     border.color: Colors.primary; border.width: 1
 
@@ -232,7 +232,7 @@ Item {
                     bottom: parent.bottom; horizontalCenter: parent.horizontalCenter
                     bottomMargin: Style.spacing.xxl
                 }
-                height: 36; radius: height / 2
+                height: 36; radius: Style.cornerRadius
                 width: linksErrText.implicitWidth + 28
                 color: Colors.error_container
                 visible: Anime.linksError.length > 0 && !Anime.isFetchingLinks
@@ -286,7 +286,7 @@ Item {
                         spacing: Style.spacing.xxxl
 
                         Rectangle {
-                            width: epPillText.implicitWidth + 16; height: 26; radius: height / 2
+                            width: epPillText.implicitWidth + 16; height: 26; radius: Style.cornerRadius
                             color: isLastWatched ? Colors.primary : Colors.primary_container
 
                             StyledText {

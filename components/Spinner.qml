@@ -17,7 +17,7 @@ Rectangle {
 
     width: 28
     height: root.width
-    radius: root.width / 2
+    radius: root.width / 2 // style-ignore — spinner
     color: "transparent"
     border.color: Colors.withAlpha(root.arcColor, 0.16)
     border.width: 2

@@ -50,9 +50,9 @@ Rectangle {
 
         Row {
             spacing: Style.space(5)
-            Rectangle { width: 8;  height: 2; radius: height / 2; color: Colors.primary; opacity: 0.2 }
-            Rectangle { width: 32; height: 2; radius: height / 2; color: Colors.primary; opacity: 0.45 }
-            Rectangle { width: 8;  height: 2; radius: height / 2; color: Colors.primary; opacity: 0.2 }
+            Rectangle { width: 8;  height: 2; radius: height / 2; color: Colors.primary; opacity: 0.2 } // style-ignore — line
+            Rectangle { width: 32; height: 2; radius: height / 2; color: Colors.primary; opacity: 0.45 } // style-ignore — line
+            Rectangle { width: 8;  height: 2; radius: height / 2; color: Colors.primary; opacity: 0.2 } // style-ignore — line
         }
 
         Item { width: 1; height: 32 }
@@ -93,7 +93,7 @@ Rectangle {
                                 ? parent.width * [0.42, 0.66, 0.3, 0.55][para.index % 4]
                                 : parent.width * (0.94 + 0.06 * ((line.index + para.index) % 2))
                             height: Math.round(root.fontSize * 0.62)
-                            radius: height / 2
+                            radius: height / 2 // style-ignore — skeleton
                             color: root.blockColor
                         }
 

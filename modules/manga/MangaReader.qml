@@ -120,7 +120,7 @@ Item {
                                 horizontalCenter: parent.horizontalCenter
                             }
                             width: active ? 28 : 0
-                            height: 2; radius: height / 2
+                            height: 2; radius: height / 2 // style-ignore — line
                             color: Colors.primary
                             Behavior on width { NumberAnimation { duration: Motion.slow; easing.type: Motion.easeOut } }
                         }

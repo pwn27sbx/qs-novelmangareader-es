@@ -49,7 +49,7 @@ Item {
             Item {
                 width: 44; height: 44
                 Rectangle {
-                    anchors.centerIn: parent; width: 34; height: 34; radius: height / 2
+                    anchors.centerIn: parent; width: 34; height: 34; radius: Style.cornerRadius
                     color: backHover.containsMouse ? Qt.rgba(1,1,1,0.1) : "transparent"
                     Behavior on color { ColorAnimation { duration: Motion.base } }
                 }
@@ -79,7 +79,7 @@ Item {
             Item {
                 width: 34; height: 34
                 Rectangle {
-                    anchors.centerIn: parent; width: 30; height: 30; radius: height / 2
+                    anchors.centerIn: parent; width: 30; height: 30; radius: Style.cornerRadius
                     color: fsMinusHover.containsMouse ? Qt.rgba(1,1,1,0.1) : "transparent"
                     Behavior on color { ColorAnimation { duration: Motion.fast } }
                 }
@@ -93,7 +93,7 @@ Item {
             Item {
                 width: 34; height: 34
                 Rectangle {
-                    anchors.centerIn: parent; width: 30; height: 30; radius: height / 2
+                    anchors.centerIn: parent; width: 30; height: 30; radius: Style.cornerRadius
                     color: fsPlusHover.containsMouse ? Qt.rgba(1,1,1,0.1) : "transparent"
                     Behavior on color { ColorAnimation { duration: Motion.fast } }
                 }
@@ -107,7 +107,7 @@ Item {
             Item {
                 width: 34; height: 34
                 Rectangle {
-                    anchors.centerIn: parent; width: 30; height: 30; radius: height / 2
+                    anchors.centerIn: parent; width: 30; height: 30; radius: Style.cornerRadius
                     color: fullscreenHover.containsMouse ? Qt.rgba(1,1,1,0.1) : "transparent"
                     Behavior on color { ColorAnimation { duration: Motion.fast } }
                 }
@@ -124,7 +124,7 @@ Item {
 
             Rectangle {
                 visible: Novel.currentChapter !== null && Novel.currentChapter.wordCount > 0
-                height: 24; width: wcTxt.implicitWidth + 18; radius: height / 2
+                height: 24; width: wcTxt.implicitWidth + 18; radius: Style.cornerRadius
                 color: Qt.rgba(1,1,1,0.07); border.color: Qt.rgba(1,1,1,0.1); border.width: 1
                 Text {
                     id: wcTxt; anchors.centerIn: parent
@@ -228,9 +228,9 @@ Item {
                 Row {
                     anchors { left: parent.left; verticalCenter: parent.verticalCenter }
                     spacing: Style.space(5)
-                    Rectangle { width: 8;  height: 2; radius: height / 2; color: Colors.primary; opacity: 0.3 }
-                    Rectangle { width: 32; height: 2; radius: height / 2; color: Colors.primary; opacity: 0.7 }
-                    Rectangle { width: 8;  height: 2; radius: height / 2; color: Colors.primary; opacity: 0.3 }
+                    Rectangle { width: 8;  height: 2; radius: height / 2; color: Colors.primary; opacity: 0.3 } // style-ignore — line
+                    Rectangle { width: 32; height: 2; radius: height / 2; color: Colors.primary; opacity: 0.7 } // style-ignore — line
+                    Rectangle { width: 8;  height: 2; radius: height / 2; color: Colors.primary; opacity: 0.3 } // style-ignore — line
                 }
             }
 
@@ -253,7 +253,7 @@ Item {
 
         ScrollBar.vertical: ScrollBar {
             policy: ScrollBar.AsNeeded
-            contentItem: Rectangle { implicitWidth: 2; color: Colors.primary; opacity: 0.25; radius: width / 2 }
+            contentItem: Rectangle { implicitWidth: 2; color: Colors.primary; opacity: 0.25; radius: width / 2 } // style-ignore — scrollbar
         }
     }
 
@@ -277,7 +277,7 @@ Item {
                 Rectangle {
                     id: prevBtn
                     anchors { verticalCenter: parent.verticalCenter; left: parent.left }
-                    width: prevBtnRow.implicitWidth + 28; height: 36; radius: height / 2
+                    width: prevBtnRow.implicitWidth + 28; height: 36; radius: Style.cornerRadius
                     color: prevNavArea.containsMouse && readerView._hasPrev
                         ? Qt.rgba(1,1,1,0.12) : Qt.rgba(1,1,1,0.06)
                     Behavior on color { ColorAnimation { duration: Motion.fast } }
@@ -316,7 +316,7 @@ Item {
                 Rectangle {
                     id: nextBtn
                     anchors { verticalCenter: parent.verticalCenter; right: parent.right }
-                    width: nextBtnRow.implicitWidth + 28; height: 36; radius: height / 2
+                    width: nextBtnRow.implicitWidth + 28; height: 36; radius: Style.cornerRadius
                     color: nextNavArea.containsMouse && readerView._hasNext
                         ? Colors.withAlpha(Colors.primary, 0.45)
                         : Colors.withAlpha(Colors.primary, 0.22)

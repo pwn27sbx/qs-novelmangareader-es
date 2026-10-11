@@ -48,6 +48,8 @@ const TRACKED = new Set([
 ]);
 
 const PURE_NUMBER = /^\d+(?:\.\d+)?$/;
+// A capsule/pill/circle radius: half the element's own height or width.
+const CAPSULE = /\b(?:height|width)\s*\/\s*2\b/;
 // A `name: value` pair, value ending at the next `;`, `}` or end of line.
 const PROP = /([A-Za-z_][A-Za-z0-9_.]*)\s*:\s*([^;}\n]*)/g;
 
@@ -77,6 +79,11 @@ function scanFile(abs) {
             const value = m[2].trim();
             if (PURE_NUMBER.test(value)) {
                 violations.push({ file: rel, line: i + 1, prop: m[1], value });
+            } else if (prop === "radius" && CAPSULE.test(value)) {
+                // A control must use Style.cornerRadius; only genuinely round
+                // things (dots, spinners, bars) keep height / 2 and opt out
+                // with // style-ignore.
+                violations.push({ file: rel, line: i + 1, prop: m[1], value: value + "  → capsule, use Style.cornerRadius" });
             }
         }
     }

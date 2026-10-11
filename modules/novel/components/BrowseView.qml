@@ -69,7 +69,7 @@ Item {
                 Rectangle {
                     id: searchBar
                     Layout.fillWidth: true
-                    height: 38; radius: height / 2
+                    height: 38; radius: Style.cornerRadius
                     color: Colors.surface_container
                     visible: false
                     border.color: searchField.activeFocus ? Colors.primary : Colors.outline_variant
@@ -110,7 +110,7 @@ Item {
                         opacity: visible ? 1 : 0
                         Behavior on opacity { NumberAnimation { duration: Motion.fast } }
                         Rectangle {
-                            anchors.centerIn: parent; width: 18; height: 18; radius: height / 2
+                            anchors.centerIn: parent; width: 18; height: 18; radius: Style.cornerRadius
                             color: Colors.surface_container_highest
                         }
                         StyledText {
@@ -143,7 +143,7 @@ Item {
                     height: 32
 
                     Rectangle {
-                        anchors.fill: parent; radius: height / 2
+                        anchors.fill: parent; radius: Style.cornerRadius
                         color: providerDropArea.containsMouse
                             ? Colors.surface_container_highest
                             : Colors.surface_container
@@ -249,7 +249,7 @@ Item {
 
                                         // Active indicator dot
                                         Rectangle {
-                                            width: 6; height: 6; radius: height / 2
+                                            width: 6; height: 6; radius: height / 2 // style-ignore — dot
                                             anchors.verticalCenter: parent.verticalCenter
                                             color: Colors.primary
                                             visible: modelData.name === Novel.activeProvider
@@ -290,7 +290,7 @@ Item {
                     width: 40; height: 40
 
                     Rectangle {
-                        anchors.centerIn: parent; width: 34; height: 34; radius: height / 2
+                        anchors.centerIn: parent; width: 34; height: 34; radius: Style.cornerRadius
                         color: searchBar.visible ? Colors.primary_container : "transparent"
                         Behavior on color { ColorAnimation { duration: Motion.base } }
                     }
@@ -341,7 +341,7 @@ Item {
                     Rectangle {
                         id: chip
                         anchors.centerIn: parent
-                        implicitWidth: chipLbl.implicitWidth + 28; height: 30; radius: height / 2
+                        implicitWidth: chipLbl.implicitWidth + 28; height: 30; radius: Style.cornerRadius
                         color: browseView.currentFilter === fid ? Colors.primary : Colors.surface_container
                         border.color: browseView.currentFilter === fid ? Colors.primary : Colors.outline_variant
                         border.width: 1
@@ -459,7 +459,7 @@ Item {
                             Rectangle {
                                 visible: modelData.status && modelData.status.length > 0
                                 anchors { top: parent.top; left: parent.left; topMargin: Style.spacing.lg; leftMargin: Style.spacing.lg }
-                                height: 18; radius: height / 2; width: statusBadge.implicitWidth + 12
+                                height: 18; radius: Style.cornerRadius; width: statusBadge.implicitWidth + 12
                                 color: modelData.status === "Ongoing"
                                     ? Qt.rgba(0.2, 0.75, 0.4, 0.85)
                                     : Qt.rgba(0.3, 0.5, 0.9, 0.85)

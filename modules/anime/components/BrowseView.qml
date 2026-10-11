@@ -63,7 +63,7 @@ Item {
                 Rectangle {
                     id: searchBar
                     Layout.fillWidth: true
-                    height: 36; radius: height / 2
+                    height: 36; radius: Style.cornerRadius
                     color: Colors.surface_container
                     visible: false
                     border.color: searchField.activeFocus ? Colors.primary : Colors.outline_variant
@@ -109,7 +109,7 @@ Item {
 
                         Rectangle {
                             anchors.centerIn: parent
-                            width: 18; height: 18; radius: height / 2
+                                    width: 18; height: 18; radius: Style.cornerRadius
                             color: Colors.surface_container_highest
                         }
                         StyledText {
@@ -139,7 +139,7 @@ Item {
 
                     Rectangle {
                         anchors.centerIn: parent
-                        width: 32; height: 32; radius: height / 2
+                        width: 32; height: 32; radius: Style.cornerRadius
                         color: searchBar.visible ? Colors.primary_container : "transparent"
                         Behavior on color { ColorAnimation { duration: Motion.base } }
                     }
@@ -166,7 +166,7 @@ Item {
                 Rectangle {
                     height: 28
                     width: modeRow.implicitWidth + 16
-                    radius: height / 2
+                    radius: Style.cornerRadius
                     color: Colors.surface_container
                     border.color: Colors.outline_variant; border.width: 1
 
@@ -185,7 +185,7 @@ Item {
 
                                 Rectangle {
                                     anchors { fill: parent; margins: Style.spacing.xs }
-                                    radius: height / 2
+                                    radius: Style.cornerRadius
                                     color: active ? Colors.primary : "transparent"
                                     Behavior on color { ColorAnimation { duration: Motion.base } }
                                 }
@@ -247,7 +247,7 @@ Item {
                         id: chipRect
                         anchors.centerIn: parent
                         implicitWidth: chipLbl.implicitWidth + 24
-                        height: 28; radius: height / 2
+                        height: 28; radius: Style.cornerRadius
                         color: active ? Colors.primary : Colors.surface_container
                         border.color: active ? Colors.primary : Colors.outline_variant
                         border.width: 1
@@ -375,7 +375,7 @@ Item {
                             Rectangle {
                                 visible: modelData.score !== null && modelData.score !== undefined
                                 anchors { top: parent.top; left: parent.left; topMargin: Style.spacing.lg; leftMargin: Style.spacing.lg }
-                                height: 20; radius: height / 2
+                                height: 20; radius: Style.cornerRadius
                                 width: scoreText.implicitWidth + 12
                                 color: Qt.rgba(0, 0, 0, 0.72)
 
@@ -393,7 +393,7 @@ Item {
                             Rectangle {
                                 visible: modelData.type && modelData.type.length > 0
                                 anchors { top: parent.top; right: parent.right; topMargin: Style.spacing.lg; rightMargin: Style.spacing.lg }
-                                height: 20; radius: height / 2
+                                height: 20; radius: Style.cornerRadius
                                 width: typeText.implicitWidth + 12
                                 color: Qt.rgba(0, 0, 0, 0.7)
 
@@ -415,7 +415,7 @@ Item {
                                     bottom: parent.bottom; right: parent.right
                                     bottomMargin: Style.spacing.lg; rightMargin: Style.spacing.lg
                                 }
-                                height: 20; radius: height / 2
+                                height: 20; radius: Style.cornerRadius
                                 width: epText.implicitWidth + 12
                                 color: Qt.rgba(0, 0, 0, 0.72)
 
@@ -470,7 +470,7 @@ Item {
                         Rectangle {
                             visible: Anime.isInLibrary(modelData.id)
                             anchors { top: parent.top; horizontalCenter: parent.horizontalCenter; topMargin: Style.spacing.md }
-                            width: 7; height: 7; radius: height / 2
+                            width: 7; height: 7; radius: height / 2 // style-ignore — dot
                             color: Colors.primary
                             opacity: 0.9
                         }

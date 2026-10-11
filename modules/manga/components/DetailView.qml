@@ -85,7 +85,7 @@ Item {
 
                     Rectangle {
                         anchors.centerIn: parent
-                        width: 34; height: 34; radius: height / 2
+                        width: 34; height: 34; radius: Style.cornerRadius
                         color: backArea.containsMouse ? Colors.surface_container : "transparent"
                         Behavior on color { ColorAnimation { duration: Motion.base } }
                     }
@@ -114,7 +114,7 @@ Item {
 
                     Rectangle {
                         anchors.fill: parent
-                        radius: height / 2
+                        radius: Style.cornerRadius
                         color: detailView._inLibrary ? Colors.primary_container : Colors.surface_container
                         border.color: detailView._inLibrary ? Colors.primary : Colors.outline_variant
                         border.width: 1
@@ -236,7 +236,7 @@ Item {
                     // Status badge
                     Rectangle {
                         visible: Manga.currentManga && Manga.currentManga.status.length > 0
-                        height: 18; width: statusText.implicitWidth + 14; radius: height / 2
+                        height: 18; width: statusText.implicitWidth + 14; radius: Style.cornerRadius
                         color: Colors.withAlpha(Colors.tertiary, 0.15)
                         border.color: Colors.tertiary; border.width: 1
 
@@ -301,7 +301,7 @@ Item {
                     visible: _entry !== null && _entry !== undefined
                         && _entry.lastReadChapterNum !== ""
                         && _entry.lastReadChapterNum !== undefined
-                    height: 20; width: lastReadText.implicitWidth + 18; radius: height / 2
+                    height: 20; width: lastReadText.implicitWidth + 18; radius: Style.cornerRadius
                     color: Style.selectedFillFor(Colors.primary)
                     border.color: Colors.primary; border.width: 1
 
@@ -337,7 +337,7 @@ Item {
                 // Search pill
                 Rectangle {
                     Layout.fillWidth: true
-                    height: 36; radius: height / 2
+                    height: 36; radius: Style.cornerRadius
                     color: Colors.surface_container
                     border.width: 1
                     border.color: chapterSearch.activeFocus ? Colors.primary : Colors.withAlpha(Colors.outline, 0.2)
@@ -384,7 +384,7 @@ Item {
 
                             Rectangle {
                                 anchors.centerIn: parent
-                                width: 22; height: 22; radius: height / 2
+                                width: 22; height: 22; radius: Style.cornerRadius
                                 color: clearArea.containsMouse
                                     ? Style.hoverFillFor(Colors.on_surface)
                                     : "transparent"
@@ -411,7 +411,7 @@ Item {
                     width: 36; height: 36
 
                     Rectangle {
-                        anchors.fill: parent; radius: height / 2
+                        anchors.fill: parent; radius: Style.cornerRadius
                         color: sortArea.containsMouse
                             ? Colors.primary_container
                             : Colors.withAlpha(Colors.primary_container, 0.6)
@@ -495,7 +495,7 @@ Item {
                         // Chapter number pill
                         Rectangle {
                             width: chapterPillText.implicitWidth + 16
-                            height: 26; radius: height / 2
+                            height: 26; radius: Style.cornerRadius
                             color: isLastRead ? Colors.primary : Colors.primary_container
 
                             StyledText {

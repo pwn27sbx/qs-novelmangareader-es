@@ -1,4 +1,5 @@
 import QtQuick
+import qs.Commons
 import qs.app
 
 // Round icon-only button that tints its background on hover.
@@ -13,7 +14,7 @@ ClickableRect {
 
     implicitWidth: 30
     implicitHeight: 30
-    radius: root.width / 2
+    radius: Style.cornerRadius
     color: root.hovered ? root.hoverColor : root.idleColor
 
     MaterialIcon {

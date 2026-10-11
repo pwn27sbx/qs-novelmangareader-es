@@ -42,7 +42,7 @@ Rectangle {
                     Rectangle {
                         id: pill
                         anchors.verticalCenter: parent.verticalCenter
-                        width: 44; height: 26; radius: height / 2
+                        width: 44; height: 26; radius: height / 2 // style-ignore — skeleton
                         color: Colors.surface_container_high
                     }
 
@@ -57,12 +57,12 @@ Rectangle {
                         Rectangle {
                             // Varied so the rows don't read as a barcode.
                             width: parent.width * [0.62, 0.48, 0.7, 0.55, 0.4][row.index % 5]
-                            height: 9; radius: height / 2
+                            height: 9; radius: height / 2 // style-ignore — skeleton
                             color: Colors.surface_container_high
                         }
                         Rectangle {
                             visible: root.subtitle
-                            width: 64; height: 7; radius: height / 2
+                            width: 64; height: 7; radius: height / 2 // style-ignore — skeleton
                             color: Colors.surface_container
                         }
                     }

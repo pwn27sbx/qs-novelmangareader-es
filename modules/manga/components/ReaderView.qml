@@ -54,7 +54,7 @@ Item {
 
                 Rectangle {
                     anchors.centerIn: parent
-                    width: 34; height: 34; radius: height / 2
+                    width: 34; height: 34; radius: Style.cornerRadius
                     color: readerBackArea.containsMouse
                         ? Qt.rgba(1, 1, 1, 0.1)
                         : "transparent"
@@ -92,7 +92,7 @@ Item {
                 visible: Manga.chapterPages.length > 0
                 height: 24
                 width: pageCountText.implicitWidth + 18
-                radius: height / 2
+                radius: Style.cornerRadius
                 color: Qt.rgba(1, 1, 1, 0.09)
                 border.color: Qt.rgba(1, 1, 1, 0.12)
                 border.width: 1
@@ -237,12 +237,12 @@ Item {
                     Rectangle {
                         anchors.horizontalCenter: parent.horizontalCenter
                         visible: pageImg.status === Image.Loading && pageImg.progress > 0
-                        width: 96; height: 2; radius: height / 2
+                        width: 96; height: 2; radius: height / 2 // style-ignore — progress
                         color: Qt.rgba(1, 1, 1, 0.08)
 
                         Rectangle {
                             width: parent.width * pageImg.progress
-                            height: parent.height; radius: height / 2
+                            height: parent.height; radius: height / 2 // style-ignore — progress
                             color: Colors.primary
                             Behavior on width { NumberAnimation { duration: Motion.base } }
                         }

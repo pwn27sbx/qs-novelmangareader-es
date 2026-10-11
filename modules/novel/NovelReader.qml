@@ -109,7 +109,7 @@ Item {
                         // Active indicator
                         Rectangle {
                             anchors { bottom: parent.bottom; horizontalCenter: parent.horizontalCenter }
-                            width: active ? 28 : 0; height: 2; radius: height / 2; color: Colors.primary
+                            width: active ? 28 : 0; height: 2; radius: height / 2; color: Colors.primary // style-ignore — line
                             Behavior on width { NumberAnimation { duration: Motion.slow; easing.type: Motion.easeOut } }
                         }
 

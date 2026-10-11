@@ -76,12 +76,12 @@ Rectangle {
 
                         Rectangle {
                             width: parent.width * (cell.index % 3 === 1 ? 0.9 : 0.75)
-                            height: 7; radius: height / 2
+                            height: 7; radius: height / 2 // style-ignore — skeleton
                             color: Colors.surface_container_highest
                         }
                         Rectangle {
                             width: parent.width * (cell.index % 2 ? 0.4 : 0.55)
-                            height: 7; radius: height / 2
+                            height: 7; radius: height / 2 // style-ignore — skeleton
                             color: Colors.surface_container_highest
                         }
                     }
@@ -95,7 +95,7 @@ Rectangle {
                             leftMargin: Style.spacing.xl; rightMargin: Style.spacing.xl
                             bottomMargin: (root.footerHeight - height) / 2
                         }
-                        height: 3; radius: height / 2
+                        height: 3; radius: height / 2 // style-ignore — line
                         color: Colors.surface_container_highest
                     }
                 }

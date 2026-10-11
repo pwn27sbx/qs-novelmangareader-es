@@ -26,7 +26,7 @@ Item {
         id: bar
         width: Math.max(40, root.width * 0.3)
         height: root.height
-        radius: height / 2
+        radius: height / 2 // style-ignore — progress
         color: root.color
 
         XAnimator on x {

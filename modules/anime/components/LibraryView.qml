@@ -47,7 +47,7 @@ Item {
                 // Entry count badge
                 Rectangle {
                     visible: Anime.libraryList.length > 0
-                    height: 22; width: libCountText.implicitWidth + 16; radius: height / 2
+                    height: 22; width: libCountText.implicitWidth + 16; radius: Style.cornerRadius
                     color: Colors.surface_container
                     border.color: Colors.outline_variant; border.width: 1
 
@@ -116,7 +116,7 @@ Item {
                     Rectangle {
                         visible: entry.score !== null && entry.score !== undefined
                         anchors { top: parent.top; left: parent.left; topMargin: Style.spacing.lg; leftMargin: Style.spacing.lg }
-                        height: 20; radius: height / 2; width: libScoreText.implicitWidth + 12
+                        height: 20; radius: Style.cornerRadius; width: libScoreText.implicitWidth + 12
                         color: Qt.rgba(0, 0, 0, 0.72)
 
                         StyledText {
@@ -132,7 +132,7 @@ Item {
                     Rectangle {
                         visible: entry.bookmarked
                         anchors { top: parent.top; right: parent.right; topMargin: Style.spacing.lg; rightMargin: Style.spacing.lg }
-                        width: 22; height: 22; radius: height / 2
+                        width: 22; height: 22; radius: Style.cornerRadius
                         color: Qt.rgba(0, 0, 0, 0.65)
 
                         Text {
