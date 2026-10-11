@@ -57,7 +57,7 @@ Item {
                         color: Colors.primary
                     }
                     StyledText {
-                        text: "ovel"
+                        text: "ovel" // i18n-ignore — brand wordmark (with the "N" above)
                         font.family: browseView.fontDisplay
                         font.pixelSize: 24; font.letterSpacing: 1
                         color: Colors.on_surface; opacity: 0.85

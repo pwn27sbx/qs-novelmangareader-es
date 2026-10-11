@@ -52,7 +52,7 @@ Item {
                         color: Colors.primary
                     }
                     StyledText {
-                        text: "anga"
+                        text: "anga" // i18n-ignore — brand wordmark (with the "M" above)
                         font.family: browseView.fontDisplay
                         font.pixelSize: 24
                         font.letterSpacing: 1

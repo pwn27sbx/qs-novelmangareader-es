@@ -7,7 +7,7 @@
 | Repo de trabajo | `~/Projects/forks/qs-novelmangareader-es` |
 | Upstream | `dhrruvsharma/qs-novelmangareader` (GPL-3.0) |
 | Inicio | 2026-10-11 |
-| Estado | **WU-4 completo** · GATE §15.1 cerrado |
+| Estado | **WU-5 completo** · GATE §15.1 cerrado |
 | Plan fuente | `2026-10-11-plan-localizacion-es-qs-novelmangareader.md` (§0–§16) |
 | Handoff | `2026-10-11-handoff-orquestador-qs-novelmangareader-es.md` |
 
@@ -75,6 +75,8 @@ Tener la interfaz de la app Quickshell `qs-novelmangareader` **en español latin
 - **WU-3 — `count.chapter`** corrige singular ("1 capítulo" en vez de "1 capítulos"); en EN también ("1 chapter"). Mejora intencional; notar por si querés EN byte-idéntico.
 - **WU-4 — §6.4 tiene un error:** `Ongoing` (`BrowseView:462`) es un **dato** de estado (`modelData.status === "Ongoing"`), y `All` (`Novel.qml:21`) es un **sentinel** de la API (`status` param), NO labels de UI. No se tradujeron; se eliminaron las claves muertas `novel.filter.ongoing`/`novel.filter.all`.
 - **WU-4 — wordmark "N"/"ovel"**: marca, se mantiene (igual que "A"/"nime", "M"/"anga").
+- **WU-5 — lint:** `tools/lint-i18n.js` (a) falla si un prop de texto tiene literal EN crudo fuera de `I18n.t`/`tn`; (b) falla si una clave usada en QML no existe en la tabla. Se integra como `tests/lint.test.js`.
+- **WU-5 — reglas del lint:** los bloques `text: { … }` se evalúan solo en su expresión `return` (evita falsos positivos por comparaciones de datos como `mode === "dub"`); las líneas con `// i18n-ignore` se saltan (wordmarks de marca). Comandos: `node --test` y `node tools/lint-i18n.js`.
 
 > Orden de ejecución recomendado (novela diferida): `WU-0 → 1 → 2 → 3 → 5 → 6 → [7 cond.] → 8 → 9 → [10 opc.] → [4 si aplica]`.
 
@@ -82,7 +84,7 @@ Tener la interfaz de la app Quickshell `qs-novelmangareader` **en español latin
 - [x] **WU-1** — Núcleo i18n: `services/I18n.qml` (`pragma Singleton` + `Singleton{}`), `t()` + `tn()` (plurales), sin `qmldir`. *(F1-2, F1-7, §15.4)*
 - [x] **WU-2** — Envolver comunes + anime. *(F1-3, F1-4)*
 - [x] **WU-3** — Envolver manga. *(F1-5)*
-- [ ] **WU-5** — Lint anti-strings sin `I18n.t` + test de paridad de claves `es`↔`en`. *(F1-8)*
+- [x] **WU-5** — Lint anti-strings sin `I18n.t` + test de paridad de claves `es`↔`en`. *(F1-8)*
 - [ ] **WU-6** — QA visual integral (3 módulos × vistas). *(F1-9, read-only)*
 - [ ] **WU-7** — Subtítulos ES (**CONDICIONADO**: requiere confirmar campo de idioma). *(F1.5-1, §13.3/§14.2)*
 - [ ] **WU-8** — MangaDex ES (`es-la`), mismo contrato JSON; tests con fixtures. *(F1.5-2, §15.5)*
@@ -191,10 +193,11 @@ Tener la interfaz de la app Quickshell `qs-novelmangareader` **en español latin
 | WU-1 | `3f8cdc4` | 2026-10-11 | ✅ completo |
 | WU-2 | `5048592` | 2026-10-11 | ✅ completo |
 | WU-3 | `84ad035` | 2026-10-11 | ✅ completo |
-| WU-4 | `—` (se completa al cierre) | 2026-10-11 | ✅ completo |
+| WU-4 | `c4e359b` | 2026-10-11 | ✅ completo |
+| WU-5 | `—` (se completa al cierre) | 2026-10-11 | ✅ completo |
 
 ---
 
 ## Próximo paso
 
-WU-5: lint anti-literales + test de paridad de claves. Luego WU-6 (QA integral). **RITMO FLOW: sin parar por WU.**
+WU-6: QA visual integral (3 módulos × vistas, acentos, desbordes) + carga real con `QS_LANG=es`. **RITMO FLOW: sin parar por WU.**
