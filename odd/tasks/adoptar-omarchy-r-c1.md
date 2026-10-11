@@ -6,7 +6,7 @@
 | Rama | `i18n-es` (fork privado, sin `origin`) |
 | Repo de trabajo | `~/Projects/forks/qs-novelmangareader-es` |
 | Inicio | 2026-10-11 |
-| Estado | **En curso** |
+| Estado | **Completo (R-C1)** |
 | Plan fuente | `/home/pwnsxb/Documents/Plans/2026-10-11-plan-c-adoptar-omarchy-qs-novelmangareader.md` (§4, §5.1, §9, §13) |
 | Plan base | `2026-10-11-plan-rediseno-ui-qs-novelmangareader.md` (R1 ✅) |
 
@@ -101,13 +101,25 @@ Que la app siga el tema y el look del sistema: usar directamente `qs.Commons` (C
 
 | Tarea | Commit | Estado |
 |---|---|---|
-| R-C1.0 | — | en curso |
-| R-C1.1 | — | pendiente |
-| R-C1.2 | — | pendiente |
-| R-C1.3 | — | pendiente |
-| R-C1.4 | — | pendiente |
-| R-C1.5 | — | pendiente |
+| R-C1.0 | `69d0224` | ✅ completo |
+| R-C1.1 | `3a03421` | ✅ completo |
+| R-C1.2 / R-C1.3 | `8d23283` | ✅ completo |
+| R-C1.4 | `eaa4a30` | ✅ completo |
+| R-C1.5 | — | ✅ completo (evidencia abajo) |
+
+### Evidencia de verificación (cierre R-C1)
+
+- **Symlinks**: `Commons -> /usr/share/omarchy/shell/Commons`, `Ui -> /usr/share/omarchy/shell/Ui`.
+- **Smoke**: log `SMOKE qs.Commons+qs.Ui ok | accent=#f38d70 | cornerRadius=0 | button=ok` → `import qs.Commons` + `import qs.Ui` cargan e instancian un `Button`.
+- **`Color.accent` == `colors.toml`**: `#f38d70` == accent del tema **ristretto** (`~/.local/state/omarchy/current/theme/colors.toml`). El `#cacccc` era la race de carga (se resuelve al instanciar `Color`).
+- **0 tokens indefinidos**: `grep` → 0 `Style.motion`, 0 `Style.font.displayFamily`, 0 `import qs.colors`, 0 `Colors.`; todo `Colors.`/`Motion.` importa `qs.app`; todo `Style.` importa `qs.Commons`.
+- **0 errores QML**: carga real + toggle IPC de **los 3 módulos** → **0 TypeError / 0 "Unable to assign"**. (Únicos WARN: bibliotecas JSON del dueño inexistentes → comportamiento normal.)
+- **Gates**: `lint-style` OK (36 files, 0 crudos) · `lint-i18n` OK · `node --test` **29/29**.
+
+### Hallazgo de colisión
+
+El singleton se llamó primero `Palette`, que **colisiona con el tipo `Palette` de QtQuick** (los roles salían `undefined` y `withAlpha` "no era función"). Se renombró a **`Colors`** en `qs.app`; así los componentes cambian **solo el import** (`qs.colors` → `qs.app`), tal como pedía la decisión.
 
 ## Próximo paso
 
-R-C1.1 — crear el módulo `qs.app` (Palette + Motion).
+R-C1 cerrada. Siguiente: **R-C2 — guardia de versión `omarchy version`** (+ doc de update), y luego **R2 — superficie/header/navegación con `qs.Ui`** (`PopupCard`, `Panel`, `ButtonGroup`).
