@@ -63,16 +63,19 @@ Item {
             }
 
             Row {
+                id: tabRow
+                objectName: "tabRow"
                 anchors { left: parent.left; top: parent.top; bottom: parent.bottom; right: languageToggle.left; rightMargin: 8 }
 
                 Repeater {
+                    id: tabsRepeater
                     model: [
                         { label: I18n.t("tab.browse"),  icon: "⊞" },
                         { label: I18n.t("tab.library"), icon: "⊟" }
                     ]
 
                     delegate: Item {
-                        width: (root.width - 46) / 2; height: parent.height
+                        width: tabRow.width / Math.max(1, tabsRepeater.count); height: parent.height
                         readonly property bool active: root.tabIndex === index
 
                         Rectangle {

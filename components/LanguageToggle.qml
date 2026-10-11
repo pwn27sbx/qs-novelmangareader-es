@@ -7,6 +7,7 @@ import qs.services
 Rectangle {
     id: root
 
+    objectName: "languageToggle"
     implicitWidth: 34
     implicitHeight: 24
     radius: 12
