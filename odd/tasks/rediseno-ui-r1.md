@@ -29,7 +29,7 @@ Unificar la UI sobre un **sistema de tokens** (`qs.Commons.Style`) espejo de Oma
 | ID | Decisión |
 |---|---|
 | **D-ESPEJO** | **(A) Espejo propio** (`<app>/Commons/Style.qml`), NO symlink ni import de Omarchy. Paleta desde `qs.colors` (Material You). |
-| **D-RADIUS** | `cornerRadius` y `gapsOut` **vivos** desde `hyprctl`. En esta máquina `decoration:rounding = 0` y `gaps_out = 0` (tema Tsukiyo, "Omarchy's square corners"). El token sigue a Hyprland; no se hardcodea. |
+| **D-RADIUS** | `cornerRadius` y `gapsOut` **vivos** desde `hyprctl`, pero **fijables**: `cornerRadiusOverride` (o `QS_CORNER_RADIUS`) ≥ 0 fija el valor; -1 sigue a Hyprland. En esta máquina `decoration:rounding = 0`, `gaps_out = 0` (tema Tsukiyo, "Omarchy's square corners"); el token NO asume 0 — el número lo decidirá el dueño. |
 | **D-LINT** | Lint "cero números crudos" para `radius:`/`spacing`/padding/margins fuera de `Style.*`. |
 
 ## Alcance
@@ -75,7 +75,7 @@ Unificar la UI sobre un **sistema de tokens** (`qs.Commons.Style`) espejo de Oma
 
 ## Diseño de tokens (`Commons/Style.qml`)
 
-- **Live**: `cornerRadius` ← `hyprctl -j getoption decoration:rounding` → `.int`; `gapsOut` ← `general:gaps_out` (primer número / 2). `refresh()` re-lee.
+- **Live/fijable**: `cornerRadius` ← `hyprctl -j getoption decoration:rounding` → `.int`; `gapsOut` ← `general:gaps_out` (primer número / 2). `cornerRadiusOverride`/`gapsOutOverride` (≥0) los fijan; `QS_CORNER_RADIUS` como override de entorno. `refresh()` re-lee.
 - **Spacing** (idéntico a Omarchy): `xxs2 xs3 sm4 md6 lg8 xl10 xxl12 xxxl14 huge18`; `controlGap8 controlPadX10 controlPadY6`. Helper `space(n)`.
 - **Tipografía** (escala Omarchy, base 12): `caption10 bodySmall11 body12 subtitle13 title14 heading16 display24 displayLarge28`; `icon 11/14/18`. Familias: `font.family="Noto Sans"`, `font.displayFamily="Noto Serif"` (tokens; el display se conserva, la escala es la de Omarchy).
 - **Estados** (como Omarchy): fill alphas `normal .04 / hover .08 / selected .18 / pressed .22 / focus = hover`; border alphas `normal .4 / hover .25 / selected 1.0 / focus = hover`; border widths `normal 1 / hover 1 / selected 0 / focus 1`. Funciones `normalFillFor/hoverFillFor/...`, `controlFill/controlBorder/controlBorderWidth`, y colores convenience desde `qs.colors` (`foreground=Colors.text`, `accent=Colors.primary`, `urgent=Colors.error`).

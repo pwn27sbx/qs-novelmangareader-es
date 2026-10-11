@@ -1,5 +1,6 @@
 pragma Singleton
 import QtQuick
+import Quickshell
 import Quickshell.Io
 import qs.colors
 
@@ -21,16 +22,29 @@ QtObject {
 
     // ------------------------------------------------------ live Hyprland
     //
-    // Read straight from `hyprctl` at startup; both are re-readable through
-    // `refresh()`. Values are the compositor's, so the app never hardcodes a
-    // radius that would drift from the windows around it.
-    property int cornerRadius: 0
-    property int gapsOut: 0
+    // `hyprlandCornerRadius` / `hyprlandGapsOut` are read straight from
+    // `hyprctl` so surfaces match the compositor. `cornerRadius` / `gapsOut`
+    // follow those live values unless pinned: set `cornerRadiusOverride` (or
+    // export QS_CORNER_RADIUS) to a value >= 0 to fix the radius regardless of
+    // the compositor, and `gapsOutOverride` likewise. -1 keeps mirroring
+    // Hyprland; the token never assumes the compositor value is any particular
+    // number.
+    property int cornerRadiusOverride: {
+        var n = Number(Quickshell.env("QS_CORNER_RADIUS"))
+        return isFinite(n) && n >= 0 ? Math.round(n) : -1
+    }
+    property int gapsOutOverride: -1
+
+    property int hyprlandCornerRadius: 0
+    property int hyprlandGapsOut: 0
+
+    readonly property int cornerRadius: cornerRadiusOverride >= 0 ? cornerRadiusOverride : hyprlandCornerRadius
+    readonly property int gapsOut: gapsOutOverride >= 0 ? gapsOutOverride : hyprlandGapsOut
 
     function applyRoundingJson(raw) {
         try {
             var n = Number(JSON.parse(raw || "{}").int)
-            if (isFinite(n) && n >= 0) cornerRadius = n
+            if (isFinite(n) && n >= 0) hyprlandCornerRadius = n
         } catch (e) {
             // hyprctl missing / Hyprland not running — keep the previous value.
         }
@@ -41,7 +55,7 @@ QtObject {
             var json = JSON.parse(raw || "{}")
             var parts = String(json.css || "").match(/-?\d+(?:\.\d+)?/g) || []
             var n = parts.length > 0 ? Number(parts[0]) : Number(json.int)
-            if (isFinite(n) && n >= 0) gapsOut = Math.max(0, Math.round(n / 2))
+            if (isFinite(n) && n >= 0) hyprlandGapsOut = Math.max(0, Math.round(n / 2))
         } catch (e) {
             // hyprctl missing — keep the previous value.
         }
