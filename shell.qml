@@ -5,6 +5,7 @@ import Quickshell.Wayland
 import qs.modules.anime
 import qs.modules.manga
 import qs.modules.novel
+import qs.components
 
 // Anime player, manga reader and novel reader as side panels. Each one is
 // loaded on its first toggle, kept while minimized, and unloaded shortly
@@ -125,6 +126,9 @@ ShellRoot {
                 }
                 sourceComponent: AnimePanel {}
             }
+
+            // Omarchy adoption smoke test (Plan C, R-C1): invisible.
+            OmarchySmoke {}
         }
     }
 
