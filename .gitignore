@@ -1,2 +1,5 @@
 __pycache__/
 *.pyc
+
+# app settings written by I18n when run from the repo root
+/settings.json

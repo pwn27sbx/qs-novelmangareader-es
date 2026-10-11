@@ -56,7 +56,6 @@ _cache_lock = threading.Lock()
 TTL_SEARCH = 600
 TTL_INFO = 1800
 TTL_FEED = 600
-TTL_PAGES = 3600
 TTL_LIST = 300
 
 
@@ -347,8 +346,10 @@ def info(manga_id, langs=None):
 
 
 def pages(chapter_id, data_saver=True):
-    data = _cached(f"athome:{chapter_id}", TTL_PAGES,
-                   lambda: _http_json(f"/at-home/server/{chapter_id}", [], athome=True))
+    # MangaDex's at-home response is temporary — the CDN node and the file URLs
+    # are meant to be used immediately, so fetch it fresh on every chapter open
+    # instead of caching it (a stale baseUrl/hash yields 404s on the images).
+    data = _http_json(f"/at-home/server/{chapter_id}", [], athome=True)
     return map_pages(data, data_saver)
 
 

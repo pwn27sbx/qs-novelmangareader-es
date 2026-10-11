@@ -119,5 +119,25 @@ class ProxyTest(unittest.TestCase):
         self.assertIn("url=https%3A%2F%2Fx%2Fa%20b.jpg", url)
 
 
+class PagesFreshnessTest(unittest.TestCase):
+    def test_pages_does_not_cache_at_home(self):
+        # The at-home response is temporary; pages() must fetch it fresh each
+        # time (a cached baseUrl/hash yields 404s on the images).
+        calls = []
+        original = manga_sources._http_json
+
+        def fake(path, params, athome=False):
+            calls.append(path)
+            return {"baseUrl": "https://cdn.example", "chapter": {"hash": "h", "dataSaver": ["a.jpg"], "data": ["a.jpg"]}}
+
+        manga_sources._http_json = fake
+        try:
+            manga_sources.pages("cid")
+            manga_sources.pages("cid")
+        finally:
+            manga_sources._http_json = original
+        self.assertEqual(len(calls), 2)
+
+
 if __name__ == "__main__":
     unittest.main()

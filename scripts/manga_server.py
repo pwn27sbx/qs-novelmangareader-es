@@ -642,8 +642,13 @@ def proxy_image(handler, img_url):
         _send_image(handler, *cached)
         return
 
-    with _img_sem:
-        body, ctype = _raw_get(img_url)
+    try:
+        with _img_sem:
+            body, ctype = _raw_get(img_url)
+    except Exception as e:  # noqa: BLE001 — upstream 4xx/5xx or connection error
+        upstream = getattr(getattr(e, "response", None), "status_code", None)
+        handler.send_error(upstream if upstream and 400 <= upstream < 500 else 502)
+        return
 
     _img_put(img_url, body, ctype)
     _send_image(handler, body, ctype)
