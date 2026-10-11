@@ -7,6 +7,10 @@ import qs.Ui
 // One bar icon that opens a small menu: Anime / Manga / Novelas. Each entry
 // runs `qs-novelmangareader <key>`, which toggles the matching reader panel
 // (the wrapper talks to the app over IPC).
+//
+// The rows are qs.Ui Buttons (icon + left-aligned label, shared hover/selected
+// states) inside the kit's KeyboardPanel, so the popup reads like the rest of
+// Omarchy instead of a hand-drawn column.
 Panel {
   id: root
   moduleName: "pwnsxb.novelmangareader"
@@ -25,8 +29,6 @@ Panel {
 
   implicitWidth: button.implicitWidth
   implicitHeight: button.implicitHeight
-
-  function alpha(c, a) { return Qt.rgba(c.r, c.g, c.b, a) }
 
   function launch(key) {
     opener.command = ["qs-novelmangareader", key]
@@ -52,6 +54,7 @@ Panel {
     anchors.fill: parent
     bar: root.bar
     text: "󰂺"
+    tooltipText: "Reader — Anime / Manga / Novelas"
     onPressed: function(code) { root.toggle() }
   }
 
@@ -61,42 +64,35 @@ Panel {
     owner: root
     bar: root.bar
     open: root.opened
-    contentWidth: Style.space(220)
-    contentHeight: column.implicitHeight + Style.spacing.lg * 2
+    contentWidth: panel.fittedContentWidth(Style.space(240))
+    contentHeight: panel.fittedContentHeight(menu.implicitHeight)
 
     Column {
-      id: column
-      anchors.fill: parent
-      anchors.margins: Style.spacing.lg
+      id: menu
+      width: parent.width
       spacing: Style.spacing.sm
+
+      PanelSectionHeader {
+        width: parent.width
+        text: "Reader"
+        foreground: root.foreground
+        fontFamily: root.fontFamily
+      }
 
       Repeater {
         model: root.entries
 
-        delegate: Rectangle {
+        delegate: Button {
           required property var modelData
-          width: column.width
-          height: Style.space(38)
-          radius: Style.cornerRadius
-          color: rowArea.containsMouse ? root.alpha(root.foreground, 0.08) : "transparent"
 
-          Text {
-            anchors.left: parent.left
-            anchors.leftMargin: Style.spacing.md
-            anchors.verticalCenter: parent.verticalCenter
-            textFormat: Text.PlainText
-            text: modelData.icon + "   " + modelData.label
-            color: root.foreground
-            font.family: root.fontFamily
-            font.pixelSize: Style.font.body
-          }
-
-          MouseArea {
-            id: rowArea
-            anchors.fill: parent
-            hoverEnabled: true
-            onClicked: root.launch(modelData.key)
-          }
+          width: menu.width
+          leftAlign: true
+          bordered: true
+          iconText: modelData.icon
+          text: modelData.label
+          foreground: root.foreground
+          fontFamily: root.fontFamily
+          onClicked: root.launch(modelData.key)
         }
       }
     }
