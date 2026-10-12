@@ -1,6 +1,6 @@
 # Feature: Fuentes en ESPAÑOL (manga/manhwa)
 
-- **Estado**: EN CURSO — F1+F2+F4 hechas; pendiente F3/F5
+- **Estado**: CERRADO — F0..F5 hechas (F3/F5 + R3-001 en esta pasada)
 - **Plan**: `~/Documents/Plans/2026-10-11-plan-fuentes-es-contenido-qs-novelmangareader.md`
 - **Principio rector**: *"No se puede" no es respuesta — la solución siempre existe.*
 
@@ -29,17 +29,17 @@ fueron **desmantelados por la policía española (mar–abr 2026)**.
 - [x] **F0**: ≥ 2 fuentes ES validadas (200 + español + encuentra "Solo Leveling" + páginas sin JS).
 - [x] **F1**: provider con contrato idéntico + fixtures + tests verdes (`scripts/zonatmo_source.py`).
 - [x] **F2**: cadena actualizada y fall-through probado (`manga_chain.py`).
-- [ ] **F3**: aviso UI claro.
+- [x] **F3**: aviso UI claro.
 - [x] **F4**: implementar `zonatmo.org` (opción B) → **opción (C) final** + mirrors/failover + detección de dominio muerto.
-- [ ] **F5**: smoke real + lint + **0 QML errors**.
+- [x] **F5**: smoke real + lint + **0 QML errors**.
 
 ## Tareas
 - [x] **F0** — Validar fuentes ES
 - [x] **F1** — Provider (`scripts/zonatmo_source.py`)
 - [x] **F2** — Cadena (`manga_chain.py`)
-- [ ] **F3** — UI
+- [x] **F3** — UI
 - [x] **F4** — Resiliencia (`zonatmo.org` opción B + mirrors)
-- [ ] **F5** — Verificación
+- [x] **F5** — Verificación
 
 ## Progreso / evidencia
 - **F1**: endpoints verificados en vivo (2026-10-11). Fixtures reales en
@@ -65,7 +65,38 @@ fueron **desmantelados por la policía española (mar–abr 2026)**.
 - **Smoke real**: (net) search "Solo Leveling" → info 202 caps → pages (HTTP 200 image/webp);
   (org) search → info 204 caps → páginas 38 → imagen HTTP 200 image/webp; cadena forzada
   `zonatmo_org` ida y vuelta OK.
-- **Tests**: `python3 -m unittest discover -s tests -p "test_*.py"` → 131 OK (2 skipped).
+- **Tests**: `python3 -m unittest discover -s tests -p "test_*.py"` → 136 OK (2 skipped);
+  `node --test` → 32 OK (i18n + lints).
+
+## F3 — aviso `no_spanish` claro
+- `manga_chain.spanish_sources()` = fuentes ES sin WeebCentral (el fallback EN).
+- `manga_server.py` adjunta `sourcesTried` cuando la cadena no tiene ES (con o sin
+  fallback a inglés) y `notice="no_spanish"`.
+- `services/Manga.qml` expone `notice`, `sourcesTried`, `detailTitle`.
+- `modules/manga/components/DetailView.qml`: banner con el mensaje + "Fuentes
+  consultadas: …" + botón "Buscar en otras fuentes" (emite
+  `searchOtherSourcesRequested`); `MangaReader.qml` vuelve a Explorar y re-busca el título.
+- Texto 100% por i18n: claves en inglés en el código + entradas es/en
+  (`manga.noSpanishNotice`, `manga.sourcesTried`, `manga.searchOtherSources`) y etiquetas
+  de fuente vía `I18n.tSource(id)` (mapa `sources` en `services/i18n.js`). Cero strings
+  visibles hardcodeados (`lint-i18n` OK).
+- Smoke real (backend en vivo): id MangaDex sin `es-la` →
+  `notice=no_spanish, language=en, sourcesTried=[mangadex,inmanga,zonatmo,zonatmo_org]`;
+  y un caso sin fallback → `error="Sin capítulos en español"` con `sourcesTried`.
+- **Nota**: el módulo novel no tiene concepto `no_spanish` (sus fuentes ya son ES), así
+  que el patrón no aplica ahí.
+
+## F5 — verificación final
+- `node tools/lint-style.js` → OK (37 archivos, 0 tokens crudos).
+- `node tools/lint-i18n.js` → OK (0 literales crudos, 0 claves desconocidas).
+- App reiniciada (`qs-novelmangareader stop` + start) y panel manga abierto → **0 QML
+  errors** (solo WARN preexistentes de FileView/portal).
+- Suite Python 136 OK (2 skipped); `node --test` 32 OK.
+
+## R3-001 — tests de transporte del provider org
+- `tests/test_zonatmo_org_source.py::TransportTest`: retry 5xx→éxito, 4xx sin retry,
+  fallo de conexión marca dominio muerto + fast-fail sin tocar el transporte, y
+  recuperación al expirar el TTL negativo. Transporte falso, sin red.
 
 ## Entrega
 1 commit por work-unit (Conventional Commits). Push/PR = decisión del dueño.
