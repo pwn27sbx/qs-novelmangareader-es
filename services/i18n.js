@@ -206,7 +206,8 @@ function tSource(id) {
 }
 
 // Replace %1, %2, … with the matching entry of `params` (1-based).
-function interpolate(str, params) {    if (!params || typeof str !== "string") {
+function interpolate(str, params) {
+    if (!params || typeof str !== "string") {
         return str;
     }
     return str.replace(/%(\d+)/g, function (_, n) {

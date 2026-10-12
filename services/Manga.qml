@@ -338,8 +338,6 @@ Singleton {
                 authors:     data.authors     || [],
                 tags:        data.tags        || [],
                 language:    data.language    || "",
-                notice:      data.notice      || "",
-                sourcesTried: data.sourcesTried || [],
                 chapters:    (data.chapters   || []).map(ch => ({
                     id:        ch.id        || "",
                     chapter:   ch.chapter   || "",
