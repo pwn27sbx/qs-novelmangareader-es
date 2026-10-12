@@ -1,18 +1,26 @@
-"""Manga source chain (Spanish): MangaDex -> InManga -> zonatmo.
+"""Manga source chain (Spanish): MangaDex -> InManga -> zonatmo -> zonatmo_org.
 
 Every endpoint returns the same JSON contract as manga_server.py, with item ids
-prefixed by the source (``mangadex:<id>`` / ``inmanga:<id>`` / ``zonatmo:<id>``)
-so info()/pages() can route back to the source that produced them.
+prefixed by the source (``mangadex:<id>`` / ``inmanga:<id>`` / ``zonatmo:<id>`` /
+``zonatmo_org:<id>``) so info()/pages() can route back to the source that
+produced them.
 
 Language fall-through: MangaDex (es-la / es) is tried first; when it has no
 chapters in the preferred language, InManga (Spanish-only) is tried by title,
-then zonatmo.net (Spanish manhwa/manga). When none has Spanish, info() returns
-{"error": "Sin capitulos en espanol"} (decision (b): never fall back to English
-content).
+then the two zonatmo backends (zonatmo.net JSON API, then zonatmo.org HTML).
+When none has Spanish, info() returns {"error": "Sin capitulos en espanol"}
+(decision (b): never fall back to English content).
 
-Source selection: QS_MANGA_SOURCE = mangadex | inmanga | zonatmo | weebcentral | auto.
-auto uses the content language (QS_CONTENT_LANG): Spanish -> the chain,
-otherwise WeebCentral (handled by manga_server.py, which owns that scraper).
+Failover / mirrors: zonatmo.net and zonatmo.org are two INDEPENDENT backends for
+the same Spanish catalogue (different protocols), so they are not identical
+mirrors. Failover happens through the chain order — a source that raises (dead
+domain, timeout) is skipped and the next is tried — and each provider
+short-caches a dead domain so a burst does not hammer it. ``SOURCE_MIRRORS``
+records the alternate domain per backend.
+
+Source selection: QS_MANGA_SOURCE = mangadex | inmanga | zonatmo | zonatmo_org |
+weebcentral | auto. auto uses the content language (QS_CONTENT_LANG): Spanish ->
+the chain, otherwise WeebCentral (handled by manga_server.py).
 """
 
 import os
@@ -21,6 +29,7 @@ import content_lang
 import inmanga_source
 import manga_sources
 import titles
+import zonatmo_org_source
 import zonatmo_source
 
 NO_SPANISH_MESSAGE = "Sin capítulos en español"
@@ -29,8 +38,20 @@ _MODULES = {
     "mangadex": manga_sources,
     "inmanga": inmanga_source,
     "zonatmo": zonatmo_source,
+    "zonatmo_org": zonatmo_org_source,
 }
-_FORCED = ("mangadex", "inmanga", "zonatmo", "weebcentral", "mangaplus")
+_FORCED = ("mangadex", "inmanga", "zonatmo", "zonatmo_org", "weebcentral", "mangaplus")
+
+# Alternate domain per zonatmo backend (for diagnostics / health reporting).
+SOURCE_MIRRORS = {
+    "zonatmo": ("zonatmo.net",),
+    "zonatmo_org": ("zonatmo.org",),
+}
+
+
+def mirrors_for(source):
+    """Alternate domains recorded for `source` (empty when it has none)."""
+    return SOURCE_MIRRORS.get(source, ())
 
 
 def active_chain(env=None, langs=None):
@@ -42,7 +63,7 @@ def active_chain(env=None, langs=None):
     for tag in preferred:
         base = str(tag).strip().lower().split("-", 1)[0].split("_", 1)[0]
         if base == "es":
-            return ["mangadex", "inmanga", "zonatmo"]
+            return ["mangadex", "inmanga", "zonatmo", "zonatmo_org"]
     return ["weebcentral"]
 
 
@@ -68,6 +89,18 @@ def _prefix_info(name, data):
     }
 
 
+def _try(call, default=None):
+    """Run `call`, returning `default` when a source raises.
+
+    A dead domain (DNS/timeout) or a flaky parser must never break the whole
+    chain: the source is skipped and the next one is tried.
+    """
+    try:
+        return call()
+    except Exception:  # noqa: BLE001 — a dead/flaky source must not break the chain
+        return default
+
+
 def _first_match(module, title):
     """Best matching series id in `module` for `title`, or "".
 
@@ -89,8 +122,8 @@ def search(query, mtype=None, offset=0, sort="Best Match"):
         module = _MODULES.get(name)
         if module is None:
             continue
-        result = module.search(query, mtype, offset, sort)
-        if result.get("results"):
+        result = _try(lambda: module.search(query, mtype, offset, sort), None)
+        if result and result.get("results"):
             return {**result, "results": _prefix_list(name, result["results"])}
     return {"results": [], "hasMore": False, "nextOffset": offset}
 
@@ -100,8 +133,8 @@ def latest(page=1):
         module = _MODULES.get(name)
         if module is None:
             continue
-        result = module.latest(page)
-        if result.get("results"):
+        result = _try(lambda: module.latest(page), None)
+        if result and result.get("results"):
             return {**result, "results": _prefix_list(name, result["results"])}
     return {"results": [], "hasMore": False, "nextPage": page + 1}
 
@@ -111,7 +144,7 @@ def hot():
         module = _MODULES.get(name)
         if module is None:
             continue
-        items = module.hot()
+        items = _try(lambda: module.hot(), None)
         if items:
             return _prefix_list(name, items)
     return []
@@ -135,14 +168,16 @@ def info(prefixed_id):
         if module is None:
             continue
         if policy == name:
-            data = module.info(raw)
+            data = _try(lambda: module.info(raw), None)
         else:
             if not title:
                 break
             match = _first_match(module, title)
             if not match:
                 continue
-            data = module.info(match)
+            data = _try(lambda: module.info(match), None)
+        if not data:
+            continue
         title = title or data.get("title", "")
         if data.get("chapters"):
             return _prefix_info(policy, data)
