@@ -54,6 +54,16 @@ def mirrors_for(source):
     return SOURCE_MIRRORS.get(source, ())
 
 
+def spanish_sources(env=None, langs=None):
+    """The Spanish sources the chain tries, in order.
+
+    WeebCentral is the English fallback (plan decision (b)), not a Spanish
+    source, so it is excluded — the UI notice names only the ES sources that
+    were actually consulted (plan §F3).
+    """
+    return [name for name in active_chain(env, langs) if name != "weebcentral"]
+
+
 def active_chain(env=None, langs=None):
     """Ordered list of source names to try for the current configuration."""
     forced = (env if env is not None else os.environ.get("QS_MANGA_SOURCE", "")).strip().lower()

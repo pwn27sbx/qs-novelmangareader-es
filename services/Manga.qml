@@ -23,6 +23,13 @@ Singleton {
     property var currentManga: null
     property bool isFetchingDetail: false
     property string detailError: ""
+    // Set when the ES chain found nothing: "" or "no_spanish". `sourcesTried`
+    // holds the source ids the chain consulted, so the notice can name them.
+    property string notice: ""
+    property var sourcesTried: []
+    // The title being viewed, kept even when detail parsing fails (the chain's
+    // no-Spanish error carries it), so "search other sources" can prefill it.
+    property string detailTitle: ""
 
     // ── Chapter pages ────────────────────────────────────────────────────────
     property list<var> chapterPages: []
@@ -300,6 +307,9 @@ Singleton {
         isFetchingDetail = true
         currentManga = null
         detailError = ""
+        notice = ""
+        sourcesTried = []
+        detailTitle = ""
         const url = root.apiUrl + "/info?id=" + encodeURIComponent(mangaId)
         Http.get(url, function(err, body) {
             if (err) { detailError = I18n.t("error.request", { 1: err }); isFetchingDetail = false; return }
@@ -310,7 +320,14 @@ Singleton {
     function _parseMangaDetail(json) {
         try {
             const data = JSON.parse(json)
-            if (data.error) { detailError = data.error; isFetchingDetail = false; return }
+            if (data.error) {
+                detailError = data.error
+                notice = data.notice || ""
+                sourcesTried = data.sourcesTried || []
+                detailTitle = data.title || ""
+                isFetchingDetail = false
+                return
+            }
             currentManga = {
                 id:          data.id          || "",
                 title:       data.title       || "",
@@ -321,6 +338,8 @@ Singleton {
                 authors:     data.authors     || [],
                 tags:        data.tags        || [],
                 language:    data.language    || "",
+                notice:      data.notice      || "",
+                sourcesTried: data.sourcesTried || [],
                 chapters:    (data.chapters   || []).map(ch => ({
                     id:        ch.id        || "",
                     chapter:   ch.chapter   || "",
@@ -330,6 +349,9 @@ Singleton {
                     publishAt: ch.publishAt || ""
                 }))
             }
+            notice = data.notice || ""
+            sourcesTried = data.sourcesTried || []
+            detailTitle = data.title || ""
             detailError = ""
         } catch (e) {
             detailError = I18n.t("error.parse", { 1: e })

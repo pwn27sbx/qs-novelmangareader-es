@@ -794,9 +794,17 @@ class Handler(BaseHTTPRequestHandler):
                 if use_chain:
                     data = manga_chain.info(mid)
                     if data.get("error") == manga_chain.NO_SPANISH_MESSAGE:
+                        # Name the sources that were tried so the UI can be
+                        # honest about what it checked (plan §F3). WeebCentral
+                        # is the English fallback, not a Spanish source.
+                        sources = manga_chain.spanish_sources()
                         english = _english_fallback(data.get("title", ""))
                         if english:
+                            english["sourcesTried"] = sources
                             data = english
+                        else:
+                            data["notice"] = "no_spanish"
+                            data["sourcesTried"] = sources
                     self._json(data)
                 else:
                     self._json(info(mid))

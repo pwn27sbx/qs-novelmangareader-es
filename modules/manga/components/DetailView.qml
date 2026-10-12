@@ -14,10 +14,17 @@ Item {
 
     signal backRequested()
     signal chapterSelected(string chapterId)
+    signal searchOtherSourcesRequested()
 
     // ── Library state ─────────────────────────────────────────────────────────
     readonly property bool _inLibrary:
         Manga.currentManga ? Manga.isInLibrary(Manga.currentManga.id) : false
+
+    // Human-readable list of the sources the ES chain tried (plan §F3).
+    readonly property string _sourcesLabel: {
+        const ids = Manga.sourcesTried || []
+        return ids.map(function(id) { return I18n.tSource(id) }).join(", ")
+    }
 
     // ── Filter / sort state ───────────────────────────────────────────────────
     property bool   _sortAscending:  false
@@ -160,26 +167,73 @@ Item {
             }
         }
 
-        // ── English-only notice ───────────────────────────────────────────────
+        // ── No-Spanish notice ─────────────────────────────────────────────────
         Rectangle {
+            id: noSpanishNotice
             Layout.fillWidth: true
-            visible: Manga.currentManga !== null && Manga.currentManga.language === "en"
-            Layout.preferredHeight: visible ? englishNoticeText.implicitHeight + 22 : 0
+            visible: Manga.notice === "no_spanish"
+            Layout.preferredHeight: noSpanishNotice.visible ? noSpanishColumn.implicitHeight + 22 : 0
             color: Colors.error_container
             z: 3
 
-            StyledText {
-                id: englishNoticeText
+            Column {
+                id: noSpanishColumn
                 anchors {
                     left: parent.left; right: parent.right
                     verticalCenter: parent.verticalCenter
                     leftMargin: Style.space(16); rightMargin: Style.space(16)
                 }
-                text: "⚠  " + I18n.t("manga.englishNotice")
-                font.family: detailView.fontBody
-                font.pixelSize: Style.font.bodySmall; font.bold: true
-                color: Colors.on_error_container
-                wrapMode: Text.Wrap
+                spacing: Style.spacing.sm
+
+                StyledText {
+                    id: noSpanishTitle
+                    width: parent.width
+                    text: "⚠  " + I18n.t("manga.noSpanishNotice")
+                    font.family: detailView.fontBody
+                    font.pixelSize: Style.font.bodySmall; font.bold: true
+                    color: Colors.on_error_container
+                    wrapMode: Text.Wrap
+                }
+
+                StyledText {
+                    width: parent.width
+                    visible: detailView._sourcesLabel.length > 0
+                    text: I18n.t("manga.sourcesTried", { 1: detailView._sourcesLabel })
+                    font.family: detailView.fontBody
+                    font.pixelSize: Style.font.caption
+                    color: Colors.on_error_container
+                    opacity: 0.85
+                    wrapMode: Text.Wrap
+                }
+
+                Rectangle {
+                    id: otherSourcesButton
+                    height: otherSourcesLabel.implicitHeight + Style.spacing.controlPaddingY * 2
+                    width: otherSourcesLabel.implicitWidth + Style.spacing.controlPaddingX * 2
+                    radius: Style.cornerRadius
+                    color: otherSourcesArea.containsMouse
+                        ? Colors.error
+                        : Colors.withAlpha(Colors.error, 0.15)
+                    border.color: Colors.error; border.width: 1
+                    Behavior on color { ColorAnimation { duration: Motion.base } }
+
+                    StyledText {
+                        id: otherSourcesLabel
+                        anchors.centerIn: parent
+                        text: I18n.t("manga.searchOtherSources")
+                        font.family: detailView.fontBody
+                        font.pixelSize: Style.font.caption; font.bold: true
+                        color: otherSourcesArea.containsMouse
+                            ? Colors.on_error
+                            : Colors.on_error_container
+                    }
+
+                    MouseArea {
+                        id: otherSourcesArea
+                        anchors.fill: parent; hoverEnabled: true
+                        onClicked: detailView.searchOtherSourcesRequested()
+                    }
+                }
             }
         }
 

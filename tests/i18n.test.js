@@ -117,3 +117,23 @@ test("es and en expose the exact same key set", () => {
     const en = Object.keys(i18n.tables.en).sort();
     assert.deepEqual(es, en);
 });
+
+test("t() translates the no-Spanish notice keys", () => {
+    assert.equal(i18n.t("es", "manga.searchOtherSources"), "Buscar en otras fuentes");
+    assert.equal(i18n.t("en", "manga.searchOtherSources"), "Search other sources");
+    assert.equal(i18n.t("es", "manga.sourcesTried", { 1: "MangaDex" }), "Fuentes consultadas: MangaDex");
+    assert.equal(i18n.t("en", "manga.sourcesTried", { 1: "MangaDex" }), "Sources checked: MangaDex");
+});
+
+test("tSource() labels the known manga sources", () => {
+    assert.equal(i18n.tSource("mangadex"), "MangaDex");
+    assert.equal(i18n.tSource("inmanga"), "InManga");
+    assert.equal(i18n.tSource("zonatmo"), "ZonaTMO (.net)");
+    assert.equal(i18n.tSource("zonatmo_org"), "ZonaTMO (.org)");
+});
+
+test("tSource() falls back to the raw id when unknown", () => {
+    assert.equal(i18n.tSource("mystery"), "mystery");
+    assert.equal(i18n.tSource(""), "");
+    assert.equal(i18n.tSource(undefined), "");
+});

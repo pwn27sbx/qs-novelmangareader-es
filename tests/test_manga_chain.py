@@ -55,6 +55,11 @@ class ActiveChainTest(unittest.TestCase):
         self.assertEqual(manga_chain.mirrors_for("zonatmo_org"), ("zonatmo.org",))
         self.assertEqual(manga_chain.mirrors_for("mangadex"), ())
 
+    def test_spanish_sources_exclude_the_english_fallback(self):
+        self.assertEqual(manga_chain.spanish_sources("", ["es"]),
+                         ["mangadex", "inmanga", "zonatmo", "zonatmo_org"])
+        self.assertEqual(manga_chain.spanish_sources("", ["en"]), [])
+
 
 class RaisingSource(FakeSource):
     """A source whose domain is dead: every call raises."""

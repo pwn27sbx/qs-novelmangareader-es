@@ -54,6 +54,23 @@ Item {
         browseView.resetList()
     }
 
+    // "Search other sources" from the no-Spanish notice: go back to Browse and
+    // re-run the search for the current title across every source (plan §F3).
+    function searchOtherSources() {
+        const title = Manga.detailTitle || ""
+        root.tabIndex = 0
+        root.browseStack = 0
+        root.searchOpen = true
+        if (searchField) {
+            searchField.text = title
+            searchField.forceActiveFocus()
+        }
+        if (title.length > 0)
+            Manga.searchManga(title, true)
+        else
+            browseView.resetList()
+    }
+
     Rectangle { anchors.fill: parent; color: Colors.background }
 
     ColumnLayout {
@@ -222,6 +239,7 @@ Item {
 
                     onBackRequested:   { root.browseStack = 0 }
                     onChapterSelected: { root.browseStack = 2 }
+                    onSearchOtherSourcesRequested: root.searchOtherSources()
                 }
 
                 ReaderView {
@@ -260,6 +278,7 @@ Item {
 
                     onBackRequested:   { root.libraryStack = 0 }
                     onChapterSelected: { root.libraryStack = 2 }
+                    onSearchOtherSourcesRequested: root.searchOtherSources()
                 }
 
                 ReaderView {

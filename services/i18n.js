@@ -69,7 +69,9 @@ var tables = {
         "manga.invalidResponse": "Respuesta no válida",
         "manga.noPages": "No se encontraron páginas para este capítulo",
         "manga.pageFailed": "no se pudo cargar",
-        "manga.englishNotice": "No hay capítulos en español para este título — se muestra en inglés",
+        "manga.noSpanishNotice": "No se encontraron capítulos en español para este título",
+        "manga.sourcesTried": "Fuentes consultadas: %1",
+        "manga.searchOtherSources": "Buscar en otras fuentes",
 
         // ── Novel ───────────────────────────────────────────────────────
         "panel.novel": "novelas",
@@ -141,7 +143,9 @@ var tables = {
         "manga.invalidResponse": "Invalid response",
         "manga.noPages": "No pages found for this chapter",
         "manga.pageFailed": "failed to load",
-        "manga.englishNotice": "No Spanish chapters for this title — showing English",
+        "manga.noSpanishNotice": "No Spanish chapters found for this title",
+        "manga.sourcesTried": "Sources checked: %1",
+        "manga.searchOtherSources": "Search other sources",
 
         // ── Novel ───────────────────────────────────────────────────────
         "panel.novel": "novels",
@@ -184,9 +188,25 @@ var display = {
     }
 };
 
+// Display labels for the manga source ids the backend reports in
+// `sourcesTried` (plan §F3). Brand names read the same in English and Spanish,
+// so a single map is enough; unknown ids fall back to the raw id.
+var sources = {
+    "mangadex": "MangaDex",
+    "inmanga": "InManga",
+    "zonatmo": "ZonaTMO (.net)",
+    "zonatmo_org": "ZonaTMO (.org)",
+    "weebcentral": "WeebCentral"
+};
+
+// tSource("zonatmo_org") -> "ZonaTMO (.org)"; unknown id -> the id itself.
+function tSource(id) {
+    var key = String(id === undefined || id === null ? "" : id);
+    return sources[key] !== undefined ? sources[key] : key;
+}
+
 // Replace %1, %2, … with the matching entry of `params` (1-based).
-function interpolate(str, params) {
-    if (!params || typeof str !== "string") {
+function interpolate(str, params) {    if (!params || typeof str !== "string") {
         return str;
     }
     return str.replace(/%(\d+)/g, function (_, n) {
@@ -305,9 +325,11 @@ if (typeof module !== "undefined" && module.exports) {
     module.exports = {
         tables: tables,
         display: display,
+        sources: sources,
         t: t,
         tn: tn,
         tData: tData,
+        tSource: tSource,
         normalizeLang: normalizeLang,
         resolveLang: resolveLang,
         settingsLanguage: settingsLanguage,

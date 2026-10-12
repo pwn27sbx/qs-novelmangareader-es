@@ -45,7 +45,13 @@ Singleton {
     // Localize a status/type data value returned by a source (e.g. "Ongoing",
     // "Movie"); unknown values are returned unchanged.
     function tData(value) {
-        return Core.tData(lang, value)
+        return Core.tData(lang, value);
+    }
+
+    // Display label for a manga source id (e.g. "zonatmo_org" -> "ZonaTMO
+    // (.org)"); unknown ids are returned unchanged.
+    function tSource(id) {
+        return Core.tSource(id);
     }
 
     // Switch language live and persist it to settings.json.
