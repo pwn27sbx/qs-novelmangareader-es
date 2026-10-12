@@ -16,6 +16,31 @@ source sites. They start with the panel's service and only listen on
 > This folder is generated from the rice by `packaging/export.sh`.
 > Report bugs and send changes to the rice repo, not here.
 
+## Spanish content
+
+This fork adds Spanish sources on top of [dhrruvsharma/qs-novelmangareader](https://github.com/dhrruvsharma/qs-novelmangareader).
+The content it fetches is **Spanish by default**, and that is independent from the
+language of the UI:
+
+- **Content language** — what the app fetches — comes from `QS_CONTENT_LANG` (an
+  ordered, comma-separated list of language tags; default `es`).
+- **UI language** — the panels' own text — comes from `QS_LANG` (default: your locale).
+
+So you can read Spanish content through an English UI, or the other way round.
+
+Default sources per panel:
+
+- **Anime:** [JKAnime](https://jkanime.net) — Spanish-subtitled (hardsub) streams.
+- **Novels:** [SkyNovels](https://skynovels.net) — Spanish light/web novels.
+- **Manga/manhwa:** a fall-through chain — **MangaDex → InManga → zonatmo.net →
+  zonatmo.org** — so a title missing from one source is tried on the next. The last two
+  are ZonaTMO's two independent backends (a JSON API and the HTML site) that back each
+  other up; a source whose domain is down is skipped without breaking the panel.
+
+When none of the sources has Spanish chapters, the reader says so plainly — naming the
+sources it checked and offering to search elsewhere — instead of showing content as if it
+were Spanish.
+
 ## Requirements
 
 - A Wayland compositor with layer-shell (Hyprland, Sway, niri, river, …)
