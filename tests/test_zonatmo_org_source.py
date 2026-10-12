@@ -8,10 +8,13 @@ Fixtures under tests/fixtures/zonatmo_org/ were captured from the live site
 touch the network.
 """
 
+import io
 import json
 import os
 import sys
+import time
 import unittest
+import urllib.error
 import urllib.parse
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "scripts"))
@@ -169,6 +172,99 @@ class ApiTest(unittest.TestCase):
     def test_pages(self):
         pages = zonatmo_org_source.pages("969671")
         self.assertEqual(len(pages), 6)
+
+
+class TransportTest(unittest.TestCase):
+    """R3-001: exercise the provider's HTTP retry, dead-domain negative cache
+    and recovery with a fake transport (no network)."""
+
+    class _Resp:
+        def __init__(self, text):
+            self._text = text
+
+        def __enter__(self):
+            return self
+
+        def __exit__(self, *args):
+            return False
+
+        def read(self):
+            return self._text.encode("utf-8")
+
+    def setUp(self):
+        self.calls = 0
+        self._orig = (zonatmo_org_source.urllib.request.urlopen,
+                      zonatmo_org_source.time.sleep,
+                      zonatmo_org_source._rate_limit)
+        zonatmo_org_source.time.sleep = lambda *a: None
+        zonatmo_org_source._rate_limit = lambda: None
+        zonatmo_org_source._cache.clear()
+        zonatmo_org_source._dead_until[0] = 0.0
+
+    def tearDown(self):
+        (zonatmo_org_source.urllib.request.urlopen,
+         zonatmo_org_source.time.sleep,
+         zonatmo_org_source._rate_limit) = self._orig
+        zonatmo_org_source._cache.clear()
+        zonatmo_org_source._dead_until[0] = 0.0
+
+    def _patch(self, fake):
+        zonatmo_org_source.urllib.request.urlopen = fake
+
+    def test_retries_5xx_then_succeeds(self):
+        def fake(request, timeout=None):
+            self.calls += 1
+            if self.calls < 3:
+                raise urllib.error.HTTPError("u", 503, "boom", {}, io.BytesIO(b""))
+            return self._Resp("hello")
+
+        self._patch(fake)
+        self.assertEqual(zonatmo_org_source._request("https://x/"), "hello")
+        self.assertEqual(self.calls, 3)
+
+    def test_4xx_is_not_retried_and_stays_alive(self):
+        def fake(request, timeout=None):
+            self.calls += 1
+            raise urllib.error.HTTPError("u", 404, "nf", {}, io.BytesIO(b""))
+
+        self._patch(fake)
+        with self.assertRaises(urllib.error.HTTPError):
+            zonatmo_org_source._request("https://x/")
+        self.assertEqual(self.calls, 1)                       # no retry
+        self.assertEqual(zonatmo_org_source._dead_until[0], 0.0)  # a 4xx is not "dead"
+
+    def test_connection_failure_marks_dead_and_fast_fails(self):
+        def fake(request, timeout=None):
+            self.calls += 1
+            raise urllib.error.URLError("dns failure")
+
+        self._patch(fake)
+        with self.assertRaises(urllib.error.URLError):
+            zonatmo_org_source._request("https://x/")
+        self.assertEqual(self.calls, 3)                       # retried, then gave up
+        self.assertGreater(zonatmo_org_source._dead_until[0], time.monotonic())
+
+        self.calls = 0                                        # next call must not touch the transport
+        with self.assertRaises(zonatmo_org_source.SourceUnavailable):
+            zonatmo_org_source._request("https://x/")
+        self.assertEqual(self.calls, 0)
+
+    def test_recovers_after_the_negative_ttl(self):
+        zonatmo_org_source._dead_until[0] = time.monotonic() + zonatmo_org_source.NEGATIVE_TTL
+
+        def fake(request, timeout=None):
+            self.calls += 1
+            return self._Resp("ok")
+
+        self._patch(fake)
+        with self.assertRaises(zonatmo_org_source.SourceUnavailable):
+            zonatmo_org_source._request("https://x/")
+        self.assertEqual(self.calls, 0)                       # fast-failed while dead
+
+        zonatmo_org_source._dead_until[0] = 0.0               # TTL elapsed
+        self.assertEqual(zonatmo_org_source._request("https://x/"), "ok")
+        self.assertEqual(self.calls, 1)
+        self.assertEqual(zonatmo_org_source._dead_until[0], 0.0)  # success clears it
 
 
 if __name__ == "__main__":
