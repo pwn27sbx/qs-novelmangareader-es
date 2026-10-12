@@ -30,6 +30,7 @@ import time
 import urllib.error
 import urllib.parse
 import urllib.request
+import warnings
 
 BASE = "https://zonatmo.net/wp-api/api"
 CDN = "https://cdn.zonatmo.to/manga"
@@ -95,10 +96,25 @@ TTL_PAGES = 3600
 TTL_LIST = 300
 
 
+def _prune_cache(now):
+    """Drop every expired entry so the cache does not grow without bound.
+
+    Called with ``_cache_lock`` held, on a cache miss.
+    """
+    for key in [k for k, (_, expires) in _cache.items() if now >= expires]:
+        _cache.pop(key, None)
+
+
 def _cached(key, ttl, fn):
+    now = time.monotonic()
     with _cache_lock:
         entry = _cache.get(key)
-    if entry and time.monotonic() < entry[1]:
+        if entry is not None and now >= entry[1]:
+            del _cache[key]
+            entry = None
+        if entry is None:
+            _prune_cache(now)
+    if entry is not None:
         return entry[0]
     value = fn()
     with _cache_lock:
@@ -288,7 +304,7 @@ def _http_json(path, params=None):
             with urllib.request.urlopen(request, timeout=25) as response:
                 return json.load(response)
         except urllib.error.HTTPError as error:
-            if error.code == 429:
+            if error.code == 429 or 500 <= error.code < 600:
                 time.sleep(1.5 * (attempt + 1))
                 last_error = error
                 continue
@@ -304,17 +320,26 @@ def _slug(value):
 
 
 def _all_chapters(manga_slug):
-    """Fetch every chapter page and return one merged payload."""
+    """Fetch every chapter page and return ``(payload, truncated)``.
+
+    ``truncated`` is True when the API still had more pages after
+    ``MAX_CHAPTER_PAGES`` — the caller must surface that instead of pretending
+    the list is complete.
+    """
     items = []
     page = 1
+    truncated = False
     while page <= MAX_CHAPTER_PAGES:
         payload = _http_json(f"/single/manga/{_slug(manga_slug)}/chapters", {"page": page})
         data = payload.get("data") or {}
         items.extend(data.get("items") or [])
         if not (data.get("pagination") or {}).get("has_next"):
             break
+        if page == MAX_CHAPTER_PAGES:
+            truncated = True
+            break
         page += 1
-    return {"data": {"items": items}}
+    return {"data": {"items": items}}, truncated
 
 
 # ── public API (mirrors manga_server.py) ───────────────────────────────────
@@ -346,8 +371,21 @@ def info(manga_slug):
     slug = _slug(manga_slug)
     detail = _cached(f"zt-detail:{manga_slug}", TTL_INFO,
                      lambda: _http_json(f"/single/manga/{slug}"))
-    chapters = _cached(f"zt-chapters:{manga_slug}", TTL_INFO, lambda: _all_chapters(manga_slug))
-    return parse_info(detail, chapters, manga_slug)
+
+    def load_chapters():
+        payload, truncated = _all_chapters(manga_slug)
+        return {"payload": payload, "truncated": truncated}
+
+    chapters = _cached(f"zt-chapters:{manga_slug}", TTL_INFO, load_chapters)
+    data = parse_info(detail, chapters["payload"], manga_slug)
+    if chapters.get("truncated"):
+        warnings.warn(
+            f"zonatmo: chapter list for {manga_slug!r} truncated at "
+            f"{MAX_CHAPTER_PAGES} pages; more chapters exist upstream",
+            stacklevel=2,
+        )
+        data["truncated"] = True
+    return data
 
 
 def pages(chapter_id):

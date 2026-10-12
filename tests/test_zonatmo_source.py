@@ -7,10 +7,13 @@ Fixtures under tests/fixtures/zonatmo/ were captured from the live zonatmo.net
 JSON API; the tests never touch the network.
 """
 
+import io
 import json
 import os
 import sys
+import time
 import unittest
+import urllib.error
 import urllib.parse
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "scripts"))
@@ -245,6 +248,126 @@ class AllChaptersPaginationTest(unittest.TestCase):
         data = zonatmo_source.info("solo-leveling")
         self.assertEqual(self.pages_requested, [1, 2])
         self.assertEqual(len(data["chapters"]), 26)
+        self.assertNotIn("truncated", data)
+
+
+class CacheEvictionTest(unittest.TestCase):
+    """R3-CacheGrowth fix: expired entries must not accumulate."""
+
+    def setUp(self):
+        zonatmo_source._cache.clear()
+
+    def tearDown(self):
+        zonatmo_source._cache.clear()
+
+    def test_expired_entries_are_evicted_on_a_miss(self):
+        now = time.monotonic()
+        zonatmo_source._cache["old"] = ("v", now - 1)
+        zonatmo_source._cache["live"] = ("v2", now + 100)
+        zonatmo_source._cached("new", 10, lambda: "v3")
+        self.assertNotIn("old", zonatmo_source._cache)
+        self.assertIn("live", zonatmo_source._cache)
+        self.assertIn("new", zonatmo_source._cache)
+
+
+class ServerErrorRetryTest(unittest.TestCase):
+    """R3-NoRetryForServerErrors fix: retry 5xx with backoff, not only 429."""
+
+    class _Resp:
+        def __enter__(self):
+            return self
+
+        def __exit__(self, *args):
+            return False
+
+        def read(self):
+            return b'{"ok": true}'
+
+    def _patch(self, fake_urlopen):
+        self.calls = {"n": 0}
+        self._orig = (zonatmo_source.urllib.request.urlopen, zonatmo_source.time.sleep,
+                      zonatmo_source._rate_limit)
+        zonatmo_source.urllib.request.urlopen = fake_urlopen
+        zonatmo_source.time.sleep = lambda *a: None
+        zonatmo_source._rate_limit = lambda: None
+
+    def _restore(self):
+        (zonatmo_source.urllib.request.urlopen, zonatmo_source.time.sleep,
+         zonatmo_source._rate_limit) = self._orig
+
+    def test_retries_5xx_then_succeeds(self):
+        def fake(request, timeout=None):
+            self.calls["n"] += 1
+            if self.calls["n"] < 3:
+                raise urllib.error.HTTPError("u", 503, "boom", {}, io.BytesIO(b""))
+            return self._Resp()
+
+        self._patch(fake)
+        try:
+            result = zonatmo_source._http_json("/x")
+        finally:
+            self._restore()
+        self.assertEqual(result, {"ok": True})
+        self.assertEqual(self.calls["n"], 3)
+
+    def test_4xx_is_not_retried(self):
+        def fake(request, timeout=None):
+            self.calls["n"] += 1
+            raise urllib.error.HTTPError("u", 404, "nf", {}, io.BytesIO(b""))
+
+        self._patch(fake)
+        try:
+            with self.assertRaises(urllib.error.HTTPError):
+                zonatmo_source._http_json("/x")
+        finally:
+            self._restore()
+        self.assertEqual(self.calls["n"], 1)
+
+
+class ChapterTruncationTest(unittest.TestCase):
+    """R3-ChapterTruncation fix: hitting the page cap must be signalled."""
+
+    def setUp(self):
+        zonatmo_source._cache.clear()
+        self._orig_http = zonatmo_source._http_json
+        self._orig_max = zonatmo_source.MAX_CHAPTER_PAGES
+        zonatmo_source.MAX_CHAPTER_PAGES = 2
+
+        def fake(path, params=None):
+            if path.endswith("/chapters"):
+                page = (params or {}).get("page")
+                return {"error": False, "message": "", "data": {
+                    "items": [{"slug": f"solo-leveling-cap-{page}", "chapter_number": str(page),
+                               "title": f"Capítulo {page}", "release_date": "2026-01-01", "group": {}}],
+                    "pagination": {"has_next": True}}}
+            return load("detail.json")
+
+        zonatmo_source._http_json = fake
+
+    def tearDown(self):
+        zonatmo_source._http_json = self._orig_http
+        zonatmo_source.MAX_CHAPTER_PAGES = self._orig_max
+        zonatmo_source._cache.clear()
+
+    def test_truncation_is_signalled(self):
+        with self.assertWarns(UserWarning):
+            data = zonatmo_source.info("solo-leveling")
+        self.assertTrue(data.get("truncated"))
+        self.assertEqual(len(data["chapters"]), 2)
+
+    def test_no_truncation_flag_when_complete(self):
+        def fake(path, params=None):
+            if path.endswith("/chapters"):
+                page = (params or {}).get("page")
+                return {"error": False, "message": "", "data": {
+                    "items": [{"slug": "solo-leveling-cap-1", "chapter_number": "1",
+                               "title": "Capítulo 1", "release_date": "2026-01-01", "group": {}}],
+                    "pagination": {"has_next": False}}}
+            return load("detail.json")
+
+        zonatmo_source._http_json = fake
+        data = zonatmo_source.info("solo-leveling")
+        self.assertNotIn("truncated", data)
 
 
 if __name__ == "__main__":
