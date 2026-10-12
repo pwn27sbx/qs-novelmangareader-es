@@ -210,6 +210,18 @@ class ChainTest(unittest.TestCase):
         data = manga_chain.info("mangadex:x")
         self.assertEqual(data.get("error"), "Sin capítulos en español")
 
+    def test_fallthrough_rejects_a_sequel(self):
+        # Regression: "Foo" must not resolve to its sequel "Foo: Ragnarok"
+        # (a subtitle is a different work). See scripts/titles.py.
+        class SequelOnly(FakeSource):
+            def search(self, query, mtype=None, offset=0, sort="Best Match"):
+                return {"results": [{"id": "x", "title": "Foo: Ragnarok"}], "hasMore": False, "nextOffset": 0}
+
+        self.set_modules(FakeSource(chapters=False), SequelOnly(found=True, chapters=True),
+                         FakeSource(found=False, chapters=False), FakeSource(found=False, chapters=False))
+        data = manga_chain.info("mangadex:x")
+        self.assertEqual(data.get("error"), "Sin capítulos en español")
+
     def test_pages_routes_by_prefix(self):
         self.set_modules(FakeSource(), FakeSource())
         pages = manga_chain.pages("inmanga:manga/CH")
