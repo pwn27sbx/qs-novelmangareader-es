@@ -38,7 +38,7 @@ class FakeSource:
 
 class ActiveChainTest(unittest.TestCase):
     def test_spanish_uses_the_chain(self):
-        self.assertEqual(manga_chain.active_chain("", ["es-419", "es"]), ["mangadex", "inmanga"])
+        self.assertEqual(manga_chain.active_chain("", ["es-419", "es"]), ["mangadex", "inmanga", "zonatmo"])
 
     def test_english_uses_weebcentral(self):
         self.assertEqual(manga_chain.active_chain("", ["en"]), ["weebcentral"])
@@ -46,6 +46,7 @@ class ActiveChainTest(unittest.TestCase):
     def test_forced_source(self):
         self.assertEqual(manga_chain.active_chain("inmanga", ["en"]), ["inmanga"])
         self.assertEqual(manga_chain.active_chain("mangadex", ["es"]), ["mangadex"])
+        self.assertEqual(manga_chain.active_chain("zonatmo", ["en"]), ["zonatmo"])
 
 
 class ChainTest(unittest.TestCase):
@@ -61,8 +62,12 @@ class ChainTest(unittest.TestCase):
         else:
             os.environ["QS_CONTENT_LANG"] = self._old_env
 
-    def set_modules(self, mangadex, inmanga):
-        manga_chain._MODULES = {"mangadex": mangadex, "inmanga": inmanga}
+    def set_modules(self, mangadex, inmanga, zonatmo=None):
+        manga_chain._MODULES = {
+            "mangadex": mangadex,
+            "inmanga": inmanga,
+            "zonatmo": zonatmo if zonatmo is not None else FakeSource(),
+        }
 
     def test_search_uses_first_source_with_results(self):
         self.set_modules(FakeSource(found=True), FakeSource(found=True))
@@ -73,6 +78,11 @@ class ChainTest(unittest.TestCase):
         self.set_modules(FakeSource(found=False), FakeSource(found=True))
         result = manga_chain.search("bleach")
         self.assertEqual(result["results"][0]["id"], "inmanga:S-bleach")
+
+    def test_search_falls_through_to_zonatmo(self):
+        self.set_modules(FakeSource(found=False), FakeSource(found=False), FakeSource(found=True))
+        result = manga_chain.search("bleach")
+        self.assertEqual(result["results"][0]["id"], "zonatmo:S-bleach")
 
     def test_info_keeps_source_when_it_has_chapters(self):
         self.set_modules(FakeSource(chapters=True), FakeSource(chapters=True))
@@ -86,8 +96,19 @@ class ChainTest(unittest.TestCase):
         self.assertEqual(data["id"], "inmanga:S-Foo")
         self.assertEqual(data["chapters"][0]["id"], "inmanga:CH")
 
+    def test_info_falls_through_to_zonatmo(self):
+        self.set_modules(
+            FakeSource(chapters=False),
+            FakeSource(found=False, chapters=False),
+            FakeSource(found=True, chapters=True),
+        )
+        data = manga_chain.info("mangadex:x")
+        self.assertEqual(data["id"], "zonatmo:S-Foo")
+        self.assertEqual(data["chapters"][0]["id"], "zonatmo:CH")
+
     def test_none_has_spanish(self):
-        self.set_modules(FakeSource(chapters=False), FakeSource(found=True, chapters=False))
+        self.set_modules(FakeSource(chapters=False), FakeSource(found=True, chapters=False),
+                         FakeSource(found=True, chapters=False))
         data = manga_chain.info("mangadex:x")
         self.assertEqual(data.get("error"), "Sin capítulos en español")
         # The title is carried so the server can fall back to the English source.
@@ -100,7 +121,8 @@ class ChainTest(unittest.TestCase):
             def search(self, query, mtype=None, offset=0, sort="Best Match"):
                 return {"results": [{"id": "x", "title": "Aoi - Hikaru"}], "hasMore": False, "nextOffset": 0}
 
-        self.set_modules(FakeSource(chapters=False), Wrong(found=True, chapters=True))
+        self.set_modules(FakeSource(chapters=False), Wrong(found=True, chapters=True),
+                         FakeSource(found=False, chapters=False))
         data = manga_chain.info("mangadex:x")
         self.assertEqual(data.get("error"), "Sin capítulos en español")
 
@@ -108,6 +130,11 @@ class ChainTest(unittest.TestCase):
         self.set_modules(FakeSource(), FakeSource())
         pages = manga_chain.pages("inmanga:manga/CH")
         self.assertEqual(pages[0]["img"], "img:manga/CH")
+
+    def test_pages_routes_to_zonatmo(self):
+        self.set_modules(FakeSource(), FakeSource(), FakeSource())
+        pages = manga_chain.pages("zonatmo:solo-leveling/solo-leveling-capitulo-1")
+        self.assertEqual(pages[0]["img"], "img:solo-leveling/solo-leveling-capitulo-1")
 
 
 if __name__ == "__main__":

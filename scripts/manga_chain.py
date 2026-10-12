@@ -1,15 +1,16 @@
-"""Manga source chain (Spanish): MangaDex -> InManga.
+"""Manga source chain (Spanish): MangaDex -> InManga -> zonatmo.
 
 Every endpoint returns the same JSON contract as manga_server.py, with item ids
-prefixed by the source (``mangadex:<id>`` / ``inmanga:<id>``) so info()/pages()
-can route back to the source that produced them.
+prefixed by the source (``mangadex:<id>`` / ``inmanga:<id>`` / ``zonatmo:<id>``)
+so info()/pages() can route back to the source that produced them.
 
 Language fall-through: MangaDex (es-la / es) is tried first; when it has no
-chapters in the preferred language, InManga (Spanish-only) is tried by title.
-When neither has Spanish, info() returns {"error": "Sin capitulos en espanol"}
-(decision (b): never fall back to English content).
+chapters in the preferred language, InManga (Spanish-only) is tried by title,
+then zonatmo.net (Spanish manhwa/manga). When none has Spanish, info() returns
+{"error": "Sin capitulos en espanol"} (decision (b): never fall back to English
+content).
 
-Source selection: QS_MANGA_SOURCE = mangadex | inmanga | weebcentral | auto.
+Source selection: QS_MANGA_SOURCE = mangadex | inmanga | zonatmo | weebcentral | auto.
 auto uses the content language (QS_CONTENT_LANG): Spanish -> the chain,
 otherwise WeebCentral (handled by manga_server.py, which owns that scraper).
 """
@@ -20,14 +21,16 @@ import content_lang
 import inmanga_source
 import manga_sources
 import titles
+import zonatmo_source
 
 NO_SPANISH_MESSAGE = "Sin capítulos en español"
 
 _MODULES = {
     "mangadex": manga_sources,
     "inmanga": inmanga_source,
+    "zonatmo": zonatmo_source,
 }
-_FORCED = ("mangadex", "inmanga", "weebcentral", "mangaplus")
+_FORCED = ("mangadex", "inmanga", "zonatmo", "weebcentral", "mangaplus")
 
 
 def active_chain(env=None, langs=None):
@@ -39,7 +42,7 @@ def active_chain(env=None, langs=None):
     for tag in preferred:
         base = str(tag).strip().lower().split("-", 1)[0].split("_", 1)[0]
         if base == "es":
-            return ["mangadex", "inmanga"]
+            return ["mangadex", "inmanga", "zonatmo"]
     return ["weebcentral"]
 
 
