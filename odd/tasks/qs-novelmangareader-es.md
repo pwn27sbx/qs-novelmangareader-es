@@ -7,7 +7,7 @@
 | Repo de trabajo | `~/Projects/forks/qs-novelmangareader-es` |
 | Upstream | `dhrruvsharma/qs-novelmangareader` (GPL-3.0) |
 | Inicio | 2026-10-11 |
-| Estado | **Fase 1 + WU-7 + WU-8 + WU-11** · UI toggle (`settings.json`) · contenido ES · GATE §15.1 cerrado |
+| Estado | **CULMINADO (2026-10-25)** — WU-0..WU-12b, fixes, ManhwaWeb (5ª fuente ES), scroll configurable, R-C1/R-C2/R1/R2 |
 | Plan fuente | `2026-10-11-plan-localizacion-es-qs-novelmangareader.md` (§0–§16) |
 | Handoff | `2026-10-11-handoff-orquestador-qs-novelmangareader-es.md` |
 
@@ -263,10 +263,15 @@ Pendiente (humano): la QA **visual** real (acentos `á é í ó ú ñ ¿ ¡`, de
 | TAREA A (manga EN fallback) | `e8b2a27` | 2026-10-11 | ✅ completo |
 | TAREA B (widget barra Omarchy) | `3942ed6` | 2026-10-11 | ✅ completo |
 | Fix default provider novelas (ES) | `322b09a` | 2026-10-11 | ✅ completo |
-| WU-9 instalador/CLI/README | (ver `git log`) | 2026-10-25 | ✅ completo |
-| WU-10 fallback ani-cli-mx | (ver `git log`) | 2026-10-25 | ✅ completo |
-| Fuente ManhwaWeb (5ª ES) | (ver `git log`) | 2026-10-25 | ✅ completo |
-| Velocidad de scroll (settings) | (ver `git log`) | 2026-10-25 | ✅ completo |
+| WU-9 instalador/CLI/README | `12d34ea` + `12315a6` + `37b044e` | 2026-10-25 | ✅ completo |
+| WU-10 fallback ani-cli-mx | `a37a0e4` + `ff91d7f` + `7261e40` + `75a8b38` | 2026-10-25 | ✅ completo |
+| Fuente ManhwaWeb (5ª ES) | `2f505f0` + `3da4d1e` + `edb2fb5` + `9ed918f` + `6409a2e` | 2026-10-25 | ✅ completo |
+| Velocidad de scroll (settings) | `89e0788` + `3bbbcd2` | 2026-10-25 | ✅ completo |
+| Panel vacío si el backend cae | `7d4540c` | 2026-10-25 | ✅ completo |
+| Fix tema Qt 6.12 (Color) | `16a95ee` | 2026-10-25 | ✅ completo |
+| Housekeeping docs | `a9b24d5` | 2026-10-25 | ✅ completo |
+| R-C2 guardia de versión | `a08ed7f` + `3fff8f7` | 2026-10-25 | ✅ completo |
+| R2 header/filtros (qs.Ui) | `1af1369` | 2026-10-25 | ✅ completo |
 
 ---
 
@@ -311,6 +316,20 @@ Pendiente (humano): la QA **visual** real (acentos `á é í ó ú ñ ¿ ¡`, de
 - **No verificado por mí**: la sensación real de la rueda (no puedo sintetizar eventos de
   rueda sin `ydotool`); lo prueba el dueño y se ajusta el valor.
 
-## Próximo paso
+## Cierre (2026-10-25)
 
-WU-9 cerrado. Siguiente: **R2** (header/panel con `qs.Ui`) y, si el dueño lo aprueba, **WU-10** (ani-cli, opcional). Pendiente humano: QA visual de los textos en español y la publicación del fork.
+**Todo lo planificado está hecho y verificado.** Estados finales: WU-0..WU-12b ✅ · fixes ✅ · R1 ✅ ·
+R-C1 ✅ · R-C2 ✅ · R2 ✅ · WU-9 ✅ · WU-10 ✅ · fuente ManhwaWeb ✅ · scroll configurable ✅ ·
+fix del panel vacío ✅.
+
+**Gates al cierre:** `node --test` 55/55 · `python3 -m unittest discover -s tests -p "test_*.py"` 191
+(2 live saltados en el venv) · `tools/lint-i18n.js` OK · `tools/lint-style.js` OK (38 archivos, 0 crudos) ·
+carga real sin errores en `qs log`.
+
+**Pendiente del dueño (no del código):**
+1. QA visual de los textos en español (lista de pantallas en el informe del vault).
+2. La publicación del fork (`2026-10-11-plan-publicar-fork-…` sigue siendo propuesta); el push a `origin`
+   ya se hizo con autorización explícita.
+3. Ajustar `scrollFactor` a su gusto en `settings.json` si 2 no le sirve.
+4. Advisory sin corrección: una respuesta HTTP muy tardía podría pisar el resultado de un reintento en el
+   buscador de manga (se cerraría con un contador de generación por petición).

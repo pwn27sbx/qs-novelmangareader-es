@@ -6,7 +6,7 @@
 | Rama | `i18n-es` (fork privado, sin `origin`) |
 | Repo de trabajo | `~/Projects/forks/qs-novelmangareader-es` |
 | Inicio | 2026-10-25 |
-| Estado | **Completo (R2.1–R2.8)** |
+| Estado | **CULMINADO (2026-10-25)** — commit `1af1369` |
 | Spec | `2026-10-11-plan-r2-header-panel-qs-novelmangareader.md` (vault) — «se implementa **esta spec**» |
 | Base | Plan C (Omarchy) ✅ + R1 (tokens) ✅ + R-C1 ✅ + R-C2 ✅ |
 

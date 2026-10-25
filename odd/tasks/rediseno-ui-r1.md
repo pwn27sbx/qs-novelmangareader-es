@@ -6,7 +6,7 @@
 | Rama | `i18n-es` (rama de trabajo del fork; sin `origin`) |
 | Repo de trabajo | `~/Projects/forks/qs-novelmangareader-es` |
 | Inicio | 2026-10-11 |
-| Estado | **Completo (R1.0–R1.7)** |
+| Estado | **CULMINADO (R1.0–R1.7)** — revisado 2026-10-25 |
 | Plan fuente | `/home/pwnsxb/Documents/ObsidianVault/QS NovelMangaReader/2026-10-11-plan-rediseno-ui-qs-novelmangareader.md` (§7 R1, §9 cobertura) |
 | Review fuente | `/home/pwnsxb/Documents/ObsidianVault/QS NovelMangaReader/2026-10-11-review-qs-novelmangareader-es.md` |
 

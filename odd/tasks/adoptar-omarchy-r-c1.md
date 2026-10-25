@@ -6,7 +6,7 @@
 | Rama | `i18n-es` (fork privado, sin `origin`) |
 | Repo de trabajo | `~/Projects/forks/qs-novelmangareader-es` |
 | Inicio | 2026-10-11 |
-| Estado | **Completo (R-C1) + R-C2 (guardia de versión)** |
+| Estado | **CULMINADO (2026-10-25)** — R-C1 `69d0224`..`eaa4a30`, R-C2 `a08ed7f` + `3fff8f7` |
 | Plan fuente | `/home/pwnsxb/Documents/ObsidianVault/QS NovelMangaReader/2026-10-11-plan-c-adoptar-omarchy-qs-novelmangareader.md` (§4, §5.1, §9, §13) |
 | Plan base | `2026-10-11-plan-rediseno-ui-qs-novelmangareader.md` (R1 ✅) |
 

@@ -1,5 +1,7 @@
 # Feature: Fuentes en ESPAÑOL (manga/manhwa)
 
+> **Estado: CULMINADO (2026-10-25)** — F1–F5 cerradas; 5 fuentes ES en la cadena. Commits: `2f505f0`, `3da4d1e`, `edb2fb5`, `9ed918f`, `6409a2e` (ManhwaWeb).
+
 - **Estado**: CERRADO — F0..F5 hechas (F3/F5 + R3-001 en esta pasada)
 - **Plan**: `~/Documents/ObsidianVault/QS NovelMangaReader/2026-10-11-plan-fuentes-es-contenido-qs-novelmangareader.md`
 - **Principio rector**: *"No se puede" no es respuesta — la solución siempre existe.*
