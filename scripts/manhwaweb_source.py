@@ -74,14 +74,24 @@ def _get_json(path):
         return json.loads(response.read().decode("utf-8", "replace"))
 
 
+CACHE_LIMIT = 200
+
+
 def _cached(key, ttl, fn):
     with _lock:
         hit = _cache.get(key)
     if hit and (time.time() - hit[0]) < ttl:
         return hit[1]
     value = fn()
+    now = time.time()
     with _lock:
-        _cache[key] = (time.time(), value)
+        # A long-lived server would otherwise keep every expired search page.
+        if len(_cache) >= CACHE_LIMIT:
+            for stale in [k for k, (at, _) in _cache.items() if (now - at) >= ttl]:
+                _cache.pop(stale, None)
+            while len(_cache) >= CACHE_LIMIT:
+                _cache.pop(next(iter(_cache)), None)
+        _cache[key] = (now, value)
     return value
 
 
@@ -158,13 +168,20 @@ def map_info(raw):
     chapters.sort(key=lambda c: float(c["chapter"] or 0), reverse=True)
     tags = [v for pair in (raw.get("_categoris") or []) if isinstance(pair, dict) for v in pair.values()
             if isinstance(v, str)]
+    # `autor` / `artista` are arrays of {"_id", "name"} objects, not strings.
+    authors = []
+    for field in ("autor", "artista"):
+        for person in raw.get(field) or []:
+            name = person.get("name") if isinstance(person, dict) else person
+            if name and name not in authors:
+                authors.append(name)
     return {
         "id": manga_id,
         "title": raw.get("name_esp") or raw.get("the_real_name") or "",
         "description": raw.get("_sinopsis") or "",
         "status": _status(raw.get("_status")),
         "image": proxy_url(raw.get("_imagen", "")),
-        "authors": [a for a in (raw.get("autor"), raw.get("artista")) if a],
+        "authors": authors,
         "tags": tags,
         "chapters": chapters,
     }
@@ -183,6 +200,11 @@ def search(query, mtype=None, offset=0, sort="Best Match"):
     page = max(0, int(offset or 0) // PAGE)
     payload = _cached(f"mweb-search:{query}:{page}", TTL_SEARCH, lambda: _library(query, page))
     results = [map_item(item) for item in payload.get("data") or []]
+    # The API's own `tipo` filter answers empty for every value, so a type-scoped
+    # search is filtered here instead of being silently ignored.
+    if mtype:
+        wanted = str(mtype).strip().lower()
+        results = [item for item in results if item["type"].lower() == wanted]
     more = bool(payload.get("next"))
     return {"results": results, "hasMore": more, "nextOffset": (page + 1) * PAGE}
 

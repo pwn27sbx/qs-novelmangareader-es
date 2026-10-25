@@ -58,6 +58,13 @@ class MappingTest(unittest.TestCase):
         self.assertIn("Drama", data["tags"])
         self.assertTrue(data["description"].startswith("Tras heredar"))
 
+    def test_authors_are_names_not_objects(self):
+        data = manhwaweb_source.map_info(INFO)
+        self.assertTrue(data["authors"])
+        for author in data["authors"]:
+            self.assertIsInstance(author, str)
+            self.assertTrue(author.strip())
+
     def test_chapters_are_newest_first_and_keep_their_label(self):
         data = manhwaweb_source.map_info(INFO)
         first = data["chapters"][0]
@@ -72,6 +79,18 @@ class MappingTest(unittest.TestCase):
         for url in urls:
             self.assertTrue(url.startswith("http://127.0.0.1:5150/image?url="))
         self.assertIn("img1mw.xyz", urls[0])
+
+
+class CacheTest(unittest.TestCase):
+    def setUp(self):
+        manhwaweb_source.clear_cache()
+
+    def test_the_cache_drops_expired_entries_instead_of_growing_forever(self):
+        with manhwaweb_source._lock:
+            for i in range(manhwaweb_source.CACHE_LIMIT + 10):
+                manhwaweb_source._cache[f"old:{i}"] = (0.0, {"x": i})
+        manhwaweb_source._cached("fresh", 300, lambda: {"ok": True})
+        self.assertLessEqual(len(manhwaweb_source._cache), manhwaweb_source.CACHE_LIMIT)
 
 
 class ChapterIdTest(unittest.TestCase):
@@ -110,6 +129,11 @@ class EndpointTest(unittest.TestCase):
         self.assertEqual(len(result["results"]), 1)
         self.assertFalse(result["hasMore"])
         self.assertEqual(result["nextOffset"], 30)
+
+    def test_a_type_scoped_search_filters_locally(self):
+        with mock.patch.object(manhwaweb_source, "_get_json", return_value=SEARCH):
+            self.assertEqual(manhwaweb_source.search("glory hole", mtype="manga")["results"], [])
+            self.assertEqual(len(manhwaweb_source.search("glory hole", mtype="Manhwa")["results"]), 1)
 
     def test_offset_maps_to_a_library_page(self):
         with mock.patch.object(manhwaweb_source, "_get_json", return_value=SEARCH) as get:
