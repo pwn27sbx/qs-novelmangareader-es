@@ -7,8 +7,8 @@
 | Repo de trabajo | `~/Projects/forks/qs-novelmangareader-es` |
 | Inicio | 2026-10-11 |
 | Estado | **Completo (R1.0–R1.7)** |
-| Plan fuente | `/home/pwnsxb/Documents/Plans/2026-10-11-plan-rediseno-ui-qs-novelmangareader.md` (§7 R1, §9 cobertura) |
-| Review fuente | `/home/pwnsxb/Documents/Plans/2026-10-11-review-qs-novelmangareader-es.md` |
+| Plan fuente | `/home/pwnsxb/Documents/ObsidianVault/QS NovelMangaReader/2026-10-11-plan-rediseno-ui-qs-novelmangareader.md` (§7 R1, §9 cobertura) |
+| Review fuente | `/home/pwnsxb/Documents/ObsidianVault/QS NovelMangaReader/2026-10-11-review-qs-novelmangareader-es.md` |
 
 > Capa **visual + navegación**. NO se tocan backends ni datos (`scripts/`, `services/{Anime,Manga,Novel,Http,HealthPoller}.qml` lógica, `~/.local/share/quickshell*`).
 
@@ -53,10 +53,10 @@ Unificar la UI sobre un **sistema de tokens** (`qs.Commons.Style`) espejo de Oma
 - [ ] **R1.1** — `Commons/Style.qml` (+`qmldir`): `cornerRadius`/`gapsOut` vivos; escala spacing/tipo idéntica a Omarchy; estados (normal/hover/selected/focus/pressed: fill/border alphas + anchos); motion (durations/easing). Retirar `services/DesktopTheme.qml` migrando sus consumidores (`ClickableRect`, `StyledText`, 16× `rad()`).
 - [ ] **R1.2** — Migrar `components/**` → `Style.*` (radios/spacing/tipo/estados/motion).
 - [ ] **R1.3** — Migrar `modules/anime/**` → `Style.*`.
-- [ ] **R1.4** — Migrar `modules/manga/**` → `Style.*`.
-- [ ] **R1.5** — Migrar `modules/novel/**` → `Style.*`.
-- [ ] **R1.6** — `shell.qml` + `omarchy/pwnsxb.novelmangareader/Panel.qml` alineados al lenguaje de tokens; resto.
-- [ ] **R1.7** — Lint `cero números crudos` (`tools/lint-style.js`) + test; verificación final (hyprctl + 3 módulos).
+- [x] **R1.4** — Migrar `modules/manga/**` → `Style.*`.
+- [x] **R1.5** — Migrar `modules/novel/**` → `Style.*`.
+- [x] **R1.6** — `shell.qml` + `omarchy/pwnsxb.novelmangareader/Panel.qml` alineados al lenguaje de tokens; resto.
+- [x] **R1.7** — Lint `cero números crudos` (`tools/lint-style.js`) + test; verificación final (hyprctl + 3 módulos).
 
 ## Scope autorizado (superficies de edición)
 

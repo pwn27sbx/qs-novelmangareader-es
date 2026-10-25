@@ -7,7 +7,7 @@
 | Repo de trabajo | `~/Projects/forks/qs-novelmangareader-es` |
 | Inicio | 2026-10-11 |
 | Estado | **Completo (R-C1)** |
-| Plan fuente | `/home/pwnsxb/Documents/Plans/2026-10-11-plan-c-adoptar-omarchy-qs-novelmangareader.md` (§4, §5.1, §9, §13) |
+| Plan fuente | `/home/pwnsxb/Documents/ObsidianVault/QS NovelMangaReader/2026-10-11-plan-c-adoptar-omarchy-qs-novelmangareader.md` (§4, §5.1, §9, §13) |
 | Plan base | `2026-10-11-plan-rediseno-ui-qs-novelmangareader.md` (R1 ✅) |
 
 > **Plan C supersede** el enfoque "espejo propio" de R1. La app **adopta Omarchy** por symlink. R1 sigue valiendo en **0 números crudos**: los componentes llaman `Style.*`, y ahora ese `Style` es el **de Omarchy**.
@@ -47,9 +47,9 @@ Que la app siga el tema y el look del sistema: usar directamente `qs.Commons` (C
 - [ ] **R-C1.0** — Feature doc + espejo Engram.
 - [ ] **R-C1.1** — Módulo `qs.app`: `app/qmldir`, `app/Palette.qml` (adapter a `Color`), `app/Motion.qml`.
 - [ ] **R-C1.2** — Symlinks `Commons`/`Ui` → Omarchy; eliminar `Commons/` propio y `colors/`.
-- [ ] **R-C1.3** — Migrar imports (`qs.colors`→`qs.app`) + calificadores (`Colors.`→`Palette.`, `Style.motion.`→`Motion.`, `Style.font.displayFamily`→`Style.font.family`) en `components/**`, `modules/**`, `shell.qml`.
-- [ ] **R-C1.4** — Smoke test: `import qs.Commons` + `import qs.Ui` + instanciar 1 componente; log de `Color.accent`/`Style.cornerRadius` al arranque.
-- [ ] **R-C1.5** — Verificación: `Color.accent == colors.toml`; smoke OK; 0 tokens indefinidos; 0 errores QML; 3 módulos.
+- [x] **R-C1.3** — Migrar imports (`qs.colors`→`qs.app`) + calificadores (`Colors.`→`Palette.`, `Style.motion.`→`Motion.`, `Style.font.displayFamily`→`Style.font.family`) en `components/**`, `modules/**`, `shell.qml`.
+- [x] **R-C1.4** — Smoke test: `import qs.Commons` + `import qs.Ui` + instanciar 1 componente; log de `Color.accent`/`Style.cornerRadius` al arranque.
+- [x] **R-C1.5** — Verificación: `Color.accent == colors.toml`; smoke OK; 0 tokens indefinidos; 0 errores QML; 3 módulos.
 
 ## Scope autorizado (superficies)
 

@@ -1,7 +1,7 @@
 # Feature: Fuentes en ESPAÑOL (manga/manhwa)
 
 - **Estado**: CERRADO — F0..F5 hechas (F3/F5 + R3-001 en esta pasada)
-- **Plan**: `~/Documents/Plans/2026-10-11-plan-fuentes-es-contenido-qs-novelmangareader.md`
+- **Plan**: `~/Documents/ObsidianVault/QS NovelMangaReader/2026-10-11-plan-fuentes-es-contenido-qs-novelmangareader.md`
 - **Principio rector**: *"No se puede" no es respuesta — la solución siempre existe.*
 
 ## Objetivo
