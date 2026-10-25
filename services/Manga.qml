@@ -179,6 +179,20 @@ Singleton {
         onTriggered: checkFavoritesForUpdates()
     }
 
+    // A request whose callback never runs (aborted after a config reload, or a
+    // backend that stops answering) left `isFetchingManga` true for good: every
+    // later search returned early. This frees the flag; the next action retries.
+    Timer {
+        id: fetchWatchdog
+        interval: 20000
+        repeat: false
+        onTriggered: {
+            if (!isFetchingManga) return
+            isFetchingManga = false
+            mangaError = I18n.t("error.request", { 1: "timeout" })
+        }
+    }
+
     Timer {
         id: dlPoller
         interval: 500
@@ -221,8 +235,10 @@ Singleton {
         if (origin === "") {
             isFetchingManga = true
             mangaError = ""
+            fetchWatchdog.restart()
             const url = root.apiUrl + "/hot"
             Http.get(url, function(err, body) {
+                fetchWatchdog.stop()
                 if (err) { mangaError = I18n.t("error.request", { 1: err }); isFetchingManga = false; return }
                 _parseMangaResults(body)
             })
@@ -230,8 +246,10 @@ Singleton {
             if (reset) latestPage = 1
             isFetchingManga = true
             mangaError = ""
+            fetchWatchdog.restart()
             const url = root.apiUrl + "/latest?page=" + latestPage
             Http.get(url, function(err, body) {
+                fetchWatchdog.stop()
                 if (err) { mangaError = I18n.t("error.request", { 1: err }); isFetchingManga = false; return }
                 _parseMangaResults(body)
             })
@@ -242,9 +260,11 @@ Singleton {
 
     function searchManga(query, reset) {
         if (isFetchingManga) return
-        if (reset) { mangaList = []; currentOffset = 0 }
+        // The list is replaced when the answer arrives, not before: a request
+        // that never comes back used to leave the panel blank.
+        if (reset) currentOffset = 0
         currentSearchText = query
-        _doSearch(query, _originType(currentOrigin), currentOffset, "Best Match")
+        _doSearch(query, _originType(currentOrigin), currentOffset, "Best Match", reset)
     }
 
     function fetchNextMangaPage() {
@@ -259,19 +279,21 @@ Singleton {
         }
     }
 
-    function _doSearch(query, type, offset, sort) {
+    function _doSearch(query, type, offset, sort, replace) {
         isFetchingManga = true
         mangaError = ""
+        fetchWatchdog.restart()
         let url = root.apiUrl + "/search?q=" + encodeURIComponent(query)
             + "&offset=" + offset + "&sort=" + encodeURIComponent(sort)
         if (type) url += "&type=" + encodeURIComponent(type)
         Http.get(url, function(err, body) {
+            fetchWatchdog.stop()
             if (err) { mangaError = I18n.t("error.request", { 1: err }); isFetchingManga = false; return }
-            _parseMangaResults(body)
+            _parseMangaResults(body, replace)
         })
     }
 
-    function _parseMangaResults(json) {
+    function _parseMangaResults(json, replace) {
         try {
             const data = JSON.parse(json)
             if (data.error) { mangaError = data.error; isFetchingManga = false; return }
@@ -280,14 +302,15 @@ Singleton {
             const isLatest = !isHot && data.nextPage !== undefined
             const items    = isHot ? data : (data.results || [])
 
-            mangaList = [...mangaList, ...items.map(item => ({
+            const mapped = items.map(item => ({
                 id:       item.id     || "",
                 title:    item.title  || "",
                 thumbUrl: item.image  || "",
                 status:   item.status || "",
                 type:     item.type   || "",
                 author:   ""
-            }))]
+            }))
+            mangaList = replace ? mapped : [...mangaList, ...mapped]
 
             hasMoreManga = isHot ? false : (data.hasMore || false)
             if (!isHot && !isLatest)
