@@ -1,18 +1,18 @@
 #!/usr/bin/env bash
-# qs-novelmangareader: the Quickshell anime player, manga reader and novel
-# reader. Installed by qs-novelmangareader's install.sh.
+# qs-novelmangareader: el reproductor de anime, el lector de manga y el
+# lector de novelas de Quickshell. Instalado por el install.sh de qs-novelmangareader.
 #
-#   qs-novelmangareader           start it (put this in your autostart)
-#   qs-novelmangareader anime     open/close the anime player
-#   qs-novelmangareader manga     open/close the manga reader
-#   qs-novelmangareader novel     open/close the novel reader
-#   qs-novelmangareader stop      quit it
-#   qs-novelmangareader log       its log
+#   qs-novelmangareader           arráncalo (ponlo en tu autostart)
+#   qs-novelmangareader anime     abre/cierra el reproductor de anime
+#   qs-novelmangareader manga     abre/cierra el lector de manga
+#   qs-novelmangareader novel     abre/cierra el lector de novelas
+#   qs-novelmangareader stop      ciérralo
+#   qs-novelmangareader log       su registro
 set -euo pipefail
 
 cfg="${XDG_CONFIG_HOME:-$HOME/.config}/qs-novelmangareader"
 case ${1-} in -h | --help | help) ;; *)
-    [[ -f $cfg/shell.qml ]] || { echo "qs-novelmangareader: no config in $cfg (run its install.sh)" >&2; exit 1; } ;;
+    [[ -f $cfg/shell.qml ]] || { echo "qs-novelmangareader: no hay configuración en $cfg (ejecuta su install.sh)" >&2; exit 1; } ;;
 esac
 
 case ${1-start} in

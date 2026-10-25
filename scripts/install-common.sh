@@ -19,8 +19,8 @@ die()  { printf '\033[1;31mxx\033[0m %s\n' "$*" >&2; exit 1; }
 confirm() {
     ((ASSUME_YES)) && return 0
     local reply
-    read -rp "$1 [Y/n] " reply
-    [[ -z $reply || $reply =~ ^[Yy] ]]
+    read -rp "$1 [S/n] " reply
+    [[ -z $reply || $reply =~ ^[SsYy] ]]
 }
 
 # pacman, apt-get or dnf, whichever is here first (INSTALL_PM overrides).
@@ -54,13 +54,13 @@ install_system_packages() {
     fi
 
     if [[ -z $pm ]]; then
-        warn "no pacman, apt or dnf here; install these yourself:"
+        warn "no hay pacman, apt ni dnf aquí; instala esto tú mismo:"
         printf '     %s\n' "${PACMAN_PKGS[@]}" >&2
         return
     fi
 
     if ((${#pkgs[@]})); then
-        info "Installing packages with $pm: ${pkgs[*]}"
+        info "Instalando paquetes con $pm: ${pkgs[*]}"
         case $pm in
             pacman)
                 local flags=(-S --needed)
@@ -70,7 +70,7 @@ install_system_packages() {
             apt-get | dnf)
                 # One at a time, so a package this release doesn't have
                 # doesn't stop the rest.
-                if confirm "Install them?"; then
+                if confirm "¿Los instalo?"; then
                     [[ $pm == apt-get ]] && sudo apt-get update -qq
                     for p in "${pkgs[@]}"; do
                         sudo "$pm" install -y -q "$p" >/dev/null || failed+=("$p")
@@ -80,7 +80,7 @@ install_system_packages() {
                 fi
                 ;;
         esac
-        ((${#failed[@]})) && warn "not installed: ${failed[*]}"
+        ((${#failed[@]})) && warn "no instalados: ${failed[*]}"
     fi
 
     # What this distro doesn't package, unless it's installed already (each
@@ -92,7 +92,7 @@ install_system_packages() {
         done
     fi
     if ((${#todo[@]})); then
-        warn "get these yourself (not in $pm's repos):"
+        warn "consigue esto tú mismo (no está en los repos de $pm):"
         printf '     %s\n' "${todo[@]}" >&2
     fi
 }
@@ -107,14 +107,14 @@ install_font() {  # family url file
     local family=$1 url=$2 file=$3 dir
     has_font "$family" && return
     dir=$(fonts_dir)
-    info "Downloading the $family font"
+    info "Descargando la fuente $family"
     mkdir -p "$dir"
     if curl -fsSL "$url" -o "$dir/$file.part"; then
         mv "$dir/$file.part" "$dir/$file"
         fc-cache -f "$dir" >/dev/null 2>&1 || true
     else
         rm -f "$dir/$file.part"
-        warn "couldn't download $family; icons will show as boxes until it's installed"
+        warn "no se pudo descargar $family; los iconos se verán como cuadros hasta que la instales"
     fi
 }
 
@@ -124,14 +124,14 @@ install_nerd_symbols() {
     has_font "Nerd Font" && return
     dir=$(fonts_dir)
     tmp=$(mktemp -d)
-    info "Downloading the Symbols Nerd Font"
+    info "Descargando la fuente Symbols Nerd Font"
     if curl -fsSL https://github.com/ryanoasis/nerd-fonts/releases/latest/download/NerdFontsSymbolsOnly.tar.xz -o "$tmp/f.tar.xz" \
         && tar -xJf "$tmp/f.tar.xz" -C "$tmp"; then
         mkdir -p "$dir"
         cp "$tmp"/*.ttf "$dir/"
         fc-cache -f "$dir" >/dev/null 2>&1 || true
     else
-        warn "couldn't download the Symbols Nerd Font; icons will show as boxes until a Nerd Font is installed"
+        warn "no se pudo descargar la fuente Symbols Nerd Font; los iconos se verán como cuadros hasta que instales una Nerd Font"
     fi
     rm -rf "$tmp"
 }
@@ -146,42 +146,46 @@ install_config() {  # name
     [[ $SRC_DIR -ef $target ]] && return
     if [[ -L $target ]]; then
         [[ ! -e $target || -e $target/.package-export ]] \
-            || die "$target is a link to something else; move it away, then run this again"
+            || die "$target es un enlace a otra cosa; muévelo aparte y vuelve a ejecutar esto"
         rm "$target"
     elif [[ -e $target ]]; then
         [[ -e $target/.package-export ]] \
-            || die "$target already exists and isn't $1; move it away, then run this again"
+            || die "$target ya existe y no es $1; muévelo aparte y vuelve a ejecutar esto"
         [[ $MODE == copy ]] \
-            || die "$target is an earlier copy of $1; remove it, or run this again with --copy to update it"
+            || die "$target es una copia anterior de $1; bórrala, o vuelve a ejecutar con --copy para actualizarla"
         # Not the copy's own state: its settings and matugen palette.
         tar -C "$SRC_DIR" --exclude=./.git --exclude=./settings.json --exclude=./colors/Colors.json -cf - . \
             | tar -C "$target" -xf -
-        info "Updated the copy in $target"
+        info "Copia actualizada en $target"
         return
     fi
     mkdir -p "$(dirname "$target")"
     if [[ $MODE == copy ]]; then
         mkdir -p "$target"
         tar -C "$SRC_DIR" --exclude=./.git -cf - . | tar -C "$target" -xf -
-        info "Copied to $target"
+        info "Copiada a $target"
     else
         ln -s "$SRC_DIR" "$target"
-        info "Linked $target -> $SRC_DIR"
+        info "Enlazada $target -> $SRC_DIR"
     fi
 }
 
 on_path() { [[ ":$PATH:" == *":$1:"* ]]; }
 
 # Links the command into a folder: as is, or with "sudo" as $3. A different
-# file of that name is left alone (ours say "Installed by <name>'s install.sh").
+# file of that name is left alone (ours name themselves in their header,
+# "Instalado por el install.sh de <name>"; installs made before the Spanish
+# messages still say "Installed by <name>'s install.sh").
 link_command() {  # source dest [sudo]
     local src=$1 dest=$2 name=${1##*/}
-    if [[ -e $dest || -L $dest ]] && ! grep -q "Installed by $name's install.sh" "$dest" 2>/dev/null; then
-        warn "$dest exists and isn't this package's; leaving it alone (use $src instead)"
+    # The command's header names itself in Spanish; an older install still
+    # says it in English, so accept both before overwriting.
+    if [[ -e $dest || -L $dest ]] && ! grep -qE "Installed by $name's install.sh|Instalado por el install.sh de $name" "$dest" 2>/dev/null; then
+        warn "$dest existe y no es de este paquete; no lo toco (usa $src en su lugar)"
         return 1
     fi
     ${3-} mkdir -p "$(dirname "$dest")" && ${3-} ln -sfn "$src" "$dest" || return 1
-    info "Installed the $name command in $(dirname "$dest")"
+    info "Comando $name instalado en $(dirname "$dest")"
 }
 
 # The line that puts ~/.local/bin on PATH for the user's shell.
@@ -208,12 +212,12 @@ install_command() {  # name
     fi
     local sys=${SYSTEM_BIN:-/usr/local/bin}
     if on_path "$sys" \
-        && confirm "$bin isn't on your PATH. Put the $name command in $sys instead (needs sudo)?" \
+        && confirm "$bin no está en tu PATH. ¿Pongo el comando $name en $sys (necesita sudo)?" \
         && link_command "$src" "$sys/$name" sudo; then
         return
     fi
     link_command "$src" "$bin/$name" || return 0
-    warn "$bin isn't on your PATH, so '$name' won't be found. Add it with"
+    warn "$bin no está en tu PATH, así que '$name' no se encontrará. Añádelo con"
     printf '     %s\n' "$(path_hint)" >&2
-    warn "then open a new terminal (and use $bin/$name in compositor keybinds, or log in again)."
+    warn "luego abre una terminal nueva (y usa $bin/$name en los atajos del compositor, o vuelve a iniciar sesión)."
 }

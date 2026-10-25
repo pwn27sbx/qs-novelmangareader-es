@@ -1,92 +1,116 @@
-# qs-novelmangareader
+# qs-novelmangareader (fork en español)
 
-An anime player, manga reader and novel reader for [Quickshell](https://quickshell.org),
-taken out of [dhrruvsharma/shell](https://github.com/dhrruvsharma/shell) so they can run
-without the rest of that rice. They open as side panels over your desktop:
-manga and anime on the left, novels on the right.
+Reproductor de anime, lector de manga y lector de novelas para
+[Quickshell](https://quickshell.org), sacados de
+[dhrruvsharma/shell](https://github.com/dhrruvsharma/shell) para poder usarlos sin el
+resto de ese rice. Se abren como paneles laterales sobre el escritorio: manga y anime a
+la izquierda, novelas a la derecha.
 
-- **Anime:** browse, search and keep a library; episodes play in `mpv`.
-- **Manga:** browse, search, favourite, download and read chapters.
-- **Novels:** browse, search, keep a library and read in the panel or full screen.
+- **Anime:** explorar, buscar y biblioteca; los episodios se reproducen en `mpv`.
+- **Manga:** explorar, buscar, favoritos, descargar y leer capítulos.
+- **Novelas:** explorar, buscar, biblioteca, y leer en el panel o a pantalla completa.
 
-Each one runs a small local Python server (`scripts/`) that fetches from the
-source sites. They start with the panel's service and only listen on
-`127.0.0.1` (anime 5050, manga 5150, novels 5151).
+Cada panel levanta un servidor Python local pequeño (`scripts/`) que consulta los sitios
+de origen. Arrancan con el servicio del panel y solo escuchan en `127.0.0.1` (anime 5050,
+manga 5150, novelas 5151).
 
-> This folder is generated from the rice by `packaging/export.sh`.
-> Report bugs and send changes to the rice repo, not here.
+> Este fork es **privado y local**: no se publica. El upstream del proyecto original es
+> [dhrruvsharma/qs-novelmangareader](https://github.com/dhrruvsharma/qs-novelmangareader)
+> (GPL-3.0); los errores del código original van a su repo, no aquí.
 
-## Spanish content
+## Qué añade este fork
 
-This fork adds Spanish sources on top of [dhrruvsharma/qs-novelmangareader](https://github.com/dhrruvsharma/qs-novelmangareader).
-The content it fetches is **Spanish by default**, and that is independent from the
-language of the UI:
+- **UI en español** (etiquetas, botones, estados, errores) con un **toggle EN/ES** que
+  persiste, y **contenido en español** por defecto, que es una preferencia aparte.
+- **Fuentes en español** para anime, manga y novelas (abajo).
+- **Adopción de Omarchy**: la app toma tema, tipografía, radios y componentes de
+  `qs.Commons` y `qs.Ui` en vez de mantener su propia copia.
+- **Widget de barra** de Omarchy: un icono que abre un menú **Anime / Manga / Novelas**
+  (`omarchy/pwnsxb.novelmangareader/`, con su propio README).
 
-- **Content language** — what the app fetches — comes from `QS_CONTENT_LANG` (an
-  ordered, comma-separated list of language tags; default `es`).
-- **UI language** — the panels' own text — comes from `QS_LANG` (default: your locale).
+## Idioma: UI y contenido son independientes
 
-So you can read Spanish content through an English UI, or the other way round.
+| Qué | Variable | Precedencia / valor por defecto |
+|---|---|---|
+| **UI** (textos de los paneles) | `QS_LANG` | `QS_LANG` → `settings.json` del app → `LANG` → `en` |
+| **Contenido** (subtítulos, capítulos) | `QS_CONTENT_LANG` | lista ordenada separada por comas; por defecto `es` |
 
-Default sources per panel:
+El toggle **EN/ES** del panel escribe `<config>/qs-novelmangareader/settings.json` y
+cambia la UI **en vivo**. `QS_LANG` manda sobre el archivo, y no se escribe nunca en el
+código: el wrapper pasa el entorno tal cual. Así puedes leer contenido en español con la
+UI en inglés, o al revés.
 
-- **Anime:** [JKAnime](https://jkanime.net) — Spanish-subtitled (hardsub) streams.
-- **Novels:** [SkyNovels](https://skynovels.net) — Spanish light/web novels.
-- **Manga/manhwa:** a fall-through chain — **MangaDex → InManga → zonatmo.net →
-  zonatmo.org** — so a title missing from one source is tried on the next. The last two
-  are ZonaTMO's two independent backends (a JSON API and the HTML site) that back each
-  other up; a source whose domain is down is skipped without breaking the panel.
+## Fuentes por panel
 
-When none of the sources has Spanish chapters, the reader says so plainly — naming the
-sources it checked and offering to search elsewhere — instead of showing content as if it
-were Spanish.
+- **Anime:** hianime primero; si el stream no trae pista de subtítulos en español, cae a
+  [JKAnime](https://jkanime.net) por título (subtítulos en español, hardsub).
+- **Manga / manhwa:** cadena **MangaDex → InManga → zonatmo.net → zonatmo.org**, de modo
+  que un título que falta en una fuente se busca en la siguiente. Las dos últimas son los
+  dos backends independientes de ZonaTMO (una API JSON y el sitio HTML) que se respaldan
+  entre sí; una fuente con el dominio caído se omite sin romper el panel.
+  Se puede forzar una fuente con `QS_MANGA_SOURCE=mangadex|inmanga|zonatmo|zonatmo_org|weebcentral|auto`.
+- **Novelas:** [SkyNovels](https://skynovels.net) en español; si el idioma de contenido no
+  es español, FreeWebNovel (inglés).
 
-## Requirements
+Cuando ninguna fuente tiene capítulos en español, el lector lo dice claramente —nombrando
+las fuentes que revisó— en vez de mostrar contenido como si fuera español. Si no hay
+capítulos en español para un manga concreto, se muestra en inglés **con un aviso
+prominente** en el detalle.
 
-- A Wayland compositor with layer-shell (Hyprland, Sway, niri, river, …)
-- `quickshell` (0.2 or newer), `python3`, `mpv`
-- Fonts: Noto Sans and a Nerd Font (for the icons)
+## Requisitos
 
-## Install
+- **Omarchy 4.0** con su shell de Quickshell. Es una dependencia dura: el repo enlaza
+  `Commons/` y `Ui/` a `/usr/share/omarchy/shell/{Commons,Ui}`, así que no funciona sin
+  Omarchy instalado. La app avisa en el log si la versión de Omarchy cambia de línea
+  (ver *Omarchy* abajo).
+- `qs` (Quickshell) — el que trae Omarchy, `python3` y `mpv`.
+- Fuentes: Noto Sans y una Nerd Font (para los iconos).
+
+## Instalar
 
 ```sh
-git clone <this repo> ~/.config/qs-novelmangareader
+git clone <este repo> ~/.config/qs-novelmangareader
 ~/.config/qs-novelmangareader/install.sh
 ```
 
-It lives in its own folder, `~/.config/qs-novelmangareader`, outside `~/.config/quickshell`,
-so it runs next to your own Quickshell config (or none) without touching it.
+Vive en su propia carpeta, `~/.config/qs-novelmangareader`, fuera de
+`~/.config/quickshell`, así que corre junto a tu propia configuración de Quickshell (o sin
+ninguna) sin tocarla.
 
-`install.sh` does everything:
+`install.sh` hace todo:
 
-- installs what the readers need with your package manager: Quickshell, Python, mpv,
-  Noto Sans and curl (pacman on Arch; apt on Debian/Ubuntu and dnf on Fedora, which
-  don't package Quickshell, so it tells you where to get it)
-- downloads the Symbols Nerd Font into `~/.local/share/fonts` if you have no Nerd Font
-- links the folder to `~/.config/qs-novelmangareader` if you cloned it elsewhere
-- puts the `qs-novelmangareader` command on your `PATH`: in `~/.local/bin` if that's on it, otherwise
-  (after asking) in `/usr/local/bin`, so it works in every shell and in keybinds right away
-- makes a venv with `flask`, `requests` and `curl_cffi` in
-  `~/.local/share/qs-novelmangareader/venv` for the backends
+- instala lo que los lectores necesitan con tu gestor de paquetes: Quickshell, Python, mpv,
+  Noto Sans y curl (pacman en Arch; apt en Debian/Ubuntu y dnf en Fedora, que no empaquetan
+  Quickshell, así que te dice dónde conseguirlo)
+- descarga la fuente Symbols Nerd Font en `~/.local/share/fonts` si no tienes ninguna Nerd
+  Font
+- enlaza la carpeta a `~/.config/qs-novelmangareader` si la clonaste en otro sitio
+- pone el comando `qs-novelmangareader` en tu `PATH`: en `~/.local/bin` si está en él; si
+  no, (tras preguntar) en `/usr/local/bin`, para que funcione en cualquier shell y en los
+  atajos del compositor desde el primer momento
+- crea un venv con `flask`, `requests` y `curl_cffi` en
+  `~/.local/share/qs-novelmangareader/venv` para los backends
 
-Options: `--no-deps` (skip packages and fonts), `--no-venv`, `--copy` (copy the folder
-instead of linking it), `--yes` (don't ask).
+Opciones: `--no-deps` (omite paquetes y fuentes), `--no-venv`, `--copy` (copia la carpeta
+en vez de enlazarla), `--yes` (no pregunta).
 
-Start it at login with `qs-novelmangareader` (it sits quietly until you open a panel).
+Arranca al iniciar sesión con `qs-novelmangareader` (queda callado hasta que abres un panel).
 
-## Commands and keybinds
+## Comandos y atajos
+
+Los tokens de comando son los mismos del original:
 
 ```sh
-qs-novelmangareader           # start it
-qs-novelmangareader anime     # open/close the anime player
-qs-novelmangareader manga     # open/close the manga reader
-qs-novelmangareader novel     # open/close the novel reader
-qs-novelmangareader stop      # quit it
-qs-novelmangareader log       # its log
+qs-novelmangareader           # arráncalo
+qs-novelmangareader anime     # abre/cierra el reproductor de anime
+qs-novelmangareader manga     # abre/cierra el lector de manga
+qs-novelmangareader novel     # abre/cierra el lector de novelas
+qs-novelmangareader stop      # ciérralo
+qs-novelmangareader log       # su registro
 ```
 
-Underneath that's `qs -p ~/.config/qs-novelmangareader …`, with IPC targets
-`animePlayer`, `mangaReader` and `novelReader` (each has `toggle`).
+Por debajo es `qs -p ~/.config/qs-novelmangareader …`, con los destinos IPC `animePlayer`,
+`mangaReader` y `novelReader` (cada uno con `toggle`).
 
 Hyprland:
 
@@ -106,32 +130,59 @@ bindsym $mod+Alt+m exec qs-novelmangareader manga
 bindsym $mod+Alt+n exec qs-novelmangareader novel
 ```
 
-The minimize button in a panel's header hides it but keeps your place; the
-next toggle brings it back as you left it.
+El botón de minimizar del header oculta el panel pero guarda tu lugar; el siguiente toggle
+lo devuelve como lo dejaste.
 
-## Colours
+## Widget de barra de Omarchy
 
-The panels use a Material You palette from `colors/Colors.json` in this folder,
-with a built-in dark purple default when the file is missing. To follow your
-wallpaper with [matugen](https://github.com/InioX/matugen), add the bundled template
-to `~/.config/matugen/config.toml`:
+El widget `pwnsxb.novelmangareader` vive en `omarchy/pwnsxb.novelmangareader/` y tiene su
+propio README con la instalación (copiar o enlazar a `~/.config/omarchy/plugins/`) y cómo
+añadirlo a la barra.
 
-```toml
-[templates.qs-novelmangareader]
-input_path  = "~/.config/qs-novelmangareader/extras/matugen/quickshell.json.hbs"
-output_path = "~/.config/qs-novelmangareader/colors/Colors.json"
+## Omarchy
+
+La app se escribe contra **una línea de Omarchy: `4.0`**. Al arrancar ejecuta
+`omarchy version` y, si el mayor/menor no coincide (o es un checkout `dev`), escribe **un**
+aviso en el log; **no bloquea**: los paneles siguen abriendo.
+
+```sh
+qs-novelmangareader log | grep -i omarchy
 ```
 
-The panels pick up a new palette as soon as the file changes.
+El camino de actualización (actualizar, reiniciar shell y app, leer el log, correr las
+suites y subir `supported` a propósito) está documentado en el README del widget, sección
+*Updating Omarchy*.
 
-## Your data
+## Colores
 
-- Libraries and reading progress: `~/.local/share/quickshell/{anime,manga}_library.json`,
+La paleta sale del tema de Omarchy (`qs.Commons.Color`, respaldado por
+`~/.local/state/omarchy/current/theme/colors.toml`). No hay copia propia ni archivo de
+paleta que mantener: cambiar el tema de Omarchy cambia la app. `app/Colors.qml` solo traduce
+los nombres de rol que usan las vistas a los colores del sistema.
+`extras/matugen/quickshell.json.hbs` es legado de antes de adoptar Omarchy y ya no se usa.
+
+## Tus datos
+
+- Bibliotecas y progreso de lectura: `~/.local/share/quickshell/{anime,manga}_library.json`,
   `~/.local/share/quickshell/new_novel_library.json`
-- Downloads and caches: `~/.local/share/quickshell-manga`, `~/.local/share/quickshell-novel`
+- Descargas y cachés: `~/.local/share/quickshell-manga`, `~/.local/share/quickshell-novel`
 
-These are the same paths the full rice uses, so moving between the two keeps your library.
+Son las mismas rutas que usa el rice completo, así que moverse entre los dos conserva tu
+biblioteca.
 
-## License
+## Desarrollo y pruebas
 
-GPL-3.0-or-later, the same as the rice it comes from. See `LICENSE`.
+```sh
+node --test                  # i18n, lint de estilo, lint de i18n, CLI, guardia de Omarchy
+node tools/lint-i18n.js      # literales en inglés sin I18n.t
+node tools/lint-style.js     # números crudos de radio/espaciado/tipografía
+python3 -m unittest discover -s tests -p "test_*.py"   # backends (fixtures, sin red)
+```
+
+Las pruebas de los backends usan fixtures grabadas y `HOME`/`XDG_DATA_HOME` temporales:
+**nunca** apuntan a `~/.local/share/quickshell*` reales. Las pruebas en vivo contra los
+sitios están detrás de variables de entorno opcionales (`INMANGA_LIVE_TESTS=1`).
+
+## Licencia
+
+GPL-3.0-or-later, la misma del rice del que viene. Ver `LICENSE`.

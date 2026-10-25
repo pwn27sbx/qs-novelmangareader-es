@@ -127,7 +127,7 @@ Dos preferencias **independientes**:
 - [x] **WU-7** — Subtítulos ES por `label` (gate aprobado; `lang` es constante "en"). `scripts/subtitles.py` + tests. *(F1.5-1)*
 - [x] **WU-8** — MangaDex ES (`es-la`), mismo contrato JSON; fuente seleccionable; tests con fixtures. *(F1.5-2, §15.5)*
 - [x] **WU-11** — Toggle de idioma (EN/ES) + `settings.json`; `I18n.lang` **reactivo** (cambio en vivo). *(pedido del dueño)*
-- [ ] **WU-9** — Instalador / CLI / README. *(F2)*
+- [x] **WU-9** — Instalador / CLI / README. *(F2)*
 - [ ] **WU-10** — Fallback anime con `ani-cli` (`ANI_CLI_PLAYER=debug`), opcional. *(F3-2)*
 - [x] **WU-4** — Envolver novela (**DIFERIDO AL FINAL**, omitible). *(F1-6)*
 
@@ -263,9 +263,21 @@ Pendiente (humano): la QA **visual** real (acentos `á é í ó ú ñ ¿ ¡`, de
 | TAREA A (manga EN fallback) | `e8b2a27` | 2026-10-11 | ✅ completo |
 | TAREA B (widget barra Omarchy) | `3942ed6` | 2026-10-11 | ✅ completo |
 | Fix default provider novelas (ES) | `322b09a` | 2026-10-11 | ✅ completo |
+| WU-9 instalador/CLI/README | (ver `git log`) | 2026-10-25 | ✅ completo |
 
 ---
 
+## WU-9 — mensajes en español del instalador, el CLI y el README (2026-10-25)
+
+- **Superficies**: `install.sh`, `scripts/install-common.sh`, `bin/qs-novelmangareader`, `README.md`, `tests/cli.test.js`. Nada más.
+- **Tokens intactos**: siguen iguales `anime`, `manga`, `novel`, `start`, `stop`, `log`, `--help`, `--no-deps`, `--no-venv`, `--copy`, `--yes`, los destinos IPC y las rutas. El texto de ayuda sale de un rango fijo de `sed`, así que el número de líneas del bloque de cabecera se mantuvo (10 en `install.sh`, 9 en el CLI) — el test lo fija.
+- **Marcador del comando**: el CLI se identifica en su cabecera («Instalado por el install.sh de qs-novelmangareader») y `link_command` acepta **las dos** frases, la nueva y la inglesa, para no rechazar una instalación anterior.
+- **Prompt de confirmación**: `[S/n]` y acepta `s`/`S`/`y`/`Y` (antes `[Y/n]`).
+- **README**: reescrito en español y **actualizado al estado real**: Omarchy 4.0 como dependencia dura (symlinks), la guardia de versión y su camino de actualización, las fuentes ES de los tres paneles, el widget de barra, el toggle EN/ES y que la paleta ya no se mantiene aquí (`extras/matugen` es legado). La sección de colores decía «Material You desde `colors/Colors.json`», que dejó de ser cierto en R-C1.
+- **Tests** `tests/cli.test.js` (5): tokens del `--help`, `--help` en español en las dos herramientas, todas las banderas, e **instalación completa en un `HOME` temporal** (`--no-deps --no-venv --yes`, sin sudo: `SYSTEM_BIN` fuera del `PATH` para que la rama de `sudo` no sea alcanzable).
+- **Evidencia**: `node --test` 44/44; `./bin/qs-novelmangareader --help` y `./install.sh --help` en español; instalación temporal crea el symlink de config y el comando.
+- **No verificado**: la rama de `sudo` de `install_command` y la instalación de paquetes (`install_system_packages`), que necesitan sudo y red; y `--copy` contra una copia previa.
+
 ## Próximo paso
 
-WU-7, WU-8 y WU-11 completos. Siguiente (con validación individual del dueño): **WU-9** (instalador/CLI/README), **WU-10** (ani-cli, opcional). Además: QA visual humana, ajuste de desbordes, y validación del toggle y de la fuente de manga en la UI real.
+WU-9 cerrado. Siguiente: **R2** (header/panel con `qs.Ui`) y, si el dueño lo aprueba, **WU-10** (ani-cli, opcional). Pendiente humano: QA visual de los textos en español y la publicación del fork.
