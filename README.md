@@ -48,7 +48,10 @@ UI en inglés, o al revés.
   que un título que falta en una fuente se busca en la siguiente. Las dos últimas son los
   dos backends independientes de ZonaTMO (una API JSON y el sitio HTML) que se respaldan
   entre sí; una fuente con el dominio caído se omite sin romper el panel.
-  Se puede forzar una fuente con `QS_MANGA_SOURCE=mangadex|inmanga|zonatmo|zonatmo_org|weebcentral|auto`.
+  Se puede forzar una fuente con `QS_MANGA_SOURCE`: `mangadex`, `inmanga`,
+  `zonatmo` (zonatmo.net), `zonatmo_org` (zonatmo.org) y `weebcentral` (inglés, sin
+  capítulos en español) fijan esa fuente; `auto` (por defecto) elige por el idioma de
+  contenido: español → la cadena, cualquier otro → WeebCentral.
 - **Novelas:** [SkyNovels](https://skynovels.net) en español; si el idioma de contenido no
   es español, FreeWebNovel (inglés).
 

@@ -72,5 +72,5 @@ Listo. Arráncalo con
     qs-novelmangareader manga
     qs-novelmangareader novel
 
-Mira README.md para ejemplos de compositor y para los colores de matugen.
+Mira README.md para los ejemplos de compositor; los colores salen del tema de Omarchy.
 MSG

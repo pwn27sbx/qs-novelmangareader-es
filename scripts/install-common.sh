@@ -153,7 +153,8 @@ install_config() {  # name
             || die "$target ya existe y no es $1; muévelo aparte y vuelve a ejecutar esto"
         [[ $MODE == copy ]] \
             || die "$target es una copia anterior de $1; bórrala, o vuelve a ejecutar con --copy para actualizarla"
-        # Not the copy's own state: its settings and matugen palette.
+        # Not the copy's own state: its settings and the palette file an
+        # install from before the Omarchy adoption still carries.
         tar -C "$SRC_DIR" --exclude=./.git --exclude=./settings.json --exclude=./colors/Colors.json -cf - . \
             | tar -C "$target" -xf -
         info "Copia actualizada en $target"

@@ -29,8 +29,10 @@ function run(script, args, env) {
     });
 }
 
-// Spanish help for a Spanish fork: an accented word or a Spanish verb.
+// Spanish help for a Spanish fork: an accented word or a Spanish verb, and
+// none of the English words the original help used.
 const SPANISH = /[áéíóúñ¿¡]|\b(inicia|arranca|abre|cierra|instala|opciones|registro|comando)\b/i;
+const ENGLISH_LEFTOVER = /\b(skip|download|copy the folder|don't ask|start it|quit it|its log|install the system)\b/i;
 
 test("the command --help prints and keeps the command tokens", () => {
     const result = run(BIN, ["--help"]);
@@ -43,6 +45,7 @@ test("the command --help prints and keeps the command tokens", () => {
 test("the command --help is in Spanish", () => {
     const result = run(BIN, ["--help"]);
     assert.match(result.stdout, SPANISH);
+    assert.doesNotMatch(result.stdout, ENGLISH_LEFTOVER);
 });
 
 test("install.sh --help prints and keeps every flag", () => {
@@ -55,6 +58,7 @@ test("install.sh --help prints and keeps every flag", () => {
 test("install.sh --help is in Spanish", () => {
     const result = run(INSTALL, ["--help"]);
     assert.match(result.stdout, SPANISH);
+    assert.doesNotMatch(result.stdout, ENGLISH_LEFTOVER);
 });
 
 test("install.sh installs into a temporary HOME without sudo", () => {
@@ -75,7 +79,16 @@ test("install.sh installs into a temporary HOME without sudo", () => {
         "the config folder is not a symlink");
     assert.ok(fs.existsSync(path.join(home, ".local/bin/qs-novelmangareader")),
         "the command was not installed");
-    // The marker install.sh greps before overwriting the command.
+    // The marker install.sh greps before overwriting the command: it lives in
+    // the command's header and in install-common.sh's grep, so both have to
+    // carry the same phrase or every reinstall refuses to replace the file.
     const command = fs.readFileSync(path.join(home, ".local/bin/qs-novelmangareader"), "utf8");
-    assert.match(command, /install\.sh/);
+    const common = fs.readFileSync(path.join(ROOT, "scripts/install-common.sh"), "utf8");
+    // The command names itself; the installer greps the same sentence with
+    // the command name interpolated.
+    const sentence = "Instalado por el install.sh de ";
+    assert.ok(command.includes(sentence + "qs-novelmangareader"),
+        "the command header lost the install marker");
+    assert.ok(common.includes(sentence + "$name"),
+        "install-common.sh no longer greps the install marker");
 });
