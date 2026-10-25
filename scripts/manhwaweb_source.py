@@ -80,18 +80,20 @@ CACHE_LIMIT = 200
 def _cached(key, ttl, fn):
     with _lock:
         hit = _cache.get(key)
-    if hit and (time.time() - hit[0]) < ttl:
+    if hit and (time.time() - hit[0]) < hit[2]:
         return hit[1]
     value = fn()
     now = time.time()
     with _lock:
         # A long-lived server would otherwise keep every expired search page.
+        # Each entry carries its own TTL, so a short-lived entry cannot evict a
+        # still-valid long-lived one.
         if len(_cache) >= CACHE_LIMIT:
-            for stale in [k for k, (at, _) in _cache.items() if (now - at) >= ttl]:
+            for stale in [k for k, (at, _, entry_ttl) in _cache.items() if (now - at) >= entry_ttl]:
                 _cache.pop(stale, None)
             while len(_cache) >= CACHE_LIMIT:
                 _cache.pop(next(iter(_cache)), None)
-        _cache[key] = (now, value)
+        _cache[key] = (now, value, ttl)
     return value
 
 
@@ -168,10 +170,14 @@ def map_info(raw):
     chapters.sort(key=lambda c: float(c["chapter"] or 0), reverse=True)
     tags = [v for pair in (raw.get("_categoris") or []) if isinstance(pair, dict) for v in pair.values()
             if isinstance(v, str)]
-    # `autor` / `artista` are arrays of {"_id", "name"} objects, not strings.
+    # `autor` / `artista` are arrays of {"_id", "name"} objects, but a bare
+    # string is accepted too: iterating it blindly would split the name into
+    # characters.
     authors = []
     for field in ("autor", "artista"):
-        for person in raw.get(field) or []:
+        value = raw.get(field)
+        people = [value] if isinstance(value, str) else (value or [])
+        for person in people:
             name = person.get("name") if isinstance(person, dict) else person
             if name and name not in authors:
                 authors.append(name)

@@ -58,6 +58,10 @@ class MappingTest(unittest.TestCase):
         self.assertIn("Drama", data["tags"])
         self.assertTrue(data["description"].startswith("Tras heredar"))
 
+    def test_a_scalar_author_is_not_split_into_characters(self):
+        data = manhwaweb_source.map_info({"_id": "x_1", "autor": "Kimtuk", "chapters": []})
+        self.assertEqual(data["authors"], ["Kimtuk"])
+
     def test_authors_are_names_not_objects(self):
         data = manhwaweb_source.map_info(INFO)
         self.assertTrue(data["authors"])
@@ -85,10 +89,18 @@ class CacheTest(unittest.TestCase):
     def setUp(self):
         manhwaweb_source.clear_cache()
 
+    def test_a_short_lived_entry_does_not_evict_a_valid_one(self):
+        with manhwaweb_source._lock:
+            manhwaweb_source._cache["valid"] = (__import__("time").time(), {"ok": 1}, 600)
+            for i in range(manhwaweb_source.CACHE_LIMIT):
+                manhwaweb_source._cache[f"short:{i}"] = (0.0, {"x": i}, 1)
+        manhwaweb_source._cached("fresh", 1, lambda: {"ok": 2})
+        self.assertIn(("valid"), manhwaweb_source._cache)
+
     def test_the_cache_drops_expired_entries_instead_of_growing_forever(self):
         with manhwaweb_source._lock:
             for i in range(manhwaweb_source.CACHE_LIMIT + 10):
-                manhwaweb_source._cache[f"old:{i}"] = (0.0, {"x": i})
+                manhwaweb_source._cache[f"old:{i}"] = (0.0, {"x": i}, 300)
         manhwaweb_source._cached("fresh", 300, lambda: {"ok": True})
         self.assertLessEqual(len(manhwaweb_source._cache), manhwaweb_source.CACHE_LIMIT)
 
