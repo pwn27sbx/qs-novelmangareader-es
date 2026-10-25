@@ -95,7 +95,13 @@ class CacheTest(unittest.TestCase):
             for i in range(manhwaweb_source.CACHE_LIMIT):
                 manhwaweb_source._cache[f"short:{i}"] = (0.0, {"x": i}, 1)
         manhwaweb_source._cached("fresh", 1, lambda: {"ok": 2})
-        self.assertIn(("valid"), manhwaweb_source._cache)
+        # The retained entry is still usable, and asking for it does not reload.
+        self.assertEqual(manhwaweb_source._cached("valid", 600, lambda: {"ok": 0}), {"ok": 1})
+
+    def test_a_shorter_ttl_call_cannot_read_a_stale_entry(self):
+        with manhwaweb_source._lock:
+            manhwaweb_source._cache["k"] = (0.0, {"old": True}, 600)
+        self.assertEqual(manhwaweb_source._cached("k", 1, lambda: {"old": False}), {"old": False})
 
     def test_the_cache_drops_expired_entries_instead_of_growing_forever(self):
         with manhwaweb_source._lock:

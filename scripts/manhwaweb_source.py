@@ -80,7 +80,9 @@ CACHE_LIMIT = 200
 def _cached(key, ttl, fn):
     with _lock:
         hit = _cache.get(key)
-    if hit and (time.time() - hit[0]) < hit[2]:
+    # A hit honours the shorter of the TTL it was stored with and the one asked
+    # for now, so a later short-TTL call can never read a stale value.
+    if hit and (time.time() - hit[0]) < min(hit[2], ttl):
         return hit[1]
     value = fn()
     now = time.time()
