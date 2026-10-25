@@ -167,6 +167,20 @@ Item {
         spacing: Style.spacing.xs
         Behavior on anchors.topMargin { NumberAnimation { duration: Motion.slow; easing.type: Motion.easeOut } }
 
+        // Wheel speed is a preference, not a constant: Qt's default notch is a
+        // few dozen pixels, which crawls through a full page. `scrollFactor`
+        // (settings.json, default 2) multiplies it.
+        WheelHandler {
+            blocking: true
+            acceptedDevices: PointerDevice.Mouse | PointerDevice.TouchPad
+            onWheel: function(event) {
+                const step = event.angleDelta.y !== 0 ? event.angleDelta.y : -event.pixelDelta.y
+                const limit = Math.max(0, pageListView.contentHeight - pageListView.height)
+                pageListView.contentY = Math.max(0, Math.min(limit, pageListView.contentY - step * UiPrefs.scrollFactor))
+                event.accepted = true
+            }
+        }
+
         // Tap anywhere to toggle header
         MouseArea {
             anchors.fill: parent

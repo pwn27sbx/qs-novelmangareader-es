@@ -318,9 +318,8 @@ function settingsLanguage(text) {
 }
 
 // Serialised settings.json contents for a language.
-function settingsJson(lang) {
-    return JSON.stringify({ language: normalizeLang(lang) === "es" ? "es" : "en" }, null, 2) + "\n";
-}
+// The settings writer moved to services/prefs.js: it has to preserve the
+// other keys (scrollFactor), which a language-only serialiser did not.
 
 // Exposed for the Node test runner only; QML's import ignores `module`.
 if (typeof module !== "undefined" && module.exports) {
@@ -334,7 +333,6 @@ if (typeof module !== "undefined" && module.exports) {
         tSource: tSource,
         normalizeLang: normalizeLang,
         resolveLang: resolveLang,
-        settingsLanguage: settingsLanguage,
-        settingsJson: settingsJson
+        settingsLanguage: settingsLanguage
     };
 }

@@ -266,6 +266,7 @@ Pendiente (humano): la QA **visual** real (acentos `á é í ó ú ñ ¿ ¡`, de
 | WU-9 instalador/CLI/README | (ver `git log`) | 2026-10-25 | ✅ completo |
 | WU-10 fallback ani-cli-mx | (ver `git log`) | 2026-10-25 | ✅ completo |
 | Fuente ManhwaWeb (5ª ES) | (ver `git log`) | 2026-10-25 | ✅ completo |
+| Velocidad de scroll (settings) | (ver `git log`) | 2026-10-25 | ✅ completo |
 
 ---
 
@@ -290,6 +291,25 @@ Pendiente (humano): la QA **visual** real (acentos `á é í ó ú ñ ¿ ¡`, de
 - **Tests**: `tests/test_anicli_fallback.py` (13: parseo sobre fixture real, comando, binario ausente, CLI que falla, timeout, `QS_ANIME_CLI`, caché) + `tests/test_anime_fallback.py` (4: el cableado con la cadena simulada; se saltan fuera del venv).
 - **En vivo**: `fetch('naruto', '1')` → `970`, `m3u8`, `AnimeAV1`, con `referer` al player.
 - **Límite conocido**: los ítems con id `jkanime:<slug>` no pasan por el respaldo (la ruta solo tiene el slug, no el título); se documenta y no se toca el contrato del panel.
+
+## Velocidad de scroll de los lectores (2026-10-25)
+
+- **Problema**: el lector de manga es un `ListView` (y el de novela un `Flickable`) sin
+  ninguna preferencia de rueda: usaba el paso por defecto de Qt (unas decenas de píxeles),
+  que con páginas de ~760 px se siente lentísimo. No existía ningún «apartado» para tocarlo.
+- **Arreglo**: `WheelHandler` (con `blocking: true`) en los dos lectores, que mueve
+  `contentY` con `step * scrollFactor` y respeta el tope (nunca pasa del final).
+- **Preferencia**: `scrollFactor` en `<config>/qs-novelmangareader/settings.json`, `1..10`,
+  **por defecto 2**. Se lee en `services/UiPrefs.qml` (singleton) con los helpers puros de
+  `services/prefs.js`.
+- **Un solo archivo, dos escritores**: el toggle de idioma antes serializaba `{language}` a
+  secas y habría borrado `scrollFactor`; ahora `prefs.withLanguage()` **fusiona** sobre el
+  documento existente (y `i18n.settingsJson` se retiró con su test).
+- **Tests**: `tests/prefs.test.js` (5: parseo, clamp, merge, archivo roto, salto de línea).
+  Verificado en QML con un `settings.json` temporal: `scrollFactor: 7` → 7; `"mucho"` → 2;
+  sin archivo → 2.
+- **No verificado por mí**: la sensación real de la rueda (no puedo sintetizar eventos de
+  rueda sin `ydotool`); lo prueba el dueño y se ajusta el valor.
 
 ## Próximo paso
 

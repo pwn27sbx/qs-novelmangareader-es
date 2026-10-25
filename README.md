@@ -40,6 +40,23 @@ cambia la UI **en vivo**. `QS_LANG` manda sobre el archivo, y no se escribe nunc
 código: el wrapper pasa el entorno tal cual. Así puedes leer contenido en español con la
 UI en inglés, o al revés.
 
+### Preferencias (`settings.json`)
+
+```json
+{
+  "language": "es",
+  "scrollFactor": 2
+}
+```
+
+- `language` — `"en"` o `"es"`; lo escribe el toggle del panel.
+- `scrollFactor` — cuánto avanza **una muesca de rueda** en los lectores de manga y
+  novela. Por defecto `2`; acepta de `1` a `10`. Súbelo si el scroll te resulta lento
+  (por ejemplo `3` o `4`) y reinicia el app para que lo lea.
+
+El archivo lo comparten el toggle de idioma y los lectores: cada uno conserva las claves
+del otro (servicios `services/prefs.js`).
+
 ## Fuentes por panel
 
 - **Anime:** hianime primero; si el stream no trae pista de subtítulos en español, cae a

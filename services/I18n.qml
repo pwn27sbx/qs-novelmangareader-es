@@ -3,6 +3,7 @@ import QtQuick
 import Quickshell
 import Quickshell.Io
 import "i18n.js" as Core
+import "prefs.js" as Prefs
 
 // Central i18n singleton. Quickshell module pattern (pragma Singleton +
 // Singleton {} + `import qs.services`), so there is NO qmldir involved.
@@ -59,7 +60,8 @@ Singleton {
         const next = Core.normalizeLang(code) === "es" ? "es" : "en"
         root.lang = next
         root.settingsLang = next
-        settingsWriter.setText(Core.settingsJson(next))
+        // Keep whatever else the user has in settings.json (scrollFactor).
+        settingsWriter.setText(Prefs.withLanguage(settingsReader.text(), next))
         settingsWriter.save()
     }
 

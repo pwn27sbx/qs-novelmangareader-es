@@ -202,6 +202,18 @@ Item {
         clip: true; boundsBehavior: Flickable.StopAtBounds
         Behavior on anchors.topMargin { NumberAnimation { duration: Motion.slow; easing.type: Motion.easeOut } }
 
+        // Same wheel preference as the manga reader (settings.json).
+        WheelHandler {
+            blocking: true
+            acceptedDevices: PointerDevice.Mouse | PointerDevice.TouchPad
+            onWheel: function(event) {
+                const step = event.angleDelta.y !== 0 ? event.angleDelta.y : -event.pixelDelta.y
+                const limit = Math.max(0, textScroll.contentHeight - textScroll.height)
+                textScroll.contentY = Math.max(0, Math.min(limit, textScroll.contentY - step * UiPrefs.scrollFactor))
+                event.accepted = true
+            }
+        }
+
         MouseArea {
             anchors.fill: parent; propagateComposedEvents: true
             onClicked: { readerView.headerVisible = !readerView.headerVisible; mouse.accepted = false }

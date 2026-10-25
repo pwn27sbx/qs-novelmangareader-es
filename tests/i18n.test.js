@@ -107,10 +107,8 @@ test("settingsLanguage() reads the language key safely", () => {
     assert.equal(i18n.settingsLanguage("not json"), "");
 });
 
-test("settingsJson() serialises a language", () => {
-    assert.deepEqual(JSON.parse(i18n.settingsJson("es")), { language: "es" });
-    assert.deepEqual(JSON.parse(i18n.settingsJson("fr")), { language: "en" });
-});
+// The settings writer lives in services/prefs.js now (tests/prefs.test.js):
+// it has to keep the keys the language toggle does not own.
 
 test("es and en expose the exact same key set", () => {
     const es = Object.keys(i18n.tables.es).sort();
