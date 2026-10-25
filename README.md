@@ -40,7 +40,18 @@ cambia la UI **en vivo**. `QS_LANG` manda sobre el archivo, y no se escribe nunc
 código: el wrapper pasa el entorno tal cual. Así puedes leer contenido en español con la
 UI en inglés, o al revés.
 
-### Preferencias (`settings.json`)
+### Ajustes (el engranaje del panel)
+
+El botón **`󰒓`** del header, en cualquiera de los tres paneles, abre la vista de ajustes:
+
+- **Velocidad de scroll** — cuánto avanza una muesca de rueda en el lector (1..10,
+  por defecto `2`). Se aplica **en vivo**; en el panel de anime no aparece, porque no tiene
+  lector. El slider se maneja con ratón o rueda.
+- **Interfaz en español** — el mismo cambio que el chip `EN`, pero explicado y persistente.
+  Si tienes `QS_LANG` en el entorno, esa variable manda y la fila lo dice (se ve atenuada).
+
+Se cierra con la flecha de volver o `Esc`. Todo se guarda en
+`<config>/qs-novelmangareader/settings.json`:
 
 ```json
 {
@@ -49,13 +60,8 @@ UI en inglés, o al revés.
 }
 ```
 
-- `language` — `"en"` o `"es"`; lo escribe el toggle del panel.
-- `scrollFactor` — cuánto avanza **una muesca de rueda** en los lectores de manga y
-  novela. Por defecto `2`; acepta de `1` a `10`. Súbelo si el scroll te resulta lento
-  (por ejemplo `3` o `4`) y reinicia el app para que lo lea.
-
-El archivo lo comparten el toggle de idioma y los lectores: cada uno conserva las claves
-del otro (servicios `services/prefs.js`).
+Un solo escritor mantiene ese archivo (`services/UiPrefs.qml`): cambiar una clave nunca
+borra la otra.
 
 ## Fuentes por panel
 

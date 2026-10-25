@@ -30,6 +30,17 @@ test("normalizeScrollFactor() clamps and falls back", () => {
     assert.equal(prefs.normalizeScrollFactor(0.2), prefs.MIN_SCROLL_FACTOR);
 });
 
+test("withSetting() writes one key and keeps the rest", () => {
+    const before = JSON.stringify({ language: "en", scrollFactor: 4 });
+    const after = JSON.parse(prefs.withSetting(before, "scrollFactor", 7));
+    assert.equal(after.scrollFactor, 7);
+    assert.equal(after.language, "en");
+});
+
+test("withSetting() adds the key when the document is empty", () => {
+    assert.deepEqual(JSON.parse(prefs.withSetting("", "scrollFactor", 3)), { scrollFactor: 3 });
+});
+
 test("withLanguage() keeps the reader's scrollFactor", () => {
     const before = JSON.stringify({ language: "en", scrollFactor: 4 });
     const after = JSON.parse(prefs.withLanguage(before, "es"));

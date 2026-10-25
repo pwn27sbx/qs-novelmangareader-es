@@ -1,5 +1,6 @@
 import QtQuick
 import qs.app
+import qs.services
 import qs.Commons
 import qs.Ui
 
@@ -21,6 +22,9 @@ Item {
     property bool showSearch: true
     property bool searchOpen: false
     property bool showMode: false
+    // While the settings view is open the content controls step aside: search,
+    // SUB/DUB and the module action belong to the list, not to settings.
+    property bool settingsMode: false
     property string mode: ""
     // Module-specific action (the novel panel's provider dropdown), placed
     // between the SUB/DUB pair and the language chip.
@@ -32,6 +36,7 @@ Item {
 
     signal tabActivated(int index)
     signal searchClicked()
+    signal settingsClicked()
     signal modeSelected(string value)
     signal minimizeClicked()
 
@@ -93,7 +98,7 @@ Item {
         spacing: Style.spacing.controlGap
 
         PanelActionButton {
-            visible: root.showSearch && root.tabIndex === 0
+            visible: !root.settingsMode && root.showSearch && root.tabIndex === 0
             iconText: "⌕"
             hasCursor: root.searchOpen
             size: Style.space(36)
@@ -102,7 +107,7 @@ Item {
         }
 
         Row {
-            visible: root.showMode && root.tabIndex === 0
+            visible: !root.settingsMode && root.showMode && root.tabIndex === 0
             spacing: Style.spacing.xs
 
             Repeater {
@@ -127,12 +132,22 @@ Item {
 
         Loader {
             anchors.verticalCenter: parent.verticalCenter
-            visible: root.extraAction !== null && root.tabIndex === 0 && !root.searchOpen
+            visible: !root.settingsMode && root.extraAction !== null && root.tabIndex === 0 && !root.searchOpen
             sourceComponent: root.extraAction
         }
 
         LanguageToggle {
+            visible: !root.settingsMode
             anchors.verticalCenter: parent.verticalCenter
+        }
+
+        PanelActionButton {
+            iconText: "󰒓"
+            tooltipText: I18n.t("settings.open")
+            focusable: true
+            hasCursor: root.settingsMode
+            size: Style.space(36)
+            onClicked: root.settingsClicked()
         }
 
         PanelActionButton {

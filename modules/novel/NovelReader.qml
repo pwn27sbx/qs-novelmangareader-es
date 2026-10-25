@@ -25,6 +25,9 @@ Item {
     property bool fullscreen: false
     property int tabIndex: 0
 
+    // Gear in the header: the settings view replaces the content stack.
+    property bool settingsMode: false
+
     // ── Search state ──────────────────────────────────────────────────────────
     property bool searchOpen: false
 
@@ -68,7 +71,12 @@ Item {
             tabIndex: root.tabIndex
             searchOpen: root.searchOpen
             fontFamily: root.fontBody
-            onTabActivated: function(index) { root.tabIndex = index }
+            settingsMode: root.settingsMode
+            onTabActivated: function(index) {
+                root.settingsMode = false
+                root.tabIndex = index
+            }
+            onSettingsClicked: root.settingsMode = !root.settingsMode
             onSearchClicked: root.searchOpen ? root.closeSearch() : root.openSearch()
             onMinimizeClicked: root.minimize()
 
@@ -281,7 +289,8 @@ Item {
 
         StackLayout {
             Layout.fillWidth: true; Layout.fillHeight: true
-            currentIndex: root.tabIndex
+            currentIndex: root.settingsMode ? 2 : root.tabIndex
+
 
             Item {
                 BrowseView {
@@ -364,6 +373,14 @@ Item {
                         libraryReader.reset()
                     }
                 }
+            }
+
+            // Settings view (gear in the header). Third page of the same stack,
+            // so Browse/Library keep their state while it is open.
+            PanelSettings {
+                showScroll: true
+                active: root.settingsMode
+                onCloseRequested: root.settingsMode = false
             }
         }
     }

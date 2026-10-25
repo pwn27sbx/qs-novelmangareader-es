@@ -4,11 +4,17 @@ import Quickshell
 import Quickshell.Io
 import "prefs.js" as Core
 
-// Reader/UI preferences kept in <config>/qs-novelmangareader/settings.json.
+// The app's preferences, and the ONLY writer of
+// <config>/qs-novelmangareader/settings.json.
 //
-// Today: `scrollFactor`, how far one wheel notch moves a reader (default 2).
-// The language toggle owns `language` in the same file; both writers keep the
-// other's keys (see services/prefs.js).
+// Two features own a key here: the language row (`language`) and the readers
+// (`scrollFactor`). There used to be two writers with two in-memory copies of
+// the file, which is how one key could clobber the other; every write now goes
+// through `setSetting()`, which merges into what is on disk-as-loaded and
+// preserves the rest (services/prefs.js).
+//
+// The values are reactive: `scrollFactor` is read by the readers' wheel
+// handlers and `language` by I18n, so a change applies without a restart.
 Singleton {
     id: root
 
@@ -20,15 +26,27 @@ Singleton {
 
     property string raw: ""
 
+    // "es" | "en" when the file says so, "" otherwise (I18n applies the rest
+    // of its precedence: QS_LANG -> settings -> LANG -> en).
+    readonly property string language: {
+        const value = Core.parseSettings(root.raw).language
+        return (value === "es" || value === "en") ? value : ""
+    }
+
     // 1..10; a missing or broken value falls back to the default.
     readonly property real scrollFactor: Core.normalizeScrollFactor(Core.parseSettings(root.raw).scrollFactor)
 
-    function setScrollFactor(value) {
-        const data = Core.parseSettings(root.raw)
-        data.scrollFactor = Core.normalizeScrollFactor(value)
-        root.raw = JSON.stringify(data, null, 2) + "\n"
+    function setSetting(key, value) {
+        root.raw = Core.withSetting(root.raw, key, value)
         writer.setText(root.raw)
-        writer.save()
+    }
+
+    function setLanguage(code) {
+        root.setSetting("language", String(code) === "es" ? "es" : "en")
+    }
+
+    function setScrollFactor(value) {
+        root.setSetting("scrollFactor", Core.normalizeScrollFactor(value))
     }
 
     FileView {
@@ -43,5 +61,14 @@ Singleton {
         path: root.settingsPath
     }
 
-    Component.onCompleted: reader.reload()
+    // The config dir may not exist on a fresh setup; create it before writing.
+    Process {
+        id: ensureDir
+        command: ["mkdir", "-p", root.settingsDir]
+    }
+
+    Component.onCompleted: {
+        ensureDir.running = true
+        reader.reload()
+    }
 }

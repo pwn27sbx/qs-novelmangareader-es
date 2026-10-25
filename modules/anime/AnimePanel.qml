@@ -23,6 +23,9 @@ Item {
     // ── Tab state ─────────────────────────────────────────────────────────────
     property int tabIndex: 0       // 0 = Browse, 1 = Library
 
+    // Gear in the header: the settings view replaces the content stack.
+    property bool settingsMode: false
+
     // ── Search state ──────────────────────────────────────────────────────────
     property bool searchOpen: false
 
@@ -80,7 +83,12 @@ Item {
             showMode: true
             mode: Anime.currentMode
             fontFamily: root.fontBody
-            onTabActivated: function(index) { root.tabIndex = index }
+            settingsMode: root.settingsMode
+            onTabActivated: function(index) {
+                root.settingsMode = false
+                root.tabIndex = index
+            }
+            onSettingsClicked: root.settingsMode = !root.settingsMode
             onSearchClicked: root.searchOpen ? root.closeSearch() : root.openSearch()
             onModeSelected: function(value) { Anime.setMode(value) }
             onMinimizeClicked: root.minimize()
@@ -169,7 +177,8 @@ Item {
         StackLayout {
             Layout.fillWidth: true
             Layout.fillHeight: true
-            currentIndex: root.tabIndex
+            currentIndex: root.settingsMode ? 2 : root.tabIndex
+
 
             // ── Browse tab ────────────────────────────────────────────────────
             Item {
@@ -226,6 +235,14 @@ Item {
                         Anime.clearDetail()
                     }
                 }
+            }
+
+            // Settings view (gear in the header). Third page of the same stack,
+            // so Browse/Library keep their state while it is open.
+            PanelSettings {
+                showScroll: false
+                active: root.settingsMode
+                onCloseRequested: root.settingsMode = false
             }
         }
     }

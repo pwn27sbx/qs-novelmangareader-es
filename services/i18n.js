@@ -14,6 +14,15 @@ var tables = {
         // ── Shared chrome ───────────────────────────────────────────────
         "tab.browse": "Explorar",
         "tab.library": "Biblioteca",
+        // ── Settings view ───────────────────────────────────────────────
+        "settings.title": "Ajustes",
+        "settings.open": "Ajustes",
+        "settings.back": "Volver",
+        "settings.scroll": "Velocidad de scroll",
+        "settings.scrollHint": "Cuánto avanza una muesca de rueda en el lector.",
+        "settings.language": "Interfaz en español",
+        "settings.languageHint": "Se aplica en vivo y se guarda para la próxima vez.",
+        "settings.languagePinned": "QS_LANG manda sobre este archivo: quítala para cambiarlo aquí.",
         "state.loading": "cargando",
         "state.loadingMore": "cargando más…",
         "state.notStarted": "Sin empezar",
@@ -88,6 +97,15 @@ var tables = {
         // ── Shared chrome ───────────────────────────────────────────────
         "tab.browse": "Browse",
         "tab.library": "Library",
+        // ── Settings view ───────────────────────────────────────────────
+        "settings.title": "Settings",
+        "settings.open": "Settings",
+        "settings.back": "Back",
+        "settings.scroll": "Scroll speed",
+        "settings.scrollHint": "How far one wheel notch moves the reader.",
+        "settings.language": "Spanish interface",
+        "settings.languageHint": "Applies live and is saved for next time.",
+        "settings.languagePinned": "QS_LANG overrides this file: unset it to change it here.",
         "state.loading": "loading",
         "state.loadingMore": "more is on its way",
         "state.notStarted": "Not started",
