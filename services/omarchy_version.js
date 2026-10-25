@@ -19,7 +19,7 @@ function parseVersion(raw) {
     var text = String(raw === undefined || raw === null ? "" : raw).trim()
     if (text.length === 0) return ""
     if (/^dev\b/i.test(text)) return "dev"
-    var match = text.match(/^v?(\d+)\.(\d+)/)
+    var match = text.match(/^(\d+)\.(\d+)/)
     if (!match) return ""
     return match[1] + "." + match[2]
 }
@@ -32,8 +32,8 @@ function warningMessage(supported, running) {
     var shown = String(running || "") || "unknown"
     return "Omarchy " + shown + " is not the supported " + supported
         + ": qs.Commons/qs.Ui may have changed. Check the panels against the"
-        + " Omarchy upgrade notes and update SUPPORTED_OMARCHY (see the"
-        + " README, Updating Omarchy)."
+        + " Omarchy upgrade notes and bump `supported` in services/OmarchyVersion.qml"
+        + " (see the README, Updating Omarchy)."
 }
 
 if (typeof module !== "undefined" && module.exports) {

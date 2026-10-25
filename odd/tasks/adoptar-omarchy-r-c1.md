@@ -120,9 +120,9 @@ Que la app siga el tema y el look del sistema: usar directamente `qs.Commons` (C
 
 El singleton se llamó primero `Palette`, que **colisiona con el tipo `Palette` de QtQuick** (los roles salían `undefined` y `withAlpha` "no era función"). Se renombró a **`Colors`** en `qs.app`; así los componentes cambian **solo el import** (`qs.colors` → `qs.app`), tal como pedía la decisión.
 
-## Próximo paso
+## Próximo paso al cierre de R-C1 (histórico)
 
-R-C1 cerrada. Siguiente: **R-C2 — guardia de versión `omarchy version`** (+ doc de update), y luego **R2 — superficie/header/navegación con `qs.Ui`** (`PopupCard`, `Panel`, `ButtonGroup`).
+R-C1 quedó cerrada. Siguiente en ese momento: **R-C2 — guardia de versión `omarchy version`** (+ doc de update), y luego **R2 — superficie/header/navegación con `qs.Ui`** (`PopupCard`, `Panel`, `ButtonGroup`). R-C2 se completó el 2026-10-25 (bloque de abajo); el próximo paso **vigente** está al final de este archivo.
 
 ---
 
