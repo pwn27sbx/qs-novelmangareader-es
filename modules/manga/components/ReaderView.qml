@@ -5,6 +5,7 @@ import qs.app
 import qs.Commons
 import qs.services
 import qs.components
+import "../../../components/wheel_scroll.js" as WheelScroll
 
 Item {
     id: readerView
@@ -174,9 +175,10 @@ Item {
             blocking: true
             acceptedDevices: PointerDevice.Mouse | PointerDevice.TouchPad
             onWheel: function(event) {
-                const step = event.angleDelta.y !== 0 ? event.angleDelta.y : -event.pixelDelta.y
                 const limit = Math.max(0, pageListView.contentHeight - pageListView.height)
-                pageListView.contentY = Math.max(0, Math.min(limit, pageListView.contentY - step * UiPrefs.scrollFactor))
+                pageListView.contentY = WheelScroll.nextContentY(
+                    pageListView.contentY, event.angleDelta.y, event.pixelDelta.y,
+                    UiPrefs.scrollFactor, limit)
                 event.accepted = true
             }
         }
