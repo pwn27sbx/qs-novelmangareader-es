@@ -99,9 +99,13 @@ class CacheTest(unittest.TestCase):
         self.assertEqual(manhwaweb_source._cached("valid", 600, lambda: {"ok": 0}), {"ok": 1})
 
     def test_a_shorter_ttl_call_cannot_read_a_stale_entry(self):
+        import time
+        # Ten seconds old: still fresh under its stored 600s TTL, stale under
+        # the 5s the caller asks for now — the only age that tells the two
+        # behaviours apart.
         with manhwaweb_source._lock:
-            manhwaweb_source._cache["k"] = (0.0, {"old": True}, 600)
-        self.assertEqual(manhwaweb_source._cached("k", 1, lambda: {"old": False}), {"old": False})
+            manhwaweb_source._cache["k"] = (time.time() - 10, {"old": True}, 600)
+        self.assertEqual(manhwaweb_source._cached("k", 5, lambda: {"old": False}), {"old": False})
 
     def test_the_cache_drops_expired_entries_instead_of_growing_forever(self):
         with manhwaweb_source._lock:
