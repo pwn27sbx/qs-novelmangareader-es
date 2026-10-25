@@ -31,91 +31,29 @@ Item {
         anchors.fill: parent
         spacing: Style.space(0)
 
-        // ── Filter bar (joined segmented control) ─────────────────────────────
-        Rectangle {
+        // ── Filter bar (tinted chips, scroll-x) ───────────────────────────────
+        FilterBar {
             Layout.fillWidth: true
-            height: 48
-            color: "transparent"
-
-            Rectangle {
-                id: filterBar
-                anchors {
-                    fill: parent
-                    leftMargin: Style.spacing.md; rightMargin: Style.spacing.md
-                    topMargin: Style.spacing.sm; bottomMargin: Style.spacing.sm
-                }
-                radius: Style.cornerRadius
-                color: Util.alpha(Colors.text, 0.05)
-                border.width: 1
-                border.color: Util.alpha(Colors.text, 0.1)
-
-                Row {
-                    id: segRow
-                    anchors { fill: parent; margins: Style.spacing.hairline }
-                    spacing: Style.space(0)
-
-                    Repeater {
-                        id: segRepeater
-                        model: ListModel {
-                            ListElement { labelKey: "anime.filter.popular"; view: "popular"; country: "ALL" }
-                            ListElement { labelKey: "anime.filter.latest";  view: "latest";  country: "ALL" }
-                            ListElement { labelKey: "anime.filter.japan";   view: "latest";  country: "JP"  }
-                            ListElement { labelKey: "anime.filter.china";   view: "latest";  country: "CN"  }
-                            ListElement { labelKey: "anime.filter.korea";   view: "latest";  country: "KR"  }
-                        }
-
-                        delegate: Item {
-                            required property string labelKey
-                            required property string view
-                            required property string country
-                            required property int index
-                            readonly property bool active:
-                                Anime.currentView === view && Anime.currentCountry === country
-
-                            width: segRow.width / Math.max(1, segRepeater.count)
-                            height: segRow.height
-
-                            Rectangle {
-                                anchors.fill: parent
-                                color: active ? Util.alpha(Colors.accent, 0.15) : "transparent"
-                                topLeftRadius: index === 0 ? Style.cornerRadius : 0
-                                bottomLeftRadius: index === 0 ? Style.cornerRadius : 0
-                                topRightRadius: index === segRepeater.count - 1 ? Style.cornerRadius : 0
-                                bottomRightRadius: index === segRepeater.count - 1 ? Style.cornerRadius : 0
-                            }
-
-                            Rectangle {
-                                visible: index > 0
-                                width: Style.spacing.hairline
-                                height: parent.height
-                                anchors { left: parent.left; verticalCenter: parent.verticalCenter }
-                                color: Util.alpha(Colors.text, 0.1)
-                            }
-
-                            Text {
-                                anchors.centerIn: parent
-                                textFormat: Text.PlainText
-                                text: I18n.t(labelKey)
-                                color: active ? Colors.accent : Colors.text
-                                opacity: active ? 1.0 : 0.5
-                                font.family: browseView.fontBody
-                                font.pixelSize: Style.font.body
-                                font.bold: active
-                            }
-
-                            MouseArea {
-                                anchors.fill: parent
-                                cursorShape: Qt.PointingHandCursor
-                                onClicked: {
-                                    browseView.searchCleared()
-                                    Anime.currentCountry = country
-                                    if (view === "popular") Anime.fetchPopular(true)
-                                    else Anime.fetchLatest(true)
-                                }
-                            }
-                        }
-                    }
-                }
+            fontFamily: browseView.fontBody
+            options: [
+                { label: I18n.t("anime.filter.popular") },
+                { label: I18n.t("anime.filter.latest") },
+                { label: I18n.t("anime.filter.japan") },
+                { label: I18n.t("anime.filter.china") },
+                { label: I18n.t("anime.filter.korea") }
+            ]
+            currentIndex: {
+                if (Anime.currentView === "popular") return 0
+                if (Anime.currentCountry === "JP") return 2
+                if (Anime.currentCountry === "CN") return 3
+                if (Anime.currentCountry === "KR") return 4
+                return 1
+            }
+            onActivated: function(index) {
+                browseView.searchCleared()
+                Anime.currentCountry = index === 2 ? "JP" : index === 3 ? "CN" : index === 4 ? "KR" : "ALL"
+                if (index === 0) Anime.fetchPopular(true)
+                else Anime.fetchLatest(true)
             }
         }
 

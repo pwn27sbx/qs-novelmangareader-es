@@ -39,81 +39,16 @@ Item {
         anchors.fill: parent
         spacing: Style.space(0)
 
-        // ── Filter bar (joined segmented control) ─────────────────────────────
-        Rectangle {
-            Layout.fillWidth: true; height: 48
-            color: "transparent"
-
-            Rectangle {
-                id: filterBar
-                anchors {
-                    fill: parent
-                    leftMargin: Style.spacing.md; rightMargin: Style.spacing.md
-                    topMargin: Style.spacing.sm; bottomMargin: Style.spacing.sm
-                }
-                radius: Style.cornerRadius
-                color: Util.alpha(Colors.text, 0.05)
-                border.width: 1
-                border.color: Util.alpha(Colors.text, 0.1)
-
-                Row {
-                    id: filterRow
-                    anchors { fill: parent; margins: Style.spacing.hairline }
-                    spacing: Style.space(0)
-
-                    Repeater {
-                        id: filterRepeater
-                        model: ListModel {
-                            ListElement { labelKey: "novel.filter.hot";    fid: "hot"    }
-                            ListElement { labelKey: "novel.filter.latest"; fid: "latest" }
-                        }
-
-                        delegate: Item {
-                            required property string labelKey
-                            required property string fid
-                            required property int index
-                            readonly property bool active: browseView.currentFilter === fid
-
-                            width: filterRow.width / Math.max(1, filterRepeater.count)
-                            height: filterRow.height
-
-                            Rectangle {
-                                anchors.fill: parent
-                                color: active ? Util.alpha(Colors.accent, 0.15) : "transparent"
-                                topLeftRadius: index === 0 ? Style.cornerRadius : 0
-                                bottomLeftRadius: index === 0 ? Style.cornerRadius : 0
-                                topRightRadius: index === filterRepeater.count - 1 ? Style.cornerRadius : 0
-                                bottomRightRadius: index === filterRepeater.count - 1 ? Style.cornerRadius : 0
-                            }
-
-                            Rectangle {
-                                visible: index > 0
-                                width: Style.spacing.hairline
-                                height: parent.height
-                                anchors { left: parent.left; verticalCenter: parent.verticalCenter }
-                                color: Util.alpha(Colors.text, 0.1)
-                            }
-
-                            Text {
-                                anchors.centerIn: parent
-                                textFormat: Text.PlainText
-                                text: I18n.t(labelKey)
-                                color: active ? Colors.accent : Colors.text
-                                opacity: active ? 1.0 : 0.5
-                                font.family: browseView.fontBody
-                                font.pixelSize: Style.font.body
-                                font.bold: active
-                            }
-
-                            MouseArea {
-                                anchors.fill: parent
-                                cursorShape: Qt.PointingHandCursor
-                                onClicked: browseView._switchFilter(fid)
-                            }
-                        }
-                    }
-                }
-            }
+        // ── Filter bar (tinted chips, scroll-x) ───────────────────────────────
+        FilterBar {
+            Layout.fillWidth: true
+            fontFamily: browseView.fontBody
+            options: [
+                { label: I18n.t("novel.filter.hot") },
+                { label: I18n.t("novel.filter.latest") }
+            ]
+            currentIndex: browseView.currentFilter === "hot" ? 0 : browseView.currentFilter === "latest" ? 1 : -1
+            onActivated: function(index) { browseView._switchFilter(index === 0 ? "hot" : "latest") }
         }
 
         // ── Novel grid ────────────────────────────────────────────────────────

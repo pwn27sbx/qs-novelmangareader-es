@@ -71,36 +71,32 @@ Item {
         spacing: Style.space(0)
 
         // ── Header (tabs · search · SUB/DUB · language · minimize) ────────────
-        Rectangle {
+        PanelHeader {
             Layout.fillWidth: true
-            height: 48
-            color: Colors.surface_container_low
             z: 2
-
-            SegmentBar {
-                id: tabRow
-                objectName: "tabRow"
-                visible: !root.searchOpen
-                anchors { left: parent.left; leftMargin: Style.spacing.md; verticalCenter: parent.verticalCenter }
-                options: [
-                    { value: "0", label: I18n.t("tab.browse") },
-                    { value: "1", label: I18n.t("tab.library") }
-                ]
-                value: String(root.tabIndex)
-                fontFamily: root.fontBody
-                onActivated: function(v) { root.tabIndex = parseInt(v) }
-            }
+            tabs: [I18n.t("tab.browse"), I18n.t("tab.library")]
+            tabIndex: root.tabIndex
+            searchOpen: root.searchOpen
+            showMode: true
+            mode: Anime.currentMode
+            fontFamily: root.fontBody
+            onTabActivated: function(index) { root.tabIndex = index }
+            onSearchClicked: root.searchOpen ? root.closeSearch() : root.openSearch()
+            onModeSelected: function(value) { Anime.setMode(value) }
+            onMinimizeClicked: root.minimize()
 
             // Search field — occupies the left region while searching
             Rectangle {
                 id: searchBar
                 visible: root.searchOpen
                 anchors {
-                    left: parent.left; leftMargin: Style.spacing.md
-                    right: actions.left; rightMargin: Style.spacing.md
-                    verticalCenter: parent.verticalCenter
+                    fill: parent
+                    leftMargin: Style.spacing.md
+                    rightMargin: Style.spacing.md
+                    topMargin: Style.spacing.md
+                    bottomMargin: Style.spacing.md
                 }
-                height: 32; radius: Style.cornerRadius
+                radius: Style.cornerRadius
                 color: Colors.surface_container
                 border.color: searchField.activeFocus ? Colors.primary : Colors.outline_variant
                 border.width: searchField.activeFocus ? 1.5 : 1
@@ -165,48 +161,6 @@ Item {
                         Anime.searchAnime(searchField.text.trim(), true)
                     else
                         browseView.resetList()
-                }
-            }
-
-            // ── Actions (right): search · SUB/DUB · language · minimize ───────
-            Row {
-                id: actions
-                anchors { right: parent.right; rightMargin: Style.spacing.md; verticalCenter: parent.verticalCenter }
-                spacing: Style.spacing.controlGap
-
-                PanelActionButton {
-                    visible: root.tabIndex === 0
-                    iconText: "⌕"
-                    hasCursor: root.searchOpen
-                    size: Style.space(36)
-                    fontSize: Style.font.iconLarge
-                    onClicked: root.searchOpen ? root.closeSearch() : root.openSearch()
-                }
-
-                SegmentBar {
-                    visible: root.tabIndex === 0
-                    options: ["sub", "dub"]
-                    upper: true
-                    value: Anime.currentMode
-                    fontFamily: root.fontBody
-                    segmentPadding: Style.spacing.lg
-                    onActivated: function(v) { Anime.setMode(v) }
-                }
-
-                Button {
-                    text: I18n.lang === "es" ? "ES" : "EN" // i18n-ignore — language code chip
-                    height: Style.space(36)
-                    bordered: false
-                    background: "transparent"
-                    foreground: Colors.muted
-                    fontSize: Style.font.caption
-                    onClicked: I18n.toggleLanguage()
-                }
-
-                PanelActionButton {
-                    iconText: "─"
-                    size: Style.space(36)
-                    onClicked: root.minimize()
                 }
             }
         }

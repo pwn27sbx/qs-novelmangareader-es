@@ -62,34 +62,28 @@ Item {
         spacing: Style.space(0)
 
         // ── Header (tabs · search · provider · language · minimize) ───────────
-        Rectangle {
-            Layout.fillWidth: true; height: 48
-            color: Colors.surface_container_low; z: 2
-
-            SegmentBar {
-                id: tabRow
-                objectName: "tabRow"
-                visible: !root.searchOpen
-                anchors { left: parent.left; leftMargin: Style.spacing.md; verticalCenter: parent.verticalCenter }
-                options: [
-                    { value: "0", label: I18n.t("tab.browse") },
-                    { value: "1", label: I18n.t("tab.library") }
-                ]
-                value: String(root.tabIndex)
-                fontFamily: root.fontBody
-                onActivated: function(v) { root.tabIndex = parseInt(v) }
-            }
+        PanelHeader {
+            Layout.fillWidth: true; z: 2
+            tabs: [I18n.t("tab.browse"), I18n.t("tab.library")]
+            tabIndex: root.tabIndex
+            searchOpen: root.searchOpen
+            fontFamily: root.fontBody
+            onTabActivated: function(index) { root.tabIndex = index }
+            onSearchClicked: root.searchOpen ? root.closeSearch() : root.openSearch()
+            onMinimizeClicked: root.minimize()
 
             // Search field — occupies the left region while searching
             Rectangle {
                 id: searchBar
                 visible: root.searchOpen
                 anchors {
-                    left: parent.left; leftMargin: Style.spacing.md
-                    right: searchToggle.left; rightMargin: Style.spacing.sm
-                    verticalCenter: parent.verticalCenter
+                    fill: parent
+                    leftMargin: Style.spacing.md
+                    rightMargin: Style.spacing.md
+                    topMargin: Style.spacing.md
+                    bottomMargin: Style.spacing.md
                 }
-                height: 32; radius: Style.cornerRadius
+                radius: Style.cornerRadius
                 color: Colors.surface_container
                 border.color: searchField.activeFocus ? Colors.primary : Colors.outline_variant
                 border.width: searchField.activeFocus ? 1.5 : 1
@@ -159,13 +153,10 @@ Item {
                 }
             }
 
-            // ── Right actions: provider · search · language · minimize ────────
-            Item {
+            extraAction: Item {
                 id: providerButton
-                visible: root.tabIndex === 0 && !root.searchOpen
-                anchors { right: searchToggle.left; rightMargin: Style.spacing.controlGap; verticalCenter: parent.verticalCenter }
-                width: providerRow.implicitWidth + Style.spacing.lg * 2
-                height: Style.space(36)
+                implicitWidth: providerRow.implicitWidth + Style.spacing.xl * 2
+                implicitHeight: Style.space(36)
 
                 Rectangle {
                     anchors.fill: parent; radius: Style.cornerRadius
@@ -286,36 +277,6 @@ Item {
                 }
             }
 
-            PanelActionButton {
-                id: searchToggle
-                anchors { right: languageButton.left; rightMargin: Style.spacing.controlGap; verticalCenter: parent.verticalCenter }
-                iconText: "⌕"
-                visible: root.tabIndex === 0
-                hasCursor: root.searchOpen
-                size: Style.space(36)
-                fontSize: Style.font.iconLarge
-                onClicked: root.searchOpen ? root.closeSearch() : root.openSearch()
-            }
-
-            Button {
-                id: languageButton
-                anchors { right: minimizeButton.left; rightMargin: Style.spacing.controlGap; verticalCenter: parent.verticalCenter }
-                text: I18n.lang === "es" ? "ES" : "EN" // i18n-ignore — language code chip
-                height: Style.space(36)
-                bordered: false
-                background: "transparent"
-                foreground: Colors.muted
-                fontSize: Style.font.caption
-                onClicked: I18n.toggleLanguage()
-            }
-
-            PanelActionButton {
-                id: minimizeButton
-                anchors { right: parent.right; rightMargin: Style.spacing.md; verticalCenter: parent.verticalCenter }
-                iconText: "─"
-                size: Style.space(36)
-                onClicked: root.minimize()
-            }
         }
 
         StackLayout {

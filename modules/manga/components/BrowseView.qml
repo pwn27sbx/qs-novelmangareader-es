@@ -31,88 +31,31 @@ Item {
         anchors.fill: parent
         spacing: Style.space(0)
 
-        // ── Tag filter bar (joined segmented control) ────────────────────────
-        Rectangle {
+        // ── Tag filter bar (tinted chips, scroll-x) ──────────────────────────
+        FilterBar {
             Layout.fillWidth: true
-            height: 48
-            color: "transparent"
-
-            Rectangle {
-                id: filterBar
-                anchors {
-                    fill: parent
-                    leftMargin: Style.spacing.md; rightMargin: Style.spacing.md
-                    topMargin: Style.spacing.sm; bottomMargin: Style.spacing.sm
-                }
-                radius: Style.cornerRadius
-                color: Util.alpha(Colors.text, 0.05)
-                border.width: 1
-                border.color: Util.alpha(Colors.text, 0.1)
-
-                Row {
-                    id: tagRow
-                    anchors { fill: parent; margins: Style.spacing.hairline }
-                    spacing: Style.space(0)
-
-                    Repeater {
-                        id: tagRepeater
-                        model: ListModel {
-                            ListElement { labelKey: "manga.filter.hot";    tagId: ""       }
-                            ListElement { labelKey: "manga.filter.latest"; tagId: "latest" }
-                            ListElement { labelKey: "Manga";               tagId: "ja"     }
-                            ListElement { labelKey: "Manhwa";              tagId: "ko"     }
-                            ListElement { labelKey: "Manhua";              tagId: "zh"     }
-                        }
-
-                        delegate: Item {
-                            required property string labelKey
-                            required property string tagId
-                            required property int index
-                            readonly property bool active: browseView.currentTagId === tagId
-
-                            width: tagRow.width / Math.max(1, tagRepeater.count)
-                            height: tagRow.height
-
-                            Rectangle {
-                                anchors.fill: parent
-                                color: active ? Util.alpha(Colors.accent, 0.15) : "transparent"
-                                topLeftRadius: index === 0 ? Style.cornerRadius : 0
-                                bottomLeftRadius: index === 0 ? Style.cornerRadius : 0
-                                topRightRadius: index === tagRepeater.count - 1 ? Style.cornerRadius : 0
-                                bottomRightRadius: index === tagRepeater.count - 1 ? Style.cornerRadius : 0
-                            }
-
-                            Rectangle {
-                                visible: index > 0
-                                width: Style.spacing.hairline
-                                height: parent.height
-                                anchors { left: parent.left; verticalCenter: parent.verticalCenter }
-                                color: Util.alpha(Colors.text, 0.1)
-                            }
-
-                            Text {
-                                anchors.centerIn: parent
-                                textFormat: Text.PlainText
-                                text: I18n.t(labelKey)
-                                color: active ? Colors.accent : Colors.text
-                                opacity: active ? 1.0 : 0.5
-                                font.family: browseView.fontBody
-                                font.pixelSize: Style.font.body
-                                font.bold: active
-                            }
-
-                            MouseArea {
-                                anchors.fill: parent
-                                cursorShape: Qt.PointingHandCursor
-                                onClicked: {
-                                    browseView.currentTagId = tagId
-                                    browseView.searchCleared()
-                                    Manga.fetchByOrigin(tagId, true)
-                                }
-                            }
-                        }
-                    }
-                }
+            fontFamily: browseView.fontBody
+            options: [
+                { label: I18n.t("manga.filter.hot") },
+                { label: I18n.t("manga.filter.latest") },
+                // Origin tags are data values, identical in both languages.
+                { label: "Manga" }, // i18n-ignore — origin tag
+                { label: "Manhwa" }, // i18n-ignore — origin tag
+                { label: "Manhua" } // i18n-ignore — origin tag
+            ]
+            currentIndex: {
+                if (browseView.currentTagId === "") return 0
+                if (browseView.currentTagId === "latest") return 1
+                if (browseView.currentTagId === "ja") return 2
+                if (browseView.currentTagId === "ko") return 3
+                if (browseView.currentTagId === "zh") return 4
+                return -1
+            }
+            onActivated: function(index) {
+                var tagId = ["", "latest", "ja", "ko", "zh"][index]
+                browseView.currentTagId = tagId
+                browseView.searchCleared()
+                Manga.fetchByOrigin(tagId, true)
             }
         }
 
