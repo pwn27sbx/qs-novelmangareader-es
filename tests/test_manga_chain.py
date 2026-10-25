@@ -39,7 +39,7 @@ class FakeSource:
 class ActiveChainTest(unittest.TestCase):
     def test_spanish_uses_the_chain(self):
         self.assertEqual(manga_chain.active_chain("", ["es-419", "es"]),
-                         ["mangadex", "inmanga", "zonatmo", "zonatmo_org"])
+                         ["mangadex", "inmanga", "zonatmo", "zonatmo_org", "manhwaweb"])
 
     def test_english_uses_weebcentral(self):
         self.assertEqual(manga_chain.active_chain("", ["en"]), ["weebcentral"])
@@ -57,7 +57,7 @@ class ActiveChainTest(unittest.TestCase):
 
     def test_spanish_sources_exclude_the_english_fallback(self):
         self.assertEqual(manga_chain.spanish_sources("", ["es"]),
-                         ["mangadex", "inmanga", "zonatmo", "zonatmo_org"])
+                         ["mangadex", "inmanga", "zonatmo", "zonatmo_org", "manhwaweb"])
         self.assertEqual(manga_chain.spanish_sources("", ["en"]), [])
 
 

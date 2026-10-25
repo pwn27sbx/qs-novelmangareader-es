@@ -44,6 +44,22 @@ class RecordingHandler:
 
 
 @unittest.skipUnless(HAVE_SERVER, "manga_server requires curl_cffi or requests")
+@unittest.skipUnless(HAVE_SERVER, "manga_server needs curl_cffi/requests")
+class ImageRefererTest(unittest.TestCase):
+    """ManhwaWeb's CDN answers 403 without its own site as the referer."""
+
+    def test_manhwaweb_hosts_get_the_referer(self):
+        for url in ("https://img1mw.xyz/manhwas/x/chapter_1/001.jpg",
+                    "https://img2mw.xyz/x.jpg",
+                    "https://uploads.manhwaweb.com/x.jpg"):
+            self.assertEqual(manga_server.image_headers(url).get("Referer"),
+                             "https://manhwaweb.com/", url)
+
+    def test_other_hosts_are_left_alone(self):
+        headers = manga_server.image_headers("https://uploads.mangadex.org/x.jpg")
+        self.assertNotIn("Referer", headers)
+
+
 class ProxyImageTest(unittest.TestCase):
     def test_upstream_404_maps_to_404(self):
         class Upstream404(Exception):

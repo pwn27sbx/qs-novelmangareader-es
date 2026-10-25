@@ -6,7 +6,7 @@
 
 ## Objetivo
 Que el lector muestre **siempre** manga/manhwa en español cuando exista:
-cadena `MangaDex → InManga → zonatmo → zonatmo_org`, con aviso claro `no_spanish` si ninguna tiene ES.
+cadena `MangaDex → InManga → zonatmo → zonatmo_org → manhwaweb`, con aviso claro `no_spanish` si ninguna tiene ES.
 
 ## Problema
 MangaDex filtra `availableTranslatedLanguage[] = es-la/es` y los **manhwa** (Solo Leveling)
@@ -100,3 +100,35 @@ fueron **desmantelados por la policía española (mar–abr 2026)**.
 
 ## Entrega
 1 commit por work-unit (Conventional Commits). Push/PR = decisión del dueño.
+
+---
+
+## F5 — ManhwaWeb (`manhwaweb.com`) como quinta fuente (2026-10-25)
+
+Pedido del dueño: lee manhwas en `manhwaweb.com` y ese catálogo no está en MangaDex ni en
+InManga. Se añade como fuente ES propia, **al final de la cadena** (último recurso, catálogo +18).
+
+- **El sitio es una SPA (Vite) sin HTML útil**: el contenido sale de su API JSON
+  `https://api.manhwaweb.com`, leída del bundle y verificada en vivo:
+  - `GET /manhwa/library?buscar=<q>&estado=&tipo=&erotico=&demografia=&order_item=alfabetic&page=<0-based>`
+    → `{"data":[item],"next":bool}`. `order_item` se acepta pero **se ignora** (popular, nuevos y
+    alfabetic devuelven la misma página), así que `latest()` y `hot()` comparten el listado por defecto.
+  - `GET /manhwa/see/<manga id>` → serie + `chapters[]` (`chapter`, `link` del lector, `create`).
+  - `GET /chapters/see/<manga id>-<label>` → `chapter.img[]` (páginas).
+- **Ids**: el capítulo necesita las dos mitades, así que el id interno es `<manga id>-<label>`
+  (`1_01`, `151.5_01`). El id de manga puede llevar guiones (`jibakusha-the-earthbound_…`), por eso
+  el label se reconoce **desde el final** con regex.
+- **Imágenes**: `img1mw.xyz` responde **403 sin Referer** y 200 con `https://manhwaweb.com/`
+  (probado). Por eso `map_*` devuelve URLs del proxy del app y `manga_server.image_headers()`
+  añade el `Referer` por host (`IMAGE_REFERERS`), sin tocar los demás hosts.
+- **Archivos**: `scripts/manhwaweb_source.py`, `scripts/manga_chain.py` (`_MODULES`, `_FORCED`,
+  cadena), `scripts/manga_server.py` (`IMAGE_REFERERS` + `image_headers`), `services/i18n.js`
+  (etiqueta `tSource`), `README.md`.
+- **Tests**: `tests/test_manhwaweb_source.py` (13, con fixtures reales search/info/chapter) y dos de
+  `tests/test_manga_proxy.py` para el referer. En vivo: search → `manhwaweb:glory_hole_…`
+  («La Tienda del Placer»), `info` 152 capítulos, `pages` 7 imágenes, y la imagen a través del proxy
+  devuelve 412 KB `image/jpeg`.
+- **Anomalía conocida**: las filas del listado traen categorías como **ids numéricos**, no nombres;
+  `map_item` deja `tags` vacío (la tarjeta no las muestra) y los nombres salen en `info`.
+- **No verificado**: el clic real en la UI (buscar en el panel y leer un capítulo), pendiente de QA
+  humana; y el proxy del servidor arrancado aparte (se probó `_raw_get`, que es lo que usa).

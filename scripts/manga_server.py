@@ -140,9 +140,25 @@ def fetch(url, extra_headers=None, timeout=30):
     return r.text
 
 
+# Image hosts that refuse a request without a Referer. ManhwaWeb's CDN answers
+# 403 to a bare GET and 200 with its own site as the referer (checked live).
+IMAGE_REFERERS = {
+    "img1mw.xyz": "https://manhwaweb.com/",
+    "img2mw.xyz": "https://manhwaweb.com/",
+    "uploads.manhwaweb.com": "https://manhwaweb.com/",
+}
+
+
+def image_headers(url):
+    """HEADERS plus the per-host Referer an image CDN insists on."""
+    host = (urlparse(url).hostname or "").lower()
+    referer = IMAGE_REFERERS.get(host)
+    return {**HEADERS, "Referer": referer} if referer else HEADERS
+
+
 def _raw_get(url, timeout=30):
     """Return raw bytes + content-type for image proxy."""
-    r = _get(url, HEADERS, timeout)
+    r = _get(url, image_headers(url), timeout)
     r.raise_for_status()
     return r.content, r.headers.get("Content-Type", "image/jpeg")
 

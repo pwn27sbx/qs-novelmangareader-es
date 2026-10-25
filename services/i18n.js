@@ -196,6 +196,7 @@ var sources = {
     "inmanga": "InManga",
     "zonatmo": "ZonaTMO (.net)",
     "zonatmo_org": "ZonaTMO (.org)",
+    "manhwaweb": "ManhwaWeb",
     "weebcentral": "WeebCentral"
 };
 

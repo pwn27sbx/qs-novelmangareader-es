@@ -47,13 +47,15 @@ UI en inglés, o al revés.
   vuelven vacías, se pregunta a [`ani-cli-mx`](https://github.com/Gildedboy/ani-cli-mx)
   (`ani-cli-mx --debug …`), que aporta sus propias fuentes en español (AnimeAV1 y compañía).
   `QS_ANIME_CLI` acepta la ruta del binario, o `off` para desactivar ese respaldo.
-- **Manga / manhwa:** cadena **MangaDex → InManga → zonatmo.net → zonatmo.org**, de modo
-  que un título que falta en una fuente se busca en la siguiente. Las dos últimas son los
-  dos backends independientes de ZonaTMO (una API JSON y el sitio HTML) que se respaldan
+- **Manga / manhwa:** cadena **MangaDex → InManga → zonatmo.net → zonatmo.org →
+  ManhwaWeb**, de modo que un título que falta en una fuente se busca en la siguiente. Las
+  dos de ZonaTMO son backends independientes (una API JSON y el sitio HTML) que se respaldan
   entre sí; una fuente con el dominio caído se omite sin romper el panel.
+  **[ManhwaWeb](https://manhwaweb.com)** aporta su propio catálogo de manhwas en español
+  (contenido +18), que no está en las demás fuentes; va al final porque es el último recurso.
   Se puede forzar una fuente con `QS_MANGA_SOURCE`: `mangadex`, `inmanga`,
-  `zonatmo` (zonatmo.net), `zonatmo_org` (zonatmo.org) y `weebcentral` (inglés, sin
-  capítulos en español) fijan esa fuente; `auto` (por defecto) elige por el idioma de
+  `zonatmo` (zonatmo.net), `zonatmo_org` (zonatmo.org), `manhwaweb` y `weebcentral` (inglés,
+  sin capítulos en español) fijan esa fuente; `auto` (por defecto) elige por el idioma de
   contenido: español → la cadena, cualquier otro → WeebCentral.
 - **Novelas:** [SkyNovels](https://skynovels.net) en español; si el idioma de contenido no
   es español, FreeWebNovel (inglés).

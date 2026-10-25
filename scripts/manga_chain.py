@@ -1,4 +1,4 @@
-"""Manga source chain (Spanish): MangaDex -> InManga -> zonatmo -> zonatmo_org.
+"""Manga source chain (Spanish): MangaDex -> InManga -> zonatmo -> zonatmo_org -> manhwaweb.
 
 Every endpoint returns the same JSON contract as manga_server.py, with item ids
 prefixed by the source (``mangadex:<id>`` / ``inmanga:<id>`` / ``zonatmo:<id>`` /
@@ -19,7 +19,7 @@ short-caches a dead domain so a burst does not hammer it. ``SOURCE_MIRRORS``
 records the alternate domain per backend.
 
 Source selection: QS_MANGA_SOURCE = mangadex | inmanga | zonatmo | zonatmo_org |
-weebcentral | auto. auto uses the content language (QS_CONTENT_LANG): Spanish ->
+manhwaweb | weebcentral | auto. auto uses the content language (QS_CONTENT_LANG): Spanish ->
 the chain, otherwise WeebCentral (handled by manga_server.py).
 """
 
@@ -29,6 +29,7 @@ import content_lang
 import inmanga_source
 import manga_sources
 import titles
+import manhwaweb_source
 import zonatmo_org_source
 import zonatmo_source
 
@@ -39,8 +40,9 @@ _MODULES = {
     "inmanga": inmanga_source,
     "zonatmo": zonatmo_source,
     "zonatmo_org": zonatmo_org_source,
+    "manhwaweb": manhwaweb_source,
 }
-_FORCED = ("mangadex", "inmanga", "zonatmo", "zonatmo_org", "weebcentral", "mangaplus")
+_FORCED = ("mangadex", "inmanga", "zonatmo", "zonatmo_org", "manhwaweb", "weebcentral", "mangaplus")
 
 # Alternate domain per zonatmo backend (for diagnostics / health reporting).
 SOURCE_MIRRORS = {
@@ -73,7 +75,7 @@ def active_chain(env=None, langs=None):
     for tag in preferred:
         base = str(tag).strip().lower().split("-", 1)[0].split("_", 1)[0]
         if base == "es":
-            return ["mangadex", "inmanga", "zonatmo", "zonatmo_org"]
+            return ["mangadex", "inmanga", "zonatmo", "zonatmo_org", "manhwaweb"]
     return ["weebcentral"]
 
 

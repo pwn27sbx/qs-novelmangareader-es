@@ -265,6 +265,7 @@ Pendiente (humano): la QA **visual** real (acentos `á é í ó ú ñ ¿ ¡`, de
 | Fix default provider novelas (ES) | `322b09a` | 2026-10-11 | ✅ completo |
 | WU-9 instalador/CLI/README | (ver `git log`) | 2026-10-25 | ✅ completo |
 | WU-10 fallback ani-cli-mx | (ver `git log`) | 2026-10-25 | ✅ completo |
+| Fuente ManhwaWeb (5ª ES) | (ver `git log`) | 2026-10-25 | ✅ completo |
 
 ---
 
