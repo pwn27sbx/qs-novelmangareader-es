@@ -43,7 +43,10 @@ UI en inglés, o al revés.
 ## Fuentes por panel
 
 - **Anime:** hianime primero; si el stream no trae pista de subtítulos en español, cae a
-  [JKAnime](https://jkanime.net) por título (subtítulos en español, hardsub).
+  [JKAnime](https://jkanime.net) por título (subtítulos en español, hardsub). Si **ambas**
+  vuelven vacías, se pregunta a [`ani-cli-mx`](https://github.com/Gildedboy/ani-cli-mx)
+  (`ani-cli-mx --debug …`), que aporta sus propias fuentes en español (AnimeAV1 y compañía).
+  `QS_ANIME_CLI` acepta la ruta del binario, o `off` para desactivar ese respaldo.
 - **Manga / manhwa:** cadena **MangaDex → InManga → zonatmo.net → zonatmo.org**, de modo
   que un título que falta en una fuente se busca en la siguiente. Las dos últimas son los
   dos backends independientes de ZonaTMO (una API JSON y el sitio HTML) que se respaldan

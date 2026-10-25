@@ -16,6 +16,7 @@ import time
 import requests
 from flask import Flask, jsonify, request
 
+import anicli_fallback
 import jkanime_source
 import titles
 
@@ -358,6 +359,18 @@ def get_episode_links(show_id: str, ep_no: str, mode: str = "sub") -> dict:
             links = jkanime_links
 
     if not links:
+        # WU-10: last resort, the ani-cli-mx CLI (Spanish providers). Only
+        # reached when both hianime and JKAnime come back empty, and it never
+        # raises: a missing binary or a timeout is just another error.
+        backup = anicli_fallback.fetch(meta.get("name") or meta.get("englishName") or "", ep_no)
+        if backup and "error" not in backup:
+            return {
+                "show_id": show_id,
+                "episode": ep_no,
+                "mode": mode,
+                "providers": {anicli_fallback.PROVIDER: [backup]},
+                "all_links": [backup],
+            }
         return {"error": f"No {mode} stream found for episode {ep_no}"}
 
     def quality_key(x):

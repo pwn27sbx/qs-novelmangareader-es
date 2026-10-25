@@ -1,0 +1,14 @@
+[2K[1;34mBuscando animes...[0m
+[2K[1;34mBuscando episodios...[0m
+[A[K7[1;32mAnimeAV1 HLS[0m Links Fetched
+Fuente elegida: AnimeAV1
+La calidad especificada no existe, usando la mejor disponible
+Todos los enlaces:
+970 >https://player.zilla-networks.com/m3u8/a9a7e3818626d6bff13779e158d7733c
+referrer >https://player.zilla-networks.com/m3u8/a9a7e3818626d6bff13779e158d7733c>https://player.zilla-networks.com/play/a9a7e3818626d6bff13779e158d7733c
+source >https://player.zilla-networks.com/m3u8/a9a7e3818626d6bff13779e158d7733c>HLS
+site >https://player.zilla-networks.com/m3u8/a9a7e3818626d6bff13779e158d7733c>AnimeAV1
+Fuente seleccionada:
+AnimeAV1 / HLS
+Enlace seleccionado:
+https://player.zilla-networks.com/m3u8/a9a7e3818626d6bff13779e158d7733c

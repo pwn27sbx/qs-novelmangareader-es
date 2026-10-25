@@ -128,7 +128,7 @@ Dos preferencias **independientes**:
 - [x] **WU-8** — MangaDex ES (`es-la`), mismo contrato JSON; fuente seleccionable; tests con fixtures. *(F1.5-2, §15.5)*
 - [x] **WU-11** — Toggle de idioma (EN/ES) + `settings.json`; `I18n.lang` **reactivo** (cambio en vivo). *(pedido del dueño)*
 - [x] **WU-9** — Instalador / CLI / README. *(F2)*
-- [ ] **WU-10** — Fallback anime con `ani-cli` (`ANI_CLI_PLAYER=debug`), opcional. *(F3-2)*
+- [x] **WU-10** — Fallback anime con `ani-cli-mx` (`--debug`), opcional. *(F3-2)*
 - [x] **WU-4** — Envolver novela (**DIFERIDO AL FINAL**, omitible). *(F1-6)*
 
 ---
@@ -264,6 +264,7 @@ Pendiente (humano): la QA **visual** real (acentos `á é í ó ú ñ ¿ ¡`, de
 | TAREA B (widget barra Omarchy) | `3942ed6` | 2026-10-11 | ✅ completo |
 | Fix default provider novelas (ES) | `322b09a` | 2026-10-11 | ✅ completo |
 | WU-9 instalador/CLI/README | (ver `git log`) | 2026-10-25 | ✅ completo |
+| WU-10 fallback ani-cli-mx | (ver `git log`) | 2026-10-25 | ✅ completo |
 
 ---
 
@@ -277,6 +278,17 @@ Pendiente (humano): la QA **visual** real (acentos `á é í ó ú ñ ¿ ¡`, de
 - **Tests** `tests/cli.test.js` (5): tokens del `--help`, `--help` en español en las dos herramientas, todas las banderas, e **instalación completa en un `HOME` temporal** (`--no-deps --no-venv --yes`, sin sudo: `SYSTEM_BIN` fuera del `PATH` para que la rama de `sudo` no sea alcanzable).
 - **Evidencia**: `node --test` 44/44; `./bin/qs-novelmangareader --help` y `./install.sh --help` en español; instalación temporal crea el symlink de config y el comando.
 - **No verificado**: la rama de `sudo` de `install_command` y la instalación de paquetes (`install_system_packages`), que necesitan sudo y red; y `--copy` contra una copia previa.
+
+## WU-10 — respaldo de anime con `ani-cli-mx` (2026-10-25)
+
+- **Herramienta**: `ani-cli-mx` (3.0.10, instalado en esta máquina), no el `ani-cli` de pystardust: es el fork con fuentes ES y el que el dueño ya usa. `QS_ANIME_CLI` acepta una ruta para forzarlo, `off` para desactivarlo; si no hay nada, el respaldo simplemente no se usa.
+- **Invocación verificada (no interactiva)**: `ani-cli-mx --debug -t anime -S 1 -e <cap> --quality <q> "<título>"`. `--debug` («Print resolved links and playback metadata without starting a player») imprime «Todos los enlaces:» / «Enlace seleccionado:» **sin TTY**; sin `-e` el CLI abre su menú de episodios y falla en una tubería (`inappropriate ioctl`) — probado.
+- **Cuándo se usa**: solo cuando la cadena propia (hianime → JKAnime) vuelve **vacía**, dentro de `get_episode_links()`. Si la cadena funciona, el CLI no se invoca (hay test que lo fija).
+- **Contrato**: `scripts/anicli_fallback.py` devuelve el mismo dict de link que las demás fuentes (`url`, `quality`, `type`, `referer`, `subtitle`, `subtitle_label`, `provider: "ani-cli-mx"`, `source_site`). `subtitle_label` queda **vacío** a propósito: el sitio de origen no es un idioma y el panel pinta lo que diga ahí tras «Subtítulos:».
+- **Robustez**: `subprocess` con `stdin=DEVNULL` y **timeout** (45 s), caché de 300 s por (título, capítulo, calidad), errores devueltos como `{"error": …}` (nunca excepción). Ansi stripping porque el CLI colorea la salida.
+- **Tests**: `tests/test_anicli_fallback.py` (13: parseo sobre fixture real, comando, binario ausente, CLI que falla, timeout, `QS_ANIME_CLI`, caché) + `tests/test_anime_fallback.py` (4: el cableado con la cadena simulada; se saltan fuera del venv).
+- **En vivo**: `fetch('naruto', '1')` → `970`, `m3u8`, `AnimeAV1`, con `referer` al player.
+- **Límite conocido**: los ítems con id `jkanime:<slug>` no pasan por el respaldo (la ruta solo tiene el slug, no el título); se documenta y no se toca el contrato del panel.
 
 ## Próximo paso
 
