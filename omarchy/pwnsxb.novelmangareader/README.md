@@ -9,6 +9,40 @@ reader panel of the `qs-novelmangareader` Quickshell app.
 - Omarchy (Quickshell shell) with a bar.
 - `qs-novelmangareader` installed and on `PATH` (`bin/qs-novelmangareader`).
 
+## Supported Omarchy
+
+The panels import `qs.Commons` and `qs.Ui` from `/usr/share/omarchy/shell` (the
+`Commons`/`Ui` symlinks at the repo root point there), so an Omarchy upgrade
+that moves those layers changes the app's ground. The app is written against
+**one major.minor line: `4.0`** (`services/OmarchyVersion.qml`).
+
+At startup it runs `omarchy version` and, when the running line is not `4.0`,
+logs one warning — it never blocks and the panels still open:
+
+```bash
+qs-novelmangareader log | grep -i omarchy
+```
+
+## Updating Omarchy
+
+1. Update Omarchy (`omarchy update`, or your channel's updater), then
+   `omarchy-restart-shell`.
+2. Restart the app (`qs-novelmangareader stop`, then `qs-novelmangareader`) and
+   open the three panels: `qs-novelmangareader anime`, `manga`, `novel`.
+3. Read the log: `qs-novelmangareader log`. There must be no `ERROR`,
+   `TypeError`, `Unable to assign` or `Cannot read property` lines, and the
+   version warning above tells you whether the line moved.
+4. Check the palette still follows the theme: the `SMOKE` line must report the
+   `accent` of `~/.local/state/omarchy/current/theme/colors.toml`.
+5. In the repo, run `node --test`, `node tools/lint-style.js` and
+   `node tools/lint-i18n.js`.
+6. If a component moved, fix it against
+   `/usr/share/omarchy/shell/{Commons,Ui}`, then bump `supported` in
+   `services/OmarchyVersion.qml` and this section.
+
+A `dev` checkout (`OMARCHY_PATH` pointing at a git checkout) reports `dev` and
+therefore always warns: it has no release line to compare against.
+
 ## Install
 
 Copy (or symlink) this directory into your user plugin directory:

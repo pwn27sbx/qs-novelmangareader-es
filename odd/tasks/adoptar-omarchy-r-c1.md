@@ -6,7 +6,7 @@
 | Rama | `i18n-es` (fork privado, sin `origin`) |
 | Repo de trabajo | `~/Projects/forks/qs-novelmangareader-es` |
 | Inicio | 2026-10-11 |
-| Estado | **Completo (R-C1)** |
+| Estado | **Completo (R-C1) + R-C2 (guardia de versión)** |
 | Plan fuente | `/home/pwnsxb/Documents/ObsidianVault/QS NovelMangaReader/2026-10-11-plan-c-adoptar-omarchy-qs-novelmangareader.md` (§4, §5.1, §9, §13) |
 | Plan base | `2026-10-11-plan-rediseno-ui-qs-novelmangareader.md` (R1 ✅) |
 
@@ -123,3 +123,44 @@ El singleton se llamó primero `Palette`, que **colisiona con el tipo `Palette` 
 ## Próximo paso
 
 R-C1 cerrada. Siguiente: **R-C2 — guardia de versión `omarchy version`** (+ doc de update), y luego **R2 — superficie/header/navegación con `qs.Ui`** (`PopupCard`, `Panel`, `ButtonGroup`).
+
+---
+
+# R-C2 — Guardia de versión de Omarchy
+
+> Spec: plan C §6 (`2026-10-11-plan-c-adoptar-omarchy-qs-novelmangareader.md`): la app declara
+> `SUPPORTED_OMARCHY`, lee `omarchy version` al arrancar y **avisa** (no bloquea) cuando el
+> mayor/menor no coincide. Añadido: documentar el camino de actualización.
+
+| Campo | Valor |
+|---|---|
+| Inicio / cierre | 2026-10-25 |
+| Estado | **Completo** |
+
+## Checklist
+
+- [x] **R-C2.1** — `services/omarchy_version.js`: `parseVersion()` (`4.0.6-1`→`4.0`, `dev (hash)`→`dev`, resto ``), `isSupported()`, `warningMessage()`.
+- [x] **R-C2.2** — `services/OmarchyVersion.qml`: singleton con `supported = "4.0"`, `Process(["omarchy","version"])` y **un** `console.warn` cuando no coincide.
+- [x] **R-C2.3** — `shell.qml`: `Component.onCompleted: OmarchyVersion.check()` (arranque del app).
+- [x] **R-C2.4** — Camino de actualización documentado en `omarchy/pwnsxb.novelmangareader/README.md` (§ *Supported Omarchy*, § *Updating Omarchy*).
+- [x] **R-C2.5** — Tests `tests/omarchy_version.test.js` (6) + verificación en vivo.
+
+## Decisiones
+
+- **Solo mayor.menor**: un parche (4.0.7) no debe avisar; un cambio de línea (4.5) sí.
+- **`dev` siempre avisa**: un checkout (`OMARCHY_PATH` a un repo) no tiene línea de release que comparar; avisar es más honesto que adivinar.
+- **No bloquea**: el aviso va al log (`qs-novelmangareader log`), las tres pantallas siguen abriendo. El modo "safe" del plan sigue siendo opcional y **no** se implementó (requiere decisión de producto).
+- **JS puro testeable**: el parseo vive en `services/omarchy_version.js` con funciones top-level y `module.exports` guardado (mismo patrón que `anime_links.js`), porque QML importa el archivo como `Core.*` y `node --test` como módulo.
+
+## Evidencia
+
+- `node --test tests/omarchy_version.test.js` → **6/6**.
+- En vivo (máquina, Omarchy 4.0.6): `GUARD supported=4.0 running=4.0 ok=true` → **sin** warning.
+- En vivo (warning): `omarchy` falso en `PATH` que imprime `4.5.0-1` →
+  `WARN qs-novelmangareader: Omarchy 4.5 is not the supported 4.0: qs.Commons/qs.Ui may have changed…`.
+- App real: sin warning, `SMOKE … accent=#7daea3`, header/tabs/filtros visibles.
+
+## Próximo paso
+
+R-C2 cerrada. Siguiente: **WU-9** (instalador/CLI/README) y luego **R2**.
+

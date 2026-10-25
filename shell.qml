@@ -6,6 +6,7 @@ import qs.modules.anime
 import qs.modules.manga
 import qs.modules.novel
 import qs.components
+import qs.services
 
 // Anime player, manga reader and novel reader as side panels. Each one is
 // loaded on its first toggle, kept while minimized, and unloaded shortly
@@ -16,6 +17,10 @@ import qs.components
 // animePlayer|mangaReader|novelReader toggle`)
 ShellRoot {
     id: root
+
+    // R-C2: warn at startup when Omarchy moved away from the supported
+    // line; the panels keep working, the log names what may have changed.
+    Component.onCompleted: OmarchyVersion.check()
 
     component ReaderSlot: Loader {
         id: slot

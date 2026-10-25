@@ -28,7 +28,7 @@ const ROOT = path.resolve(__dirname, "..");
 // `Commons/` and `Ui/` are symlinks into /usr/share/omarchy: Omarchy's own
 // code, not ours. The token singleton itself is the one place allowed to
 // read `Commons.Color`.
-const DIRS = ["app", "components", "modules", "omarchy"];
+const DIRS = ["app", "components", "modules", "omarchy", "services"];
 const FILES = ["shell.qml"];
 
 // `Color.<role>` not already qualified (`Commons.Color.`, `Colors.`, …).
