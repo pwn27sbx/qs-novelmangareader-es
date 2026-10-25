@@ -2,6 +2,7 @@ import QtQuick
 import Quickshell
 import Quickshell.Io
 import qs.Commons
+import qs.Commons as Commons
 import qs.Ui
 
 // One bar icon that opens a small menu: Anime / Manga / Novelas. Each entry
@@ -17,7 +18,7 @@ Panel {
   ipcTarget: "pwnsxb.novelmangareader"
   manageIpc: false
 
-  readonly property color foreground: bar ? bar.foreground : Color.foreground
+  readonly property color foreground: bar ? bar.foreground : Commons.Color.foreground
   readonly property string fontFamily: bar ? bar.fontFamily : Style.font.family
 
   // Glyphs are Material Design Icons (Nerd Font). Swap freely.

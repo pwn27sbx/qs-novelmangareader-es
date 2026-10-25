@@ -52,9 +52,9 @@ Item {
                     topMargin: Style.spacing.sm; bottomMargin: Style.spacing.sm
                 }
                 radius: Style.cornerRadius
-                color: Util.alpha(Color.foreground, 0.05)
+                color: Util.alpha(Colors.text, 0.05)
                 border.width: 1
-                border.color: Util.alpha(Color.foreground, 0.1)
+                border.color: Util.alpha(Colors.text, 0.1)
 
                 Row {
                     id: filterRow
@@ -79,7 +79,7 @@ Item {
 
                             Rectangle {
                                 anchors.fill: parent
-                                color: active ? Util.alpha(Color.accent, 0.15) : "transparent"
+                                color: active ? Util.alpha(Colors.accent, 0.15) : "transparent"
                                 topLeftRadius: index === 0 ? Style.cornerRadius : 0
                                 bottomLeftRadius: index === 0 ? Style.cornerRadius : 0
                                 topRightRadius: index === filterRepeater.count - 1 ? Style.cornerRadius : 0
@@ -91,14 +91,14 @@ Item {
                                 width: Style.spacing.hairline
                                 height: parent.height
                                 anchors { left: parent.left; verticalCenter: parent.verticalCenter }
-                                color: Util.alpha(Color.foreground, 0.1)
+                                color: Util.alpha(Colors.text, 0.1)
                             }
 
                             Text {
                                 anchors.centerIn: parent
                                 textFormat: Text.PlainText
                                 text: I18n.t(labelKey)
-                                color: active ? Color.accent : Color.foreground
+                                color: active ? Colors.accent : Colors.text
                                 opacity: active ? 1.0 : 0.5
                                 font.family: browseView.fontBody
                                 font.pixelSize: Style.font.body

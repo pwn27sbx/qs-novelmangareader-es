@@ -1,5 +1,6 @@
 import QtQuick
 import qs.Commons
+import qs.Commons as Commons
 import qs.Ui
 
 // Smoke test for the Omarchy adoption (Plan C, R-C1).
@@ -29,7 +30,7 @@ Item {
     Timer {
         interval: 700
         running: true
-        onTriggered: console.log("SMOKE qs.Commons+qs.Ui ok | accent=" + Color.accent
+        onTriggered: console.log("SMOKE qs.Commons+qs.Ui ok | accent=" + Commons.Color.accent
             + " | cornerRadius=" + Style.cornerRadius
             + " | button=" + (root._probe ? "ok" : "null"))
     }
