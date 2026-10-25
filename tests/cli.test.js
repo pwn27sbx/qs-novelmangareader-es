@@ -91,4 +91,11 @@ test("install.sh installs into a temporary HOME without sudo", () => {
         "the command header lost the install marker");
     assert.ok(common.includes(sentence + "$name"),
         "install-common.sh no longer greps the install marker");
+
+    // The marker has to work, not just exist: installing over the previous
+    // run must recognise our own command and its own config link.
+    const again = run(INSTALL, ["--no-deps", "--no-venv", "--yes"], env);
+    assert.equal(again.status, 0, again.stderr);
+    assert.doesNotMatch(again.stdout + again.stderr, /no es de este paquete/,
+        "the second install refused to replace its own command");
 });
