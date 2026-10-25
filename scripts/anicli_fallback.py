@@ -14,8 +14,14 @@ starting a player, so no terminal is needed (verified on ani-cli-mx 3.0.10:
 without ``-e`` the CLI opens its episode menu and fails on a pipe).
 
 Environment:
-    QS_ANIME_CLI   off/0 disables the fallback; a path forces that binary.
-                   Otherwise ani-cli-mx is preferred and ani-cli accepted.
+    QS_ANIME_CLI   off/0 disables the fallback; a path forces that binary
+                   (it must accept this module's command line, i.e. be
+                   ani-cli-mx or a compatible fork).
+
+Only ``ani-cli-mx`` is auto-detected. Upstream ``ani-cli`` (pystardust) has no
+``--debug`` or ``-t``: it would treat the flags as search words and, with
+``-S``/``-e``, launch its own detached player, so the panel would show an error
+while a stray mpv appeared.
 
 Parsing text output is what makes this fragile, so it lives here, alone, with
 tests on recorded output (tests/fixtures/anicli/debug_output.txt) and a timeout
@@ -52,7 +58,7 @@ def available(binary: str | None = None) -> str | None:
         return None
     if override:
         return override if os.path.exists(override) else None
-    for name in ("ani-cli-mx", "ani-cli"):
+    for name in ("ani-cli-mx",):
         found = shutil.which(name)
         if found:
             return found
@@ -166,6 +172,7 @@ def fetch(title: str, episode: str | int, binary: str | None = None,
             stdin=subprocess.DEVNULL,
             capture_output=True,
             text=True,
+            errors="replace",  # one stray byte must not break the contract
             timeout=timeout,
         )
     except subprocess.TimeoutExpired:

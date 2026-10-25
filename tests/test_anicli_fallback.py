@@ -124,6 +124,15 @@ class FetchTest(unittest.TestCase):
         with mock.patch.dict(os.environ, {"QS_ANIME_CLI": "off"}):
             self.assertIsNone(anicli_fallback.available())
 
+    def test_plain_ani_cli_is_not_accepted(self):
+        # Upstream ani-cli has no --debug/-t and plays detached with -S/-e, so
+        # running it with ani-cli-mx's command would open mpv behind the panel.
+        only_upstream = tempfile.mkdtemp()
+        write_fake_cli(only_upstream, "echo nope", name="ani-cli")
+        with mock.patch.dict(os.environ, {"PATH": only_upstream}, clear=False):
+            os.environ.pop("QS_ANIME_CLI", None)
+            self.assertIsNone(anicli_fallback.available())
+
     def test_binary_comes_from_the_env_override(self):
         binary = write_fake_cli(self.tmp, "cat <<'EOF'\n" + SAMPLE + "EOF")
         with mock.patch.dict(os.environ, {"QS_ANIME_CLI": binary}):

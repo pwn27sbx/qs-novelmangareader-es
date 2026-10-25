@@ -281,7 +281,7 @@ Pendiente (humano): la QA **visual** real (acentos `á é í ó ú ñ ¿ ¡`, de
 
 ## WU-10 — respaldo de anime con `ani-cli-mx` (2026-10-25)
 
-- **Herramienta**: `ani-cli-mx` (3.0.10, instalado en esta máquina), no el `ani-cli` de pystardust: es el fork con fuentes ES y el que el dueño ya usa. `QS_ANIME_CLI` acepta una ruta para forzarlo, `off` para desactivarlo; si no hay nada, el respaldo simplemente no se usa.
+- **Herramienta**: `ani-cli-mx` (3.0.10, instalado en esta máquina), no el `ani-cli` de pystardust: es el fork con fuentes ES y el que el dueño ya usa. `QS_ANIME_CLI` acepta una ruta para forzarlo, `off` para desactivarlo; si no hay nada, el respaldo simplemente no se usa. **Solo se autodetecta `ani-cli-mx`**: el `ani-cli` de pystardust no tiene `--debug` ni `-t`, mandaría los flags a la búsqueda y abriría su propio mpv (revisión de Claude Code, 2026-10-25).
 - **Invocación verificada (no interactiva)**: `ani-cli-mx --debug -t anime -S 1 -e <cap> --quality <q> "<título>"`. `--debug` («Print resolved links and playback metadata without starting a player») imprime «Todos los enlaces:» / «Enlace seleccionado:» **sin TTY**; sin `-e` el CLI abre su menú de episodios y falla en una tubería (`inappropriate ioctl`) — probado.
 - **Cuándo se usa**: solo cuando la cadena propia (hianime → JKAnime) vuelve **vacía**, dentro de `get_episode_links()`. Si la cadena funciona, el CLI no se invoca (hay test que lo fija).
 - **Contrato**: `scripts/anicli_fallback.py` devuelve el mismo dict de link que las demás fuentes (`url`, `quality`, `type`, `referer`, `subtitle`, `subtitle_label`, `provider: "ani-cli-mx"`, `source_site`). `subtitle_label` queda **vacío** a propósito: el sitio de origen no es un idioma y el panel pinta lo que diga ahí tras «Subtítulos:».
