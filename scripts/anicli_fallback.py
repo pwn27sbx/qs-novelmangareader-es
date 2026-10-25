@@ -59,14 +59,23 @@ def available(binary: str | None = None) -> str | None:
     return None
 
 
-def build_command(binary: str, title: str, episode: str | int, quality: str = "720") -> list[str]:
-    """The documented non-interactive invocation."""
-    return [
+def build_command(binary: str, title: str, episode: str | int, quality: str = "720",
+                  mode: str = "sub") -> list[str]:
+    """The documented non-interactive invocation.
+
+    `--dub` selects the dubbed version; sub is the CLI's default, so it is not
+    passed. The mode must travel with the request: the caller labels the link
+    with the mode it asked for, and a sub stream returned as "dub" is a lie.
+    """
+    cmd = [
         binary, "--debug", "-t", "anime",
         "-S", "1", "-e", str(episode),
         "--quality", str(quality or "720"),
-        str(title),
     ]
+    if str(mode or "").strip().lower().startswith("dub"):
+        cmd.append("--dub")
+    cmd.append(str(title))
+    return cmd
 
 
 def parse_output(text: str) -> dict:
@@ -133,7 +142,8 @@ def clear_cache() -> None:
 
 
 def fetch(title: str, episode: str | int, binary: str | None = None,
-          timeout: int = DEFAULT_TIMEOUT, quality: str = "720") -> dict:
+          timeout: int = DEFAULT_TIMEOUT, quality: str = "720",
+          mode: str = "sub") -> dict:
     """Resolve one link through the CLI: a link dict, or {"error": ...}."""
     title = str(title or "").strip()
     episode = str(episode or "").strip()
@@ -144,14 +154,15 @@ def fetch(title: str, episode: str | int, binary: str | None = None,
     if not cli:
         return {"error": "ani-cli-mx: not installed or disabled"}
 
-    key = (cli, title.lower(), episode, str(quality))
+    mode = str(mode or "sub").strip().lower() or "sub"
+    key = (cli, title.lower(), episode, str(quality), mode)
     hit = _cached(key)
     if hit is not None:
         return hit
 
     try:
         done = subprocess.run(
-            build_command(cli, title, episode, quality),
+            build_command(cli, title, episode, quality, mode),
             stdin=subprocess.DEVNULL,
             capture_output=True,
             text=True,
@@ -171,6 +182,7 @@ def fetch(title: str, episode: str | int, binary: str | None = None,
 
     link = {
         "url": parsed["url"],
+        "mode": mode,
         "quality": parsed["quality"],
         "type": parsed["type"],
         "referer": parsed["referer"],

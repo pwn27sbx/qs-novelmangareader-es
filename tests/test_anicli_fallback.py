@@ -76,6 +76,16 @@ class CommandTest(unittest.TestCase):
         self.assertEqual(cmd[cmd.index("--quality") + 1], "720")
         self.assertEqual(cmd[-1], "naruto")
 
+    def test_dub_asks_for_the_dubbed_version(self):
+        cmd = anicli_fallback.build_command("ani-cli-mx", "naruto", "1", mode="dub")
+        self.assertIn("--dub", cmd)
+        self.assertEqual(cmd[-1], "naruto")
+
+    def test_sub_does_not_pass_the_dub_flag(self):
+        for mode in ("sub", "", None):
+            cmd = anicli_fallback.build_command("ani-cli-mx", "naruto", "1", mode=mode)
+            self.assertNotIn("--dub", cmd)
+
     def test_episode_is_passed_as_a_string(self):
         cmd = anicli_fallback.build_command("ani-cli-mx", "naruto", 12)
         self.assertEqual(cmd[cmd.index("-e") + 1], "12")
@@ -118,6 +128,25 @@ class FetchTest(unittest.TestCase):
         binary = write_fake_cli(self.tmp, "cat <<'EOF'\n" + SAMPLE + "EOF")
         with mock.patch.dict(os.environ, {"QS_ANIME_CLI": binary}):
             self.assertEqual(anicli_fallback.available(), binary)
+
+
+class ModeTest(unittest.TestCase):
+    def setUp(self):
+        self.tmp = tempfile.mkdtemp()
+
+    def test_the_link_reports_the_mode_it_asked_for(self):
+        binary = write_fake_cli(self.tmp, "cat <<'EOF'\n" + SAMPLE + "EOF")
+        anicli_fallback.clear_cache()
+        link = anicli_fallback.fetch("naruto", "1", binary=binary, mode="dub")
+        self.assertEqual(link["mode"], "dub")
+
+    def test_sub_and_dub_are_cached_separately(self):
+        counter = pathlib.Path(self.tmp) / "count"
+        binary = write_fake_cli(self.tmp, f'echo x >> "{counter}"\ncat <<\'EOF\'\n{SAMPLE}EOF')
+        anicli_fallback.clear_cache()
+        anicli_fallback.fetch("naruto", "1", binary=binary, mode="sub")
+        anicli_fallback.fetch("naruto", "1", binary=binary, mode="dub")
+        self.assertEqual(counter.read_text().count("x"), 2)
 
 
 class CacheTest(unittest.TestCase):

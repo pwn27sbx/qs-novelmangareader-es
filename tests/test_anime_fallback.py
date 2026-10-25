@@ -46,13 +46,13 @@ class FallbackWiringTest(unittest.TestCase):
     def setUp(self):
         anicli_fallback.clear_cache()
 
-    def _resolve(self, backup, zoko=None, jkanime=None):
+    def _resolve(self, backup, zoko=None, jkanime=None, mode="sub"):
         with mock.patch.object(anime_server, "_show_meta", return_value=dict(META)), \
              mock.patch.object(anime_server, "_hianime_embed", return_value=None), \
              mock.patch.object(anime_server, "_zoko_links", return_value=zoko or []), \
              mock.patch.object(anime_server, "_jkanime_fallback", return_value=jkanime or []), \
              mock.patch.object(anime_server.anicli_fallback, "fetch", return_value=backup) as fetch:
-            result = anime_server.get_episode_links("show-1", "1", "sub")
+            result = anime_server.get_episode_links("show-1", "1", mode)
         return result, fetch
 
     def test_the_cli_link_is_used_when_both_sources_are_empty(self):
@@ -67,6 +67,12 @@ class FallbackWiringTest(unittest.TestCase):
         args, _ = fetch.call_args
         self.assertEqual(args[0], "Naruto")
         self.assertEqual(args[1], "1")
+
+    def test_the_requested_mode_reaches_the_cli(self):
+        result, fetch = self._resolve(dict(LINK), mode="dub")
+        _, kwargs = fetch.call_args
+        self.assertEqual(kwargs.get("mode"), "dub")
+        self.assertEqual(result["mode"], "dub")
 
     def test_a_failed_cli_call_is_the_usual_no_stream_error(self):
         result, _ = self._resolve({"error": "ani-cli-mx: not installed"})

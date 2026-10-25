@@ -362,7 +362,9 @@ def get_episode_links(show_id: str, ep_no: str, mode: str = "sub") -> dict:
         # WU-10: last resort, the ani-cli-mx CLI (Spanish providers). Only
         # reached when both hianime and JKAnime come back empty, and it never
         # raises: a missing binary or a timeout is just another error.
-        backup = anicli_fallback.fetch(meta.get("name") or meta.get("englishName") or "", ep_no)
+        backup = anicli_fallback.fetch(
+            meta.get("name") or meta.get("englishName") or "", ep_no, mode=mode,
+        )
         if backup and "error" not in backup:
             return {
                 "show_id": show_id,
