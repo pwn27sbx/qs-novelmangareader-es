@@ -114,6 +114,16 @@ class FetchTest(unittest.TestCase):
         link = anicli_fallback.fetch("naruto", "1", binary=binary)
         self.assertIn("error", link)
 
+    def test_malformed_bytes_do_not_break_resolution(self):
+        # text=True without errors="replace" raised UnicodeDecodeError outside
+        # every except clause; the contract is "a link or an error dict".
+        binary = write_fake_cli(
+            self.tmp,
+            "printf '\\377\\376\\n'\ncat <<'EOF'\n" + SAMPLE + "EOF",
+        )
+        link = anicli_fallback.fetch("naruto", "1", binary=binary)
+        self.assertEqual(link["url"], "https://player.zilla-networks.com/m3u8/abc123")
+
     def test_a_slow_cli_times_out(self):
         binary = write_fake_cli(self.tmp, "sleep 30")
         link = anicli_fallback.fetch("naruto", "1", binary=binary, timeout=1)
