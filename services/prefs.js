@@ -33,6 +33,12 @@ function normalizeScrollFactor(value) {
     return Math.min(MAX_SCROLL_FACTOR, Math.max(MIN_SCROLL_FACTOR, number));
 }
 
+// The single place the UI language is coerced: anything Spanish-ish ("es",
+// "es-419", "ES") becomes "es"; everything else becomes "en".
+function normalizeLanguage(value) {
+    return String(value || "").trim().toLowerCase().indexOf("es") === 0 ? "es" : "en";
+}
+
 // Same document with ONE key set and everything else left alone. This is the
 // only writer shape the app uses: the language row and the scroll slider each
 // own their key, and neither may drop the other's.
@@ -40,11 +46,6 @@ function withSetting(text, key, value) {
     var data = parseSettings(text);
     data[String(key)] = value;
     return JSON.stringify(data, null, 2) + "\n";
-}
-
-// Kept as the language-shaped call site of withSetting().
-function withLanguage(text, lang) {
-    return withSetting(text, "language", String(lang || "en"));
 }
 
 if (typeof module !== "undefined" && module.exports) {
@@ -55,6 +56,6 @@ if (typeof module !== "undefined" && module.exports) {
         parseSettings: parseSettings,
         normalizeScrollFactor: normalizeScrollFactor,
         withSetting: withSetting,
-        withLanguage: withLanguage
+        normalizeLanguage: normalizeLanguage
     };
 }

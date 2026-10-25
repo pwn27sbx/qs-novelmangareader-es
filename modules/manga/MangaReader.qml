@@ -24,6 +24,7 @@ Item {
 
     // Gear in the header: the settings view replaces the content stack.
     property bool settingsMode: false
+    readonly property int settingsPageIndex: 2   // third page of the content stack
 
     // ── Search state ──────────────────────────────────────────────────────────
     property bool searchOpen: false
@@ -180,7 +181,7 @@ Item {
         StackLayout {
             Layout.fillWidth: true
             Layout.fillHeight: true
-            currentIndex: root.settingsMode ? 2 : root.tabIndex
+            currentIndex: root.settingsMode ? root.settingsPageIndex : root.tabIndex
 
 
             Item {

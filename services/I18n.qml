@@ -60,7 +60,7 @@ Singleton {
 
     // Switch language live and persist it (through the single writer).
     function setLanguage(code) {
-        UiPrefs.setLanguage(Core.normalizeLang(code) === "es" ? "es" : "en")
+        UiPrefs.setLanguage(code)
     }
 
     function toggleLanguage() {

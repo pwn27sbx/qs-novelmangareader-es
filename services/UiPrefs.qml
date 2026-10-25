@@ -25,6 +25,14 @@ Singleton {
     readonly property string settingsPath: root.settingsDir + "/settings.json"
 
     property string raw: ""
+    // A write can land before the first load finishes; the late `onLoaded` must
+    // not put the old file back over it (observed: the language write was
+    // reverted by the load that started earlier).
+    property bool _touched: false
+    property bool _loaded: false
+    // Writes that arrive before the file is read are held and applied on top of
+    // it, so a first-run click can never drop keys it has not seen yet.
+    property var _pending: ({})
 
     // "es" | "en" when the file says so, "" otherwise (I18n applies the rest
     // of its precedence: QS_LANG -> settings -> LANG -> en).
@@ -33,16 +41,35 @@ Singleton {
         return (value === "es" || value === "en") ? value : ""
     }
 
-    // 1..10; a missing or broken value falls back to the default.
+    // 1..10; a missing or broken value falls back to the default. The bounds
+    // come from the same place the clamp does, so the slider cannot drift.
+    readonly property real scrollFactorMin: Core.MIN_SCROLL_FACTOR
+    readonly property real scrollFactorMax: Core.MAX_SCROLL_FACTOR
     readonly property real scrollFactor: Core.normalizeScrollFactor(Core.parseSettings(root.raw).scrollFactor)
 
     function setSetting(key, value) {
+        if (!root._loaded) {
+            root._pending[key] = value
+            return
+        }
+        root._write(key, value)
+    }
+
+    function _write(key, value) {
+        root._touched = true
         root.raw = Core.withSetting(root.raw, key, value)
         writer.setText(root.raw)
     }
 
+    function _flushPending() {
+        const keys = Object.keys(root._pending)
+        for (let i = 0; i < keys.length; i++)
+            root._write(keys[i], root._pending[keys[i]])
+        root._pending = ({})
+    }
+
     function setLanguage(code) {
-        root.setSetting("language", String(code) === "es" ? "es" : "en")
+        root.setSetting("language", Core.normalizeLanguage(code))
     }
 
     function setScrollFactor(value) {
@@ -52,8 +79,18 @@ Singleton {
     FileView {
         id: reader
         path: root.settingsPath
-        onLoaded: root.raw = reader.text()
-        onLoadFailed: root.raw = ""
+        onLoaded: {
+            root._loaded = true
+            if (!root._touched)
+                root.raw = reader.text()
+            root._flushPending()
+        }
+        onLoadFailed: {
+            root._loaded = true
+            if (!root._touched)
+                root.raw = ""
+            root._flushPending()
+        }
     }
 
     FileView {

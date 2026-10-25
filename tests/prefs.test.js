@@ -41,17 +41,22 @@ test("withSetting() adds the key when the document is empty", () => {
     assert.deepEqual(JSON.parse(prefs.withSetting("", "scrollFactor", 3)), { scrollFactor: 3 });
 });
 
-test("withLanguage() keeps the reader's scrollFactor", () => {
+test("normalizeLanguage() accepts every Spanish spelling and nothing else", () => {
+    assert.equal(prefs.normalizeLanguage("es"), "es");
+    assert.equal(prefs.normalizeLanguage("es-419"), "es");
+    assert.equal(prefs.normalizeLanguage("ES"), "es");
+    assert.equal(prefs.normalizeLanguage("en"), "en");
+    assert.equal(prefs.normalizeLanguage("fr"), "en");
+    assert.equal(prefs.normalizeLanguage(""), "en");
+});
+
+test("withSetting() keeps the reader's scrollFactor when the language changes", () => {
     const before = JSON.stringify({ language: "en", scrollFactor: 4 });
-    const after = JSON.parse(prefs.withLanguage(before, "es"));
+    const after = JSON.parse(prefs.withSetting(before, "language", "es"));
     assert.equal(after.language, "es");
     assert.equal(after.scrollFactor, 4);
 });
 
-test("withLanguage() starts from an empty document when the file is broken", () => {
-    assert.deepEqual(JSON.parse(prefs.withLanguage("}{", "es")), { language: "es" });
-});
-
-test("withLanguage() writes a trailing newline", () => {
-    assert.ok(prefs.withLanguage("", "es").endsWith("\n"));
+test("withSetting() starts from an empty document when the file is broken", () => {
+    assert.deepEqual(JSON.parse(prefs.withSetting("}{", "language", "es")), { language: "es" });
 });

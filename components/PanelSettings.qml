@@ -92,8 +92,8 @@ Item {
             PanelSlider {
                 id: scroll
                 Layout.fillWidth: true
-                minimum: 1
-                maximum: 10
+                minimum: UiPrefs.scrollFactorMin
+                maximum: UiPrefs.scrollFactorMax
                 step: 1
                 integer: true
                 value: UiPrefs.scrollFactor
