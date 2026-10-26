@@ -230,8 +230,10 @@ Item {
                 // Judge with the height BEFORE the change: a page that was
                 // fully above the viewport and grew past it would fail a check
                 // against the new height and skip the compensation.
-                if (_lastHeight > 0 && y + _lastHeight <= pageListView.contentY)
-                    pageListView.contentY += (height - _lastHeight)
+                if (_lastHeight > 0 && y + _lastHeight <= pageListView.contentY) {
+                    const limit = Math.max(0, pageListView.contentHeight - pageListView.height)
+                    pageListView.contentY = Math.max(0, Math.min(limit, pageListView.contentY + (height - _lastHeight)))
+                }
                 _lastHeight = height
             }
 
