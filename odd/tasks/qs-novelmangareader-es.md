@@ -7,7 +7,7 @@
 | Repo de trabajo | `~/Projects/forks/qs-novelmangareader-es` |
 | Upstream | `dhrruvsharma/qs-novelmangareader` (GPL-3.0) |
 | Inicio | 2026-10-11 |
-| Estado | **CULMINADO (2026-10-25)** — WU-0..WU-12b, fixes, ManhwaWeb (5ª fuente ES), scroll configurable, R-C1/R-C2/R1/R2 |
+| Estado | **CULMINADO (2026-10-25)** — WU-0..WU-12b, fixes, ManhwaWeb (5ª fuente ES), scroll configurable, panel de ajustes, lector estable, R-C1/R-C2/R1/R2 |
 | Plan fuente | `2026-10-11-plan-localizacion-es-qs-novelmangareader.md` (§0–§16) |
 | Handoff | `2026-10-11-handoff-orquestador-qs-novelmangareader-es.md` |
 
@@ -268,6 +268,8 @@ Pendiente (humano): la QA **visual** real (acentos `á é í ó ú ñ ¿ ¡`, de
 | Fuente ManhwaWeb (5ª ES) | `2f505f0` + `3da4d1e` + `edb2fb5` + `9ed918f` + `6409a2e` | 2026-10-25 | ✅ completo |
 | Velocidad de scroll (settings) | `89e0788` + `3bbbcd2` | 2026-10-25 | ✅ completo |
 | Panel vacío si el backend cae | `7d4540c` | 2026-10-25 | ✅ completo |
+| Panel de ajustes (engranaje) | `3c4f125` + `811dfcd` + `cd9ace1` | 2026-10-25 | ✅ completo |
+| Lector: estabilidad (10 fixes) | `73786e6`, `e665431`, `0c89283`..`0350217` | 2026-10-25 | ✅ completo |
 | Fix tema Qt 6.12 (Color) | `16a95ee` | 2026-10-25 | ✅ completo |
 | Housekeeping docs | `a9b24d5` | 2026-10-25 | ✅ completo |
 | R-C2 guardia de versión | `a08ed7f` + `3fff8f7` | 2026-10-25 | ✅ completo |
@@ -333,3 +335,28 @@ carga real sin errores en `qs log`.
 3. Ajustar `scrollFactor` a su gusto en `settings.json` si 2 no le sirve.
 4. Advisory sin corrección: una respuesta HTTP muy tardía podría pisar el resultado de un reintento en el
    buscador de manga (se cerraría con un contador de generación por petición).
+
+## Lector: serie de estabilidad (post-cierre, 2026-10-25)
+
+Los reportes del dueño («se traba al bajar rápido», «salta de 7/14 a 1/14», «queda negro en 1/14») eran **cinco
+defectos distintos**, encontrados con un log temporal por variable de entorno (`QS_READER_DEBUG=1`, ya retirado):
+
+1. **`cacheBuffer: height * 2` negativo** antes del layout → Qt lo rechaza y la lista deja de maquetar: negro,
+   rueda muerta (`WARN … Cannot set a negative cache buffer`). → `Math.max(0, …)` (`f8f98dd`).
+2. **La compensación de altura movía `contentY` fuera de rango** y el siguiente giro lo devolvía: se sentía
+   trabado/retroceso. → acotada a `[0, límite]` (`2b518d9`, completado en `f8f98dd`).
+3. **`contentHeight` es una estimación**: caía de 93377 a 32322 para 14 páginas de 6667 px, y la rueda quedaba en
+   un fondo falso con `indexAt = -1` → contador en `1 / 14` sobre zona vacía. → paso de página con
+   `positionViewAtIndex` cuando se toca el tope (`62001ad`), con el signo corregido (`45d6385`).
+4. **Marcador de altura con ratio fijo 1,42** (852 px) cuando la página real mide 6667 px: cada página crecía 8×
+   al cargar y desmoronaba la estimación. → el ratio real se aprende de la primera página cargada (`45d6385`).
+5. **Estado del lector reutilizado**: la barra quedaba oculta al reentrar (`a391051`) y `_lastPage` sobrevivía al
+   cambio de capítulo, pudiendo reportar una página fuera de rango en un capítulo más corto (`0350217`, blocker de
+   la revisión nativa).
+
+Además: decodificado al ancho de pantalla en vez de resolución completa (`0c89283`), y el indicador pasó a
+calcularse con `indexAt()` sobre el viewport porque `currentIndex` no cambia con scroll programático (`73786e6`).
+
+**Verificado por el dueño** bajando rápido hasta el 7, el 9 y el 10 sin trabas, sin saltos y sin quedar negro.
+**Revisión nativa** de la serie (`520b1ba..c3d8403`): aprobada con 1 blocker corregido; la validación dirigida
+quedó sin recibo por el rechazo del transporte de OpenCode (misma limitación que WU-10).
