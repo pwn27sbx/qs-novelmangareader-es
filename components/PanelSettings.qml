@@ -83,7 +83,8 @@ Item {
                 StyledText {
                     // PanelSlider does not update `value` while dragging, only
                     // `liveValue`, so the readout follows that one.
-                    text: String(Math.round(scroll.liveValue))
+                    // One decimal only when it adds information: 2, not 2.0.
+                    text: Number(scroll.liveValue).toFixed(1).replace(/\.0$/, "")
                     color: Colors.primary
                     font.pixelSize: Style.font.body
                 }
@@ -94,8 +95,8 @@ Item {
                 Layout.fillWidth: true
                 minimum: UiPrefs.scrollFactorMin
                 maximum: UiPrefs.scrollFactorMax
-                step: 1
-                integer: true
+                step: 0.1
+                integer: false
                 value: UiPrefs.scrollFactor
                 // `bar` is null inside a panel: pass the theme tokens, or the
                 // component falls back to a hardcoded dark track.

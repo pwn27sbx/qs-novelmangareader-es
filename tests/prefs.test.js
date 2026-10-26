@@ -23,11 +23,16 @@ test("parseSettings() returns an object only for real JSON objects", () => {
 test("normalizeScrollFactor() clamps and falls back", () => {
     assert.equal(prefs.normalizeScrollFactor(2), 2);
     assert.equal(prefs.normalizeScrollFactor("3"), 3);
+    assert.equal(prefs.normalizeScrollFactor("1.5"), 1.5);
     assert.equal(prefs.normalizeScrollFactor(0), prefs.DEFAULT_SCROLL_FACTOR);
     assert.equal(prefs.normalizeScrollFactor(-4), prefs.DEFAULT_SCROLL_FACTOR);
     assert.equal(prefs.normalizeScrollFactor("abc"), prefs.DEFAULT_SCROLL_FACTOR);
     assert.equal(prefs.normalizeScrollFactor(99), prefs.MAX_SCROLL_FACTOR);
     assert.equal(prefs.normalizeScrollFactor(0.2), prefs.MIN_SCROLL_FACTOR);
+    assert.equal(prefs.normalizeScrollFactor(0.5), 0.5);
+    assert.equal(prefs.normalizeScrollFactor(1.24), 1.2);
+    assert.equal(prefs.normalizeScrollFactor(1.26), 1.3);
+    assert.equal(prefs.normalizeScrollFactor(5.4), prefs.MAX_SCROLL_FACTOR);
 });
 
 test("withSetting() writes one key and keeps the rest", () => {

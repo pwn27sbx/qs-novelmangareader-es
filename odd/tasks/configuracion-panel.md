@@ -23,7 +23,7 @@ de `settings.json` para que las dos claves no puedan pisarse.
 - **D2 — Vista, no popup.** `qs.Ui.PopupCard`/`KeyboardPanel` exigen `bar` + `anchorItem`; los paneles
   son layer-shell sin barra. Se usa el patrón de los plugins de Omarchy: página hermana en el
   `StackLayout` + flecha de volver.
-- **D3 — Controles.** `PanelSlider` (1..10, `integer`, guarda en `released`) para el scroll;
+- **D3 — Controles.** `PanelSlider` (**0,5..5 en pasos de 0,1**, guarda en `released`) para el scroll;
   `Toggle` etiquetado para el idioma (fila booleana con foco y Enter/Espacio, no por el borde).
   El slider **no** es operable por teclado (el componente no expone foco/teclas).
 - **D4 — Alcance.** Solo claves que ya existen y se aplican en QML. Idioma de contenido
@@ -40,7 +40,10 @@ de `settings.json` para que las dos claves no puedan pisarse.
 ## Verificación
 
 - `node --test` **57/57** (2 nuevos de `withSetting`) · python 191 · `lint-i18n` y `lint-style` OK.
-- Persistencia probada en QML con un `settings.json` temporal: lee `2`, guarda `5`, luego `language: en`
+- Escala ajustada tras medirla con el dueño: **0,5..5 con pasos 0,1** (1 = 120 px/muesca, 5 ≈ 1,3 muescas por
+  página; 10 saltaba más de una página). Redondeo a un decimal al guardar.
+- Persistencia probada en QML con un `settings.json` temporal: `0.5` se lee como `0.5`, `1.24` se guarda `1.2`,
+  `0.2` se recorta a `0.5`, y `language: en`
   → el archivo queda con **las dos** claves (`{"language":"en","scrollFactor":5}`) y `I18n.lang` sigue el
   cambio en vivo.
 - Vista de ajustes capturada (probe) y engranaje visible en el header real del panel de manga.

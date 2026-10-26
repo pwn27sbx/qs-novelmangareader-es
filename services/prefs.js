@@ -13,8 +13,10 @@
 // user had set. `withLanguage()` merges into whatever is already there.
 
 var DEFAULT_SCROLL_FACTOR = 2;
-var MIN_SCROLL_FACTOR = 1;
-var MAX_SCROLL_FACTOR = 10;
+// 0.5 is half the fastest "slow" a reader wants on a long strip; 5 already
+// moves ~1.3 notches per page, so 10 was a jump bigger than a page.
+var MIN_SCROLL_FACTOR = 0.5;
+var MAX_SCROLL_FACTOR = 5;
 
 function parseSettings(text) {
     try {
@@ -25,12 +27,14 @@ function parseSettings(text) {
     }
 }
 
-// A usable wheel multiplier: numbers and numeric strings accepted, clamped.
+// A usable wheel multiplier: numbers and numeric strings accepted, clamped and
+// rounded to one decimal (a slider with step 0.1 accumulates 1.2000000001).
 function normalizeScrollFactor(value) {
     var number = Number(value);
     if (!isFinite(number) || number <= 0)
         return DEFAULT_SCROLL_FACTOR;
-    return Math.min(MAX_SCROLL_FACTOR, Math.max(MIN_SCROLL_FACTOR, number));
+    var clamped = Math.min(MAX_SCROLL_FACTOR, Math.max(MIN_SCROLL_FACTOR, number));
+    return Math.round(clamped * 10) / 10;
 }
 
 // The single place the UI language is coerced: anything Spanish-ish ("es",

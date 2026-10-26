@@ -44,9 +44,9 @@ UI en inglés, o al revés.
 
 El botón **`󰒓`** del header, en cualquiera de los tres paneles, abre la vista de ajustes:
 
-- **Velocidad de scroll** — cuánto avanza una muesca de rueda en el lector (1..10,
-  por defecto `2`). Se aplica **en vivo**; en el panel de anime no aparece, porque no tiene
-  lector. El slider se maneja con ratón o rueda.
+- **Velocidad de scroll** — cuánto avanza una muesca de rueda en el lector: de **0,5 a 5**
+  en pasos de **0,1**, por defecto `2`. Se aplica **en vivo**; en el panel de anime no
+  aparece, porque no tiene lector. El slider se maneja con ratón o rueda.
 - **Interfaz en español** — el mismo cambio que el chip `EN`, pero explicado y persistente.
   Si tienes `QS_LANG` en el entorno, esa variable manda y la fila lo dice (se ve atenuada).
 
