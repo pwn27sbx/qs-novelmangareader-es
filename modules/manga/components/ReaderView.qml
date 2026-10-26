@@ -177,6 +177,16 @@ Item {
     // estimate can fall short while pages are recycled). Keep the last answer
     // instead of dropping to currentIndex, which never moves with a wheel.
     property int _lastPage: 0
+
+    // Placeholder height ratio (height / width). The old fixed 1.42 was eight
+    // times smaller than a real long-strip page (852 vs 6667 px), so every
+    // page grew hugely when it loaded and the list's height estimate kept
+    // collapsing. The first loaded page teaches the real value.
+    property real _ratio: 1.42
+    function _learnRatio(value) {
+        if (value > 0.1 && value < 50)
+            readerView._ratio = value
+    }
     readonly property int visiblePage: {
         const index = pageListView.indexAt(pageListView.width / 2, pageListView.contentY + 1)
         return index < 0 ? Math.max(0, readerView._lastPage) : index
@@ -235,7 +245,7 @@ Item {
                 // pixel clamp then parks the reader on a fake bottom. When that
                 // happens and pages remain, move by page instead — this uses
                 // the laid-out items, not the estimate.
-                if (target >= limit && WheelScroll.stepOf(event.angleDelta.y, event.pixelDelta.y) > 0
+                if (target >= limit && WheelScroll.stepOf(event.angleDelta.y, event.pixelDelta.y) < 0
                         && readerView.visiblePage < pageListView.count - 1) {
                     pageListView.positionViewAtIndex(readerView.visiblePage + 1, ListView.Beginning)
                 } else {
@@ -257,9 +267,9 @@ Item {
 
         delegate: Item {
             width: pageListView.width
-            height: pageImg.implicitHeight > 0 && pageImg.implicitWidth > 0
+            height: pageImg.status === Image.Ready && pageImg.implicitWidth > 0
                 ? pageImg.implicitHeight * (Math.max(1, pageListView.width) / pageImg.implicitWidth)
-                : Math.max(1, pageListView.width) * 1.42
+                : Math.max(1, pageListView.width) * readerView._ratio
 
             // While this page sits entirely above the viewport, its height
             // change must move the content back by the same amount, or the
@@ -273,8 +283,13 @@ Item {
                 // fully above the viewport and grew past it would fail a check
                 // against the new height and skip the compensation.
                 if (_lastHeight > 0 && y + _lastHeight <= pageListView.contentY) {
-                    const limit = Math.max(0, pageListView.contentHeight - pageListView.height)
-                    pageListView.contentY = Math.max(0, Math.min(limit, pageListView.contentY + (height - _lastHeight)))
+                    const limit = pageListView.contentHeight - pageListView.height
+                    let next = pageListView.contentY + (height - _lastHeight)
+                    // Only clamp the top here: while the list's estimate is
+                    // short, a zero limit would otherwise jump to the start.
+                    if (limit > 0)
+                        next = Math.min(next, limit)
+                    pageListView.contentY = Math.max(0, next)
                 }
                 _lastHeight = height
             }
@@ -292,6 +307,8 @@ Item {
                 asynchronous: true
                 cache: true
                 opacity: status === Image.Ready ? 1 : 0
+                onStatusChanged: if (status === Image.Ready && implicitWidth > 0)
+                    readerView._learnRatio(implicitHeight / implicitWidth)
                 Behavior on opacity { NumberAnimation { duration: Motion.slow } }
 
             }
