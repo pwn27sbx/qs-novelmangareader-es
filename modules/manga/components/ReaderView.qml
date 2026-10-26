@@ -1,5 +1,4 @@
 import QtQuick
-import Quickshell
 import QtQuick.Controls
 import QtQuick.Layouts
 import qs.app
@@ -21,12 +20,6 @@ Item {
     // ── Internal state ───────────────────────────────────────────────────────
     property bool headerVisible: true
 
-    // Temporary diagnostics: start the app with QS_READER_DEBUG=1 and the
-    // reader logs where the list believes it is on every wheel event and every
-    // page height change. Off by default (and removed once this is closed).
-    readonly property bool _debug: Quickshell.env("QS_READER_DEBUG") === "1"
-
-    Component.onCompleted: if (readerView._debug) console.log("[reader] diagnostics on")
 
     // Called by the parent to reset state when re-entering this view
     function reset() {
@@ -222,11 +215,6 @@ Item {
                 // Still laying out (contentHeight not known yet). Swallowing the
                 // event made the reader look frozen; move without the upper
                 // clamp instead and let the list re-measure.
-                if (readerView._debug)
-                    console.log("[reader] wheel ci=" + Math.round(pageListView.contentY)
-                        + " lim=" + Math.round(limit) + " cH=" + Math.round(pageListView.contentHeight)
-                        + " h=" + Math.round(pageListView.height) + " count=" + pageListView.count
-                        + " page=" + readerView.visiblePage + " step=" + Math.round(WheelScroll.stepOf(event.angleDelta.y, event.pixelDelta.y)))
                 if (limit <= 0) {
                     if (pageListView.count > 0) {
                         console.warn("[reader] no scrollable height yet (count=" + pageListView.count
@@ -276,9 +264,6 @@ Item {
             // reading position drifts.
             property real _lastHeight: 0
             onHeightChanged: {
-                if (readerView._debug)
-                    console.log("[reader] page " + index + " h " + Math.round(_lastHeight) + " -> " + Math.round(height)
-                        + " ci=" + Math.round(pageListView.contentY) + " cH=" + Math.round(pageListView.contentHeight))
                 // Judge with the height BEFORE the change: a page that was
                 // fully above the viewport and grew past it would fail a check
                 // against the new height and skip the compensation.
