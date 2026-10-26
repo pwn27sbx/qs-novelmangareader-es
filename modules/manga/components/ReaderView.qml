@@ -191,6 +191,9 @@ Item {
             acceptedDevices: PointerDevice.Mouse | PointerDevice.TouchPad
             onWheel: function(event) {
                 const limit = Math.max(0, pageListView.contentHeight - pageListView.height)
+                // Still laying out (contentHeight not known yet): moving now
+                // would clamp contentY to 0 and look like a stuck scroll.
+                if (limit <= 0) { event.accepted = true; return }
                 pageListView.contentY = WheelScroll.nextContentY(
                     pageListView.contentY, event.angleDelta.y, event.pixelDelta.y,
                     UiPrefs.scrollFactor, limit)
@@ -231,6 +234,11 @@ Item {
                 id: pageImg
                 anchors.fill: parent
                 source: modelData.url || ""
+                // A page is often 1080x3000; decoding it at full size costs
+                // ~12 MB each and several per screen with the preload, which
+                // is what made fast scrolling stutter. Scaling during decode
+                // keeps the aspect ratio and returns the same implicit size.
+                sourceSize.width: Math.max(1, pageListView.width)
                 fillMode: Image.PreserveAspectFit
                 asynchronous: true
                 cache: true
