@@ -1,4 +1,5 @@
 import QtQuick
+import Quickshell
 import QtQuick.Controls
 import QtQuick.Layouts
 import qs.app
@@ -19,6 +20,13 @@ Item {
 
     // ── Internal state ───────────────────────────────────────────────────────
     property bool headerVisible: true
+
+    // Temporary diagnostics: start the app with QS_READER_DEBUG=1 and the
+    // reader logs where the list believes it is on every wheel event and every
+    // page height change. Off by default (and removed once this is closed).
+    readonly property bool _debug: Quickshell.env("QS_READER_DEBUG") === "1"
+
+    Component.onCompleted: if (readerView._debug) console.log("[reader] diagnostics on")
 
     // Called by the parent to reset state when re-entering this view
     function reset() {
@@ -165,10 +173,15 @@ Item {
     // handler moves `contentY` directly, and a programmatic scroll does NOT
     // update it (measured: contentY 2100 -> currentIndex 0 while indexAt said
     // 3), so the indicator used to sit on "1" forever.
+    // indexAt answers -1 in an area the list has not laid out (its height
+    // estimate can fall short while pages are recycled). Keep the last answer
+    // instead of dropping to currentIndex, which never moves with a wheel.
+    property int _lastPage: 0
     readonly property int visiblePage: {
         const index = pageListView.indexAt(pageListView.width / 2, pageListView.contentY + 1)
-        return index < 0 ? Math.max(0, pageListView.currentIndex) : index
+        return index < 0 ? Math.max(0, readerView._lastPage) : index
     }
+    onVisiblePageChanged: if (visiblePage !== _lastPage) _lastPage = visiblePage
 
     ListView {
         id: pageListView
@@ -199,6 +212,11 @@ Item {
                 // Still laying out (contentHeight not known yet). Swallowing the
                 // event made the reader look frozen; move without the upper
                 // clamp instead and let the list re-measure.
+                if (readerView._debug)
+                    console.log("[reader] wheel ci=" + Math.round(pageListView.contentY)
+                        + " lim=" + Math.round(limit) + " cH=" + Math.round(pageListView.contentHeight)
+                        + " h=" + Math.round(pageListView.height) + " count=" + pageListView.count
+                        + " page=" + readerView.visiblePage + " step=" + Math.round(WheelScroll.stepOf(event.angleDelta.y, event.pixelDelta.y)))
                 if (limit <= 0) {
                     if (pageListView.count > 0) {
                         console.warn("[reader] no scrollable height yet (count=" + pageListView.count
@@ -209,9 +227,20 @@ Item {
                     event.accepted = true
                     return
                 }
-                pageListView.contentY = WheelScroll.nextContentY(
+                const target = WheelScroll.nextContentY(
                     pageListView.contentY, event.angleDelta.y, event.pixelDelta.y,
                     UiPrefs.scrollFactor, limit)
+                // The list's contentHeight is an ESTIMATE while pages are
+                // recycled, and it can fall well short of the real end: the
+                // pixel clamp then parks the reader on a fake bottom. When that
+                // happens and pages remain, move by page instead — this uses
+                // the laid-out items, not the estimate.
+                if (target >= limit && WheelScroll.stepOf(event.angleDelta.y, event.pixelDelta.y) > 0
+                        && readerView.visiblePage < pageListView.count - 1) {
+                    pageListView.positionViewAtIndex(readerView.visiblePage + 1, ListView.Beginning)
+                } else {
+                    pageListView.contentY = target
+                }
                 event.accepted = true
             }
         }
@@ -237,6 +266,9 @@ Item {
             // reading position drifts.
             property real _lastHeight: 0
             onHeightChanged: {
+                if (readerView._debug)
+                    console.log("[reader] page " + index + " h " + Math.round(_lastHeight) + " -> " + Math.round(height)
+                        + " ci=" + Math.round(pageListView.contentY) + " cH=" + Math.round(pageListView.contentHeight))
                 // Judge with the height BEFORE the change: a page that was
                 // fully above the viewport and grew past it would fail a check
                 // against the new height and skip the compensation.
