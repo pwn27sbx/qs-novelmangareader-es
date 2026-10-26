@@ -25,6 +25,11 @@ Item {
         headerVisible = true
     }
 
+    // Tapping hides the header (tap again to bring it back). Leaving the reader
+    // with it hidden and opening another chapter used to leave the chrome gone,
+    // because the same instance is reused: any entry shows it again.
+    onVisibleChanged: if (visible) headerVisible = true
+
     // ── Ink-black background ─────────────────────────────────────────────────
     Rectangle { anchors.fill: parent; color: "#08080a" }
 
