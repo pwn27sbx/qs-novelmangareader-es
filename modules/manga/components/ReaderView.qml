@@ -24,6 +24,13 @@ Item {
     // Called by the parent to reset state when re-entering this view
     function reset() {
         headerVisible = true
+        _lastPage = 0
+    }
+
+    // A new chapter starts at page 1, whatever the previous one left behind.
+    Connections {
+        target: Manga
+        function onChapterPagesChanged() { readerView._lastPage = 0 }
     }
 
     // Tapping hides the header (tap again to bring it back). Leaving the reader
@@ -182,7 +189,10 @@ Item {
     }
     readonly property int visiblePage: {
         const index = pageListView.indexAt(pageListView.width / 2, pageListView.contentY + 1)
-        return index < 0 ? Math.max(0, readerView._lastPage) : index
+        // Clamped to the current chapter: the remembered page survives a
+        // chapter change, and a shorter chapter would otherwise report an
+        // out-of-range number and look like it is already at the end.
+        return index < 0 ? Math.max(0, Math.min(readerView._lastPage, pageListView.count - 1)) : index
     }
     onVisiblePageChanged: if (visiblePage !== _lastPage) _lastPage = visiblePage
 
