@@ -101,7 +101,7 @@ Item {
                 StyledText {
                     id: pageCountText
                     anchors.centerIn: parent
-                    text: (pageListView.currentIndex + 1) + " / " + Manga.chapterPages.length
+                    text: (readerView.visiblePage + 1) + " / " + Manga.chapterPages.length
                     font.family: readerView.fontBody
                     font.pixelSize: Style.font.caption
                     font.letterSpacing: 0.5
@@ -156,6 +156,15 @@ Item {
     }
 
     // ── Page list ────────────────────────────────────────────────────────────
+    // Which page the viewport is on. `currentIndex` is no use here: the wheel
+    // handler moves `contentY` directly, and a programmatic scroll does NOT
+    // update it (measured: contentY 2100 -> currentIndex 0 while indexAt said
+    // 3), so the indicator used to sit on "1" forever.
+    readonly property int visiblePage: {
+        const index = pageListView.indexAt(pageListView.width / 2, pageListView.contentY + 1)
+        return index < 0 ? Math.max(0, pageListView.currentIndex) : index
+    }
+
     ListView {
         id: pageListView
         anchors {
@@ -290,7 +299,7 @@ Item {
         // Fill
         Rectangle {
             width: Manga.chapterPages.length > 0
-                ? parent.width * ((pageListView.currentIndex + 1) / Manga.chapterPages.length)
+                ? parent.width * ((readerView.visiblePage + 1) / Manga.chapterPages.length)
                 : 0
             height: parent.height
             color: Colors.primary
