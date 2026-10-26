@@ -184,7 +184,7 @@ Item {
         // height after you scrolled past it — everything then shifts under the
         // eye ("the scroll jumps back to something I already read"). A bigger
         // cache preloads them, and the delegate compensates the shift.
-        cacheBuffer: height * 2
+        cacheBuffer: Math.max(0, height * 2)
         spacing: Style.spacing.xs
         Behavior on anchors.topMargin { NumberAnimation { duration: Motion.slow; easing.type: Motion.easeOut } }
 
@@ -196,9 +196,19 @@ Item {
             acceptedDevices: PointerDevice.Mouse | PointerDevice.TouchPad
             onWheel: function(event) {
                 const limit = Math.max(0, pageListView.contentHeight - pageListView.height)
-                // Still laying out (contentHeight not known yet): moving now
-                // would clamp contentY to 0 and look like a stuck scroll.
-                if (limit <= 0) { event.accepted = true; return }
+                // Still laying out (contentHeight not known yet). Swallowing the
+                // event made the reader look frozen; move without the upper
+                // clamp instead and let the list re-measure.
+                if (limit <= 0) {
+                    if (pageListView.count > 0) {
+                        console.warn("[reader] no scrollable height yet (count=" + pageListView.count
+                            + " contentH=" + pageListView.contentHeight + " h=" + pageListView.height + ")")
+                        pageListView.contentY = Math.max(0, pageListView.contentY
+                            - WheelScroll.stepOf(event.angleDelta.y, event.pixelDelta.y) * UiPrefs.scrollFactor)
+                    }
+                    event.accepted = true
+                    return
+                }
                 pageListView.contentY = WheelScroll.nextContentY(
                     pageListView.contentY, event.angleDelta.y, event.pixelDelta.y,
                     UiPrefs.scrollFactor, limit)
@@ -218,9 +228,9 @@ Item {
 
         delegate: Item {
             width: pageListView.width
-            height: pageImg.implicitHeight > 0
-                ? pageImg.implicitHeight * (pageListView.width / pageImg.implicitWidth)
-                : pageListView.width * 1.42
+            height: pageImg.implicitHeight > 0 && pageImg.implicitWidth > 0
+                ? pageImg.implicitHeight * (Math.max(1, pageListView.width) / pageImg.implicitWidth)
+                : Math.max(1, pageListView.width) * 1.42
 
             // While this page sits entirely above the viewport, its height
             // change must move the content back by the same amount, or the
