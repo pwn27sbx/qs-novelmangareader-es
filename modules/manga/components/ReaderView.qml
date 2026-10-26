@@ -219,7 +219,10 @@ Item {
             // reading position drifts.
             property real _lastHeight: 0
             onHeightChanged: {
-                if (_lastHeight > 0 && y + height <= pageListView.contentY)
+                // Judge with the height BEFORE the change: a page that was
+                // fully above the viewport and grew past it would fail a check
+                // against the new height and skip the compensation.
+                if (_lastHeight > 0 && y + _lastHeight <= pageListView.contentY)
                     pageListView.contentY += (height - _lastHeight)
                 _lastHeight = height
             }
