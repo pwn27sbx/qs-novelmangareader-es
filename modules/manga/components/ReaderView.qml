@@ -174,6 +174,12 @@ Item {
         clip: true
         boundsBehavior: Flickable.StopAtBounds
         model: Manga.chapterPages
+        // Pages load asynchronously and their real height differs from the
+        // placeholder ratio, so a page created above the viewport can change
+        // height after you scrolled past it — everything then shifts under the
+        // eye ("the scroll jumps back to something I already read"). A bigger
+        // cache preloads them, and the delegate compensates the shift.
+        cacheBuffer: height * 2
         spacing: Style.spacing.xs
         Behavior on anchors.topMargin { NumberAnimation { duration: Motion.slow; easing.type: Motion.easeOut } }
 
@@ -207,6 +213,16 @@ Item {
             height: pageImg.implicitHeight > 0
                 ? pageImg.implicitHeight * (pageListView.width / pageImg.implicitWidth)
                 : pageListView.width * 1.42
+
+            // While this page sits entirely above the viewport, its height
+            // change must move the content back by the same amount, or the
+            // reading position drifts.
+            property real _lastHeight: 0
+            onHeightChanged: {
+                if (_lastHeight > 0 && y + height <= pageListView.contentY)
+                    pageListView.contentY += (height - _lastHeight)
+                _lastHeight = height
+            }
 
             Image {
                 id: pageImg

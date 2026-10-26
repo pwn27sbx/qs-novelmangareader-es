@@ -73,7 +73,10 @@ Item {
 
                 CoverCard {
                     anchors.fill: parent
-                    source: libEntry.coverUrl || ""
+                    // Covers go through the local backend; requesting them
+                    // before it is ready fails and Qt keeps that failure for
+                    // the session, so wait for the health check.
+                    source: Manga.serverReady ? (libEntry.coverUrl || "") : ""
                     title: libEntry.title || ""
                     bodyFont: libraryView.fontBody
                     gradientHeight: 48
