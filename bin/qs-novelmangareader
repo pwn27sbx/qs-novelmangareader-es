@@ -15,11 +15,20 @@ case ${1-} in -h | --help | help) ;; *)
     [[ -f $cfg/shell.qml ]] || { echo "qs-novelmangareader: no hay configuración en $cfg (ejecuta su install.sh)" >&2; exit 1; } ;;
 esac
 
+# The toggle is what the bar widget and the keybinds run, and it must work
+# from a cold desktop too: with no instance, `qs ipc` fails and the click
+# did nothing. Start it and give the IPC targets a moment to appear.
+ensure_instance() {
+    qs -p "$cfg" ipc show >/dev/null 2>&1 && return 0
+    qs -p "$cfg" --no-duplicate >/dev/null 2>&1 &
+    sleep 3
+}
+
 case ${1-start} in
     start) exec qs -p "$cfg" --no-duplicate ;;
-    anime) exec qs -p "$cfg" ipc call animePlayer toggle ;;
-    manga) exec qs -p "$cfg" ipc call mangaReader toggle ;;
-    novel) exec qs -p "$cfg" ipc call novelReader toggle ;;
+    anime) ensure_instance; exec qs -p "$cfg" ipc call animePlayer toggle ;;
+    manga) ensure_instance; exec qs -p "$cfg" ipc call mangaReader toggle ;;
+    novel) ensure_instance; exec qs -p "$cfg" ipc call novelReader toggle ;;
     stop)  exec qs -p "$cfg" kill ;;
     log)   exec qs -p "$cfg" log ;;
     -h|--help|help) sed -n '2,10p' "$0" | sed 's/^# \{0,1\}//' ;;
