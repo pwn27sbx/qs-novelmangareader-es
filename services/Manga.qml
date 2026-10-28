@@ -155,7 +155,13 @@ Singleton {
     Timer {
         id: restartTimer
         interval: 3000
-        onTriggered: serverProcess.running = true
+        onTriggered: {
+            serverProcess.running = true
+            // HealthPoller stops itself at the first ready(), so a restart has
+            // to re-arm it; otherwise serverReady stays false for the rest of
+            // the session and the cover grids never bind their images again.
+            healthPoller.running = true
+        }
     }
 
     HealthPoller {

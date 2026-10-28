@@ -18,6 +18,17 @@ ClickableRect {
     property int gradientHeight: 48
     property int footerHeight: 0
 
+    // Qt caches a FAILED image load per URL for the engine's lifetime, so one
+    // request that lands while the local backend is restarting would leave the
+    // tile broken until the shell restarts. Retry with a cache-busting token.
+    property int _attempt: 0
+    readonly property string _coverUrl: {
+        const base = String(root.source || "")
+        if (base === "") return ""
+        if (root._attempt === 0) return base
+        return base + (base.indexOf("?") >= 0 ? "&" : "?") + "retry=" + root._attempt
+    }
+
     anchors.margins: Style.space(5)
     radius: Style.cornerRadius
     color: Colors.surface_container
@@ -34,12 +45,25 @@ ClickableRect {
         id: cover
         anchors { top: parent.top; left: parent.left; right: parent.right }
         height: root.height - titleBar.height - root.footerHeight
-        source: root.source
+        source: root._coverUrl
         fillMode: Image.PreserveAspectCrop
         asynchronous: true
         cache: true
         opacity: status === Image.Ready ? 1 : 0
         Behavior on opacity { NumberAnimation { duration: Motion.slow } }
+
+        onStatusChanged: {
+            if (status === Image.Error && root._attempt < 2)
+                coverRetry.restart()
+        }
+
+        // One retry per failure, two in total: a backend that is briefly down
+        // heals itself, a cover that is genuinely gone stops hammering.
+        Timer {
+            id: coverRetry
+            interval: 1500
+            onTriggered: root._attempt += 1
+        }
 
         Rectangle {
             anchors { bottom: parent.bottom; left: parent.left; right: parent.right }
