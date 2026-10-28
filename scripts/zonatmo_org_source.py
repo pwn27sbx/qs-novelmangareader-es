@@ -301,11 +301,51 @@ def parse_series(html, series_path):
     }
 
 
+_PAGE_MARK = re.compile(r'data-page="(\d+)"')
+_PAGE_IMAGE = re.compile(
+    r"https://storage\d*\.zonatmo\.org/chapters/\d+/([^\"'\s>]+?\.(?:webp|jpe?g|png|avif))",
+    re.IGNORECASE,
+)
+
+
+def _page_number(position, filename, markers):
+    """Page number for an image, or None when it carries no usable order.
+
+    The live page wraps every scan in ``<div class="reader-img-wrap"
+    data-page="N">``; the image file itself is a content hash now (it used to
+    be ``N.webp``), so the wrapper is authoritative and a numeric filename is
+    only the fallback for older uploads.
+    """
+    number = None
+    for start, page in markers:
+        if start > position:
+            break
+        number = page
+    if number is not None:
+        return number
+    stem = filename.rsplit(".", 1)[0]
+    return int(stem) if stem.isdigit() else None
+
+
 def parse_chapter(html, upload_id):
-    """Map a /view_uploads page to [{page, img}] through the image proxy."""
+    """Map a /view_uploads page to [{page, img}] through the image proxy.
+
+    ``<link rel=preload>`` repeats the same URLs before the reader markup, so
+    entries are de-duplicated by URL and ordered by their page number.
+    """
+    text = html or ""
+    markers = [(m.start(), int(m.group(1))) for m in _PAGE_MARK.finditer(text)]
     by_page = {}
-    for match in re.finditer(r'https://storage\d*\.zonatmo\.org/chapters/\d+/(\d+)\.\w+', html or ""):
-        by_page[int(match.group(1))] = match.group(0)
+    seen = set()
+    for match in _PAGE_IMAGE.finditer(text):
+        url = match.group(0)
+        if url in seen:
+            continue
+        number = _page_number(match.start(), match.group(1), markers)
+        if number is None:
+            continue
+        seen.add(url)
+        by_page.setdefault(number, url)
     return [{"page": number, "img": proxy_url(url)} for number, url in sorted(by_page.items())]
 
 

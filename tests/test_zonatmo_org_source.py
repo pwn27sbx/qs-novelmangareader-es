@@ -110,6 +110,16 @@ class ParseChapterTest(unittest.TestCase):
         self.assertIn("storage.zonatmo.org/chapters/969671/1.webp", url)
         self.assertTrue(pages[0]["img"].startswith("http://127.0.0.1:5150/image?url="))
 
+    def test_hashed_filenames_are_ordered_by_data_page(self):
+        # The live site stopped naming chapter images "1.webp", "2.webp": they
+        # are hashes now, so the order comes from the reader wrapper's
+        # data-page attribute (captured 2026-10-27).
+        pages = zonatmo_org_source.parse_chapter(load_text("chapter_hashed.html"), "748475")
+        self.assertEqual([p["page"] for p in pages], [1, 2, 3, 4])
+        first = urllib.parse.unquote(pages[0]["img"])
+        self.assertIn("/chapters/748475/e6f9f22dc4b458db77b0c5b17490d747.webp", first)
+        self.assertTrue(pages[0]["img"].startswith("http://127.0.0.1:5150/image?url="))
+
 
 class ProxyTest(unittest.TestCase):
     def test_empty_url(self):

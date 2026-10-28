@@ -24,6 +24,7 @@ the chain, otherwise WeebCentral (handled by manga_server.py).
 """
 
 import os
+import re
 
 import content_lang
 import inmanga_source
@@ -129,6 +130,19 @@ def _first_match(module, title):
     return ""
 
 
+def title_hint(prefixed_id):
+    """Human title guessed from an id, for when its source cannot answer.
+
+    ``"zonatmo:tienda-del-placer"`` -> ``"Tienda Del Placer"``. A dead backend
+    used to abort the whole fall-through because no title was known yet, so a
+    live source later in the chain was never tried.
+    """
+    slug = str(prefixed_id or "").rstrip("/").rsplit("/", 1)[-1]
+    slug = re.sub(r"^[a-z_]+:", "", slug)
+    words = [w for w in re.split(r"[-_]+", slug) if w and not w.isdigit()]
+    return " ".join(w[:1].upper() + w[1:] for w in words)
+
+
 def search(query, mtype=None, offset=0, sort="Best Match"):
     for name in active_chain():
         module = _MODULES.get(name)
@@ -175,6 +189,7 @@ def info(prefixed_id):
     start = chain.index(name)
 
     title = ""
+    hint = title_hint(raw)
     for policy in chain[start:]:
         module = _MODULES.get(policy)
         if module is None:
@@ -182,9 +197,11 @@ def info(prefixed_id):
         if policy == name:
             data = _try(lambda: module.info(raw), None)
         else:
-            if not title:
+            # A source that raised left no title behind; the id slug is enough
+            # to keep the fall-through alive (2026-10-27, zonatmo.net 404s).
+            if not (title or hint):
                 break
-            match = _first_match(module, title)
+            match = _first_match(module, title or hint)
             if not match:
                 continue
             data = _try(lambda: module.info(match), None)
@@ -193,7 +210,7 @@ def info(prefixed_id):
         title = title or data.get("title", "")
         if data.get("chapters"):
             return _prefix_info(policy, data)
-    return {"error": NO_SPANISH_MESSAGE, "title": title}
+    return {"error": NO_SPANISH_MESSAGE, "title": title or hint}
 
 
 def pages(prefixed_chapter_id):

@@ -190,6 +190,30 @@ class ChainTest(unittest.TestCase):
         data = manga_chain.info("mangadex:x")
         self.assertEqual(data["id"], "zonatmo:S-Foo")
 
+    def test_info_uses_the_id_slug_when_the_starting_source_has_no_data(self):
+        # zonatmo.net's detail endpoint 404s (2026-10-27), so the starting
+        # source answers with nothing and there is no title yet. The chain must
+        # derive the title from the id slug ("tienda-del-placer") instead of
+        # stopping before the fall-through, or a dead backend hides a live one.
+        import titles as titles_module
+
+        class TitleAware(FakeSource):
+            def search(self, query, mtype=None, offset=0, sort="Best Match"):
+                matches = titles_module.titles_match(query, "Tienda del Placer")
+                results = [{"id": "ORG", "title": "Tienda del Placer"}] if matches else []
+                return {"results": results, "hasMore": False, "nextOffset": 0}
+
+        manga_chain._MODULES = {
+            "mangadex": FakeSource(found=False, chapters=False),
+            "inmanga": FakeSource(found=False, chapters=False),
+            "zonatmo": RaisingSource(),
+            "zonatmo_org": TitleAware(found=True, chapters=True),
+            "manhwaweb": FakeSource(found=False, chapters=False),
+        }
+        data = manga_chain.info("zonatmo:tienda-del-placer")
+        self.assertEqual(data.get("id"), "zonatmo_org:ORG")
+        self.assertEqual(data["chapters"][0]["id"], "zonatmo_org:CH")
+
     def test_none_has_spanish(self):
         self.set_modules(FakeSource(chapters=False), FakeSource(found=True, chapters=False),
                          FakeSource(found=True, chapters=False), FakeSource(found=True, chapters=False))
