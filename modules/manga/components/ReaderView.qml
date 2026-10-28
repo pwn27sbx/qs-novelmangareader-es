@@ -39,6 +39,8 @@ Item {
     onVisibleChanged: if (visible) headerVisible = true
 
     // ── Ink-black background ─────────────────────────────────────────────────
+    // The reading canvas stays near-black on purpose: it is the mat under the
+    // pages, like a video player, so a light theme does not glare around them.
     Rectangle { anchors.fill: parent; color: "#08080a" }
 
     // ── Reader header ────────────────────────────────────────────────────────
@@ -46,7 +48,7 @@ Item {
         id: readerHeader
         anchors { top: parent.top; left: parent.left; right: parent.right }
         height: 54
-        color: Qt.rgba(0.05, 0.05, 0.08, 0.95)
+        color: Util.alpha(Colors.surface_container_low, 0.96)
         z: 10
         opacity: readerView.headerVisible ? 1 : 0
         Behavior on opacity { NumberAnimation { duration: Motion.slow; easing.type: Motion.easeOut } }
@@ -55,7 +57,7 @@ Item {
         Rectangle {
             anchors { bottom: parent.bottom; left: parent.left; right: parent.right }
             height: 1
-            color: Qt.rgba(1, 1, 1, 0.07)
+            color: Util.alpha(Colors.text, 0.07)
         }
 
         RowLayout {
@@ -70,7 +72,7 @@ Item {
                     anchors.centerIn: parent
                     width: 34; height: 34; radius: Style.cornerRadius
                     color: readerBackArea.containsMouse
-                        ? Qt.rgba(1, 1, 1, 0.1)
+                        ? Util.alpha(Colors.text, 0.1)
                         : "transparent"
                     Behavior on color { ColorAnimation { duration: Motion.base } }
                 }
@@ -78,7 +80,7 @@ Item {
                     anchors.centerIn: parent
                     text: "←"
                     font.pixelSize: Style.font.iconLarge
-                    color: Qt.rgba(1, 1, 1, 0.7)
+                    color: Util.alpha(Colors.text, 0.7)
                 }
                 MouseArea {
                     id: readerBackArea
@@ -97,7 +99,7 @@ Item {
                 text: Manga.currentManga ? Manga.currentManga.title : ""
                 font.family: readerView.fontDisplay
                 font.pixelSize: Style.font.subtitle
-                color: Qt.rgba(1, 1, 1, 0.85)
+                color: Util.alpha(Colors.text, 0.85)
                 elide: Text.ElideRight
             }
 
@@ -107,8 +109,8 @@ Item {
                 height: 24
                 width: pageCountText.implicitWidth + 18
                 radius: Style.cornerRadius
-                color: Qt.rgba(1, 1, 1, 0.09)
-                border.color: Qt.rgba(1, 1, 1, 0.12)
+                color: Util.alpha(Colors.text, 0.09)
+                border.color: Util.alpha(Colors.text, 0.12)
                 border.width: 1
 
                 StyledText {
@@ -118,7 +120,7 @@ Item {
                     font.family: readerView.fontBody
                     font.pixelSize: Style.font.caption
                     font.letterSpacing: 0.5
-                    color: Qt.rgba(1, 1, 1, 0.65)
+                    color: Util.alpha(Colors.text, 0.65)
                 }
             }
         }
@@ -157,7 +159,7 @@ Item {
             }
             StyledText {
                 text: Manga.pagesError
-                color: Qt.rgba(1, 1, 1, 0.45)
+                color: Util.alpha(Colors.text, 0.45)
                 font.pixelSize: Style.font.bodySmall
                 font.family: readerView.fontBody
                 wrapMode: Text.Wrap
@@ -313,7 +315,7 @@ Item {
             Rectangle {
                 anchors.fill: parent
                 z: -1
-                color: "#111115"
+                color: Colors.surface_container_low
                 visible: pageImg.status !== Image.Ready
 
                 Column {
@@ -325,8 +327,8 @@ Item {
                         visible: pageImg.status !== Image.Error
                         width: 22
                         border.width: 2
-                        border.color: Qt.rgba(1, 1, 1, 0.08)
-                        arcColor: Qt.rgba(1, 1, 1, 0.45)
+                        border.color: Util.alpha(Colors.text, 0.08)
+                        arcColor: Util.alpha(Colors.text, 0.45)
                         duration: Motion.loop
                     }
                     StyledText {
@@ -334,13 +336,13 @@ Item {
                         visible: pageImg.status === Image.Error
                         text: "⊘"
                         font.pixelSize: 22 // style-ignore — bespoke size
-                        color: Qt.rgba(1, 1, 1, 0.3)
+                        color: Util.alpha(Colors.text, 0.3)
                     }
                     StyledText {
                         anchors.horizontalCenter: parent.horizontalCenter
                         text: I18n.t("page", { 1: modelData.index + 1 })
                             + (pageImg.status === Image.Error ? "  ·  " + I18n.t("manga.pageFailed") : "")
-                        color: Qt.rgba(1, 1, 1, 0.3)
+                        color: Util.alpha(Colors.text, 0.3)
                         font.pixelSize: Style.font.caption
                         font.family: readerView.fontBody
                         font.letterSpacing: 1.5
@@ -351,7 +353,7 @@ Item {
                         anchors.horizontalCenter: parent.horizontalCenter
                         visible: pageImg.status === Image.Loading && pageImg.progress > 0
                         width: 96; height: 2; radius: height / 2 // style-ignore — progress
-                        color: Qt.rgba(1, 1, 1, 0.08)
+                        color: Util.alpha(Colors.text, 0.08)
 
                         Rectangle {
                             width: parent.width * pageImg.progress
@@ -381,7 +383,7 @@ Item {
         // Track
         Rectangle {
             anchors.fill: parent
-            color: Qt.rgba(1, 1, 1, 0.06)
+            color: Util.alpha(Colors.text, 0.06)
         }
 
         // Fill
