@@ -34,13 +34,24 @@ function toggleAction(state) {
 // "hide" writes `visible` alone on purpose: the visible-changed cascade is what
 // clears `open` (see afterHide), and clearing it early would disarm the unload
 // timer, keeping the panel loaded forever.
+// load and restore write the same "this panel is on screen" fields; one
+// constant so an edit to one cannot silently diverge from the other. LOAD sets
+// `minimized: false` because a panel declares that flag as its initial state,
+// and a future default change must not leave a newly loaded panel minimized.
+var OPENED_PATCH = { open: true, minimized: false, visible: true };
+
+// A copy each time: a caller that mutates the patch must not corrupt the next one.
+function openedPatch() {
+    return { open: OPENED_PATCH.open, minimized: OPENED_PATCH.minimized, visible: OPENED_PATCH.visible };
+}
+
 function togglePatch(action) {
     if (action === ACTION.HIDE)
         return { visible: false };
     if (action === ACTION.RESTORE)
-        return { open: true, minimized: false, visible: true };
+        return openedPatch();
     if (action === ACTION.LOAD)
-        return { open: true, minimized: false, visible: true };
+        return openedPatch();
     throw new Error("panels: unknown toggle action " + String(action));
 }
 
