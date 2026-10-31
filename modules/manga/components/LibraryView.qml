@@ -50,10 +50,23 @@ Item {
             visible: Manga.libraryList.length > 0
 
             PanelSectionHeader {
-                Layout.fillWidth: true
                 Layout.alignment: Qt.AlignVCenter
                 fontFamily: libraryView.fontBody
-                text: I18n.t("tab.library") + " · " + Manga.libraryList.length
+                text: I18n.t("tab.library")
+            }
+
+            // The library's count is exact, so it is a plain number next to the
+            // heading. The stretch sits on the counter so the layout toggle
+            // stays on the right edge, as in Browse.
+            StyledText {
+                Layout.fillWidth: true
+                Layout.alignment: Qt.AlignVCenter
+                text: String(Manga.libraryList.length)
+                font.family: libraryView.fontBody
+                font.pixelSize: Style.font.caption
+                color: Colors.muted
+                elide: Text.ElideRight
+                maximumLineCount: 1
             }
 
             // Grid/list toggle. Its twin lives in BrowseView.qml: the shared

@@ -6,8 +6,8 @@ import qs.Ui
 // Horizontal filter chips shared by the three Browse views (plan R2 §2.2).
 //
 // The active chip is TINTED (`selected`, the Style selected fill) with the
-// foreground text; the rest are muted and have no background at all. Nothing
-// carries a border: that was the look the plan replaced.
+// foreground text and carries a 1 px accent ring; the rest are muted and have
+// no background and no border at all.
 //
 // `options` is a string[] or an array of { label } objects; `currentIndex`
 // marks the active one and `activated(index)` reports a click. `label` is
@@ -54,18 +54,34 @@ Item {
                 model: root.options
 
                 delegate: Button {
+                    id: chip
+
                     required property var modelData
                     required property int index
 
-                    readonly property bool active: index === root.currentIndex
+                    readonly property bool current: index === root.currentIndex
 
                     text: root.labelOf(modelData)
                     bordered: false
-                    selected: active
-                    foreground: active ? Colors.text : Colors.muted
+                    selected: current
+                    foreground: current ? Colors.text : Colors.muted
                     fontFamily: root.fontFamily
                     fontSize: Style.font.body
                     onClicked: root.activated(index)
+
+                    // The ring of the active chip. It is drawn instead of
+                    // assigned as `borderSpec` because Button derives that from
+                    // its own state machine (hover, focus, selected); overriding
+                    // it here would silently drop those borders. The ring is
+                    // inside the reserved border space, so nothing relayouts.
+                    Rectangle {
+                        anchors.fill: parent
+                        visible: chip.current
+                        color: "transparent"
+                        radius: chip.radius
+                        border.width: Style.normalBorderWidth
+                        border.color: Colors.primary
+                    }
                 }
             }
         }

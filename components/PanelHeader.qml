@@ -9,8 +9,9 @@ import qs.Ui
 // Far left: the optional panel brand (`brand`, a Component); the tabs follow
 // it and shift right when it is present. Absent on callers that do not pass
 // one, which keeps their header exactly as it was.
-// Left: the Browse / Library tabs as tinted text — the active one carries the
-// selected fill, the other is muted, and neither has a border or a box.
+// Left: the Browse / Library tabs. The current one is a pill — the accent tint
+// behind its label — and the other stays plain muted text; neither has a
+// border.
 // Right: search, the optional SUB/DUB pair, the EN/ES chip and minimize, all
 // on the same baseline, with the free space in the middle.
 //
@@ -93,7 +94,10 @@ Item {
                 required property var modelData
                 required property int index
 
-                readonly property bool active: index === root.tabIndex
+                // Not `active`: that name belongs to Button and drives its own
+                // selected fill, so overriding it (as this delegate used to)
+                // would tint the pill a second time.
+                readonly property bool isCurrent: index === root.tabIndex
                 // -1 / missing entry: this tab carries no counter.
                 readonly property int count: {
                     var counts = root.tabCounts
@@ -105,8 +109,15 @@ Item {
 
                 text: count >= 0 ? String(modelData) + " · " + count : String(modelData)
                 bordered: false
-                selected: active
-                foreground: active ? Colors.text : Colors.muted
+                // The current tab is a pill: the accent tint behind the label,
+                // with the label itself at full strength. `selected` and `active`
+                // stay off on purpose — both paint Button's own text-coloured
+                // fill, which would stack a second tint over this one. Radius is
+                // the shared token, so the pill stays square while the theme's
+                // Hyprland rounding is 0.
+                background: isCurrent ? Style.selectedFillFor(Colors.primary) : "transparent"
+                radius: Style.cornerRadius
+                foreground: isCurrent ? Colors.text : Colors.muted
                 fontFamily: root.fontFamily
                 fontSize: Style.font.body
                 onClicked: root.tabActivated(index)

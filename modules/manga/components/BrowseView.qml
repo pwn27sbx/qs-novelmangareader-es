@@ -88,11 +88,23 @@ Item {
             visible: Manga.mangaList.length > 0
 
             PanelSectionHeader {
-                Layout.fillWidth: true
                 Layout.alignment: Qt.AlignVCenter
                 fontFamily: browseView.fontBody
-                text: I18n.t("header.results") + " · "
-                    + I18n.tn("header.loaded", Manga.mangaList.length)
+                text: I18n.t("header.results")
+            }
+
+            // The counter is its own, muted line: it is a number that moves,
+            // the label is a fixed heading. The stretch sits on the counter so
+            // the layout toggle stays on the right edge.
+            StyledText {
+                Layout.fillWidth: true
+                Layout.alignment: Qt.AlignVCenter
+                text: I18n.tn("header.loaded", Manga.mangaList.length)
+                font.family: browseView.fontBody
+                font.pixelSize: Style.font.caption
+                color: Colors.muted
+                elide: Text.ElideRight
+                maximumLineCount: 1
             }
 
             // Grid/list toggle. Its twin lives in LibraryView.qml: the shared
@@ -219,6 +231,10 @@ Item {
                         gradientHeight: 56
                         titlePadding: 18
                         typeBadge: I18n.tData(modelData.type || "").toUpperCase()
+                        // The mockup's tile: the artwork does not bleed to the
+                        // card's edge, and the badge leads instead of trailing.
+                        inset: Style.space(6)
+                        badgeLeading: true
                         // The work's chapter · status. The search of some
                         // sources carries no chapter, and the line then drops
                         // that segment instead of leaving an orphan dot.
