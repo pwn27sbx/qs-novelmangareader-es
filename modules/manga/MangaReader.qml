@@ -95,10 +95,9 @@ Item {
 
     // Header brand: the app glyph plus this panel's short name (decision 1).
     // The other two panels pass their own; the shared PanelHeader renders it.
-    // Brand row shared with the other panels: one component, one glyph.
     Component {
         id: brandComponent
-        PanelBrand { title: I18n.t("brand.manga") }
+        PanelBrand { title: I18n.t("brand.manga"); fontFamily: root.fontBody }
     }
 
     Rectangle { anchors.fill: parent; color: Colors.background }

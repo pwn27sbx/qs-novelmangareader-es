@@ -67,10 +67,9 @@ Item {
     }
 
     // Header brand: the app glyph plus this panel's short name (decision 1).
-    // Brand row shared with the other panels: one component, one glyph.
     Component {
         id: brandComponent
-        PanelBrand { title: I18n.t("brand.anime") }
+        PanelBrand { title: I18n.t("brand.anime"); fontFamily: root.fontBody }
     }
 
     // ── Background ────────────────────────────────────────────────────────────
