@@ -16,7 +16,7 @@ Exit codes: 0 all good, 1 at least one source broke, 2 the canary could not run.
 
 It never trusts the local image proxy: a module's `img` field points at
 127.0.0.1:5150, which only exists while the app runs, so the origin URL is
-fetched directly (use --via-proxy to go through the proxy instead).
+fetched directly.
 """
 
 import argparse
@@ -112,15 +112,27 @@ def fetch_bytes(url, timeout=TIMEOUT):
         return response.read()
 
 
-def check_image(url, fetch=fetch_bytes):
-    """Problems with the first page of a chapter, judged from its bytes."""
+def check_image(url, fetch=fetch_bytes, retries=1, sleep=time.sleep):
+    """Problems with the first page of a chapter, judged from its bytes.
+
+    One transient timeout must not mark a healthy source as broken (a false
+    Discord alert costs more than a two-second retry), so a failed FETCH is
+    retried. A 200 that is not an image is reported at once: retrying an HTML
+    block would only delay the truth.
+    """
     if not url:
         return ["image: no url"]
-    try:
-        body = fetch(url)
-    except Exception as error:  # noqa: BLE001 — the canary reports, never raises
-        status = getattr(getattr(error, "response", None), "status", None)
-        return [f"image: {type(error).__name__}{'' if status is None else ' ' + str(status)}"]
+    attempt = 0
+    while True:
+        try:
+            body = fetch(url)
+            break
+        except Exception as error:  # noqa: BLE001 — the canary reports, never raises
+            if attempt >= retries:
+                status = getattr(getattr(error, "response", None), "status", None)
+                return [f"image: {type(error).__name__}{'' if status is None else ' ' + str(status)}"]
+            attempt += 1
+            sleep(1.5)
     kind = sniff_image(body)
     if not kind:
         return ["image: not an image (html or placeholder)"]
@@ -363,10 +375,12 @@ def main(argv=None):
 
     sources = args.source or list(SOURCES)
     started = time.monotonic()
-    lines, code = run(sources, modules, fetch_bytes, chain=not args.no_chain)
     if args.fail:
-        lines.append(f"FAIL {args.fail}: forced failure (--fail)")
-        code = 1
+        # The point of --fail is testing the alert path, not the network: no
+        # probes, no imports beyond what main already did.
+        lines, code = [f"FAIL {args.fail}: forced failure (--fail)"], 1
+    else:
+        lines, code = run(sources, modules, fetch_bytes, chain=not args.no_chain)
     elapsed = time.monotonic() - started
 
     if args.json:

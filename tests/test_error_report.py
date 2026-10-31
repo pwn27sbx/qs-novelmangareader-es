@@ -108,12 +108,17 @@ class ReportTest(unittest.TestCase):
         self.assertFalse(error_report.report(ValueError("x"), "s", "o", dsn=DSN, sink=sink, now=1))
         self.assertFalse(error_report.report(ValueError("y"), "s", "o", dsn=DSN, sink=lambda u, p: False, now=2))
 
-    def test_a_failed_delivery_does_not_silence_the_next_one(self):
+    def test_a_failed_delivery_backs_off_for_five_minutes(self):
         error_report._sent.clear()
+        error_report._failed.clear()
         self.assertFalse(error_report.report(ValueError("x"), "s", "o", dsn=DSN,
                                              sink=lambda u, p: False, now=1))
+        # Inside the backoff the same key is not retried (a burst is not a retry storm).
+        self.assertFalse(error_report.report(ValueError("x"), "s", "o", dsn=DSN,
+                                             sink=lambda u, p: True, now=2))
+        # Once it expires the report goes out.
         self.assertTrue(error_report.report(ValueError("x"), "s", "o", dsn=DSN,
-                                            sink=lambda u, p: True, now=2))
+                                            sink=lambda u, p: True, now=1 + error_report.FAILED_BACKOFF + 1))
 
 
 class ChainInstrumentationTest(unittest.TestCase):

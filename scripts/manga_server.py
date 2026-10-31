@@ -142,6 +142,13 @@ def fetch(url, extra_headers=None, timeout=30):
 
 # Image hosts that refuse a request without a Referer. ManhwaWeb's CDN answers
 # 403 to a bare GET and 200 with its own site as the referer (checked live).
+# MangaDex serves every page from a per-user at-home node
+# (<hash>.mangadex.network) that answers 404 without the site as referer, so the
+# node host has to match by suffix. uploads.mangadex.org is the canonical
+# fallback and answers 200 WITHOUT a referer: it must stay out of this map.
+IMAGE_REFERER_SUFFIXES = (
+    (".mangadex.network", "https://mangadex.org/"),
+)
 IMAGE_REFERERS = {
     "img1mw.xyz": "https://manhwaweb.com/",
     "img2mw.xyz": "https://manhwaweb.com/",
@@ -149,10 +156,20 @@ IMAGE_REFERERS = {
 }
 
 
+def referer_for(host):
+    """The Referer an image host insists on, or "" when it needs none."""
+    host = (host or "").lower()
+    if host in IMAGE_REFERERS:
+        return IMAGE_REFERERS[host]
+    for suffix, referer in IMAGE_REFERER_SUFFIXES:
+        if host.endswith(suffix):
+            return referer
+    return ""
+
+
 def image_headers(url):
     """HEADERS plus the per-host Referer an image CDN insists on."""
-    host = (urlparse(url).hostname or "").lower()
-    referer = IMAGE_REFERERS.get(host)
+    referer = referer_for(urlparse(url).hostname or "")
     return {**HEADERS, "Referer": referer} if referer else HEADERS
 
 

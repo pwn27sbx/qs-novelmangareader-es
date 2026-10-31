@@ -78,11 +78,12 @@ class MappingTest(unittest.TestCase):
         self.assertEqual(data["chapters"][-1]["chapter"], "1")
 
     def test_chapter_pages_are_proxied(self):
-        urls = manhwaweb_source.map_pages(CHAPTER)
-        self.assertGreater(len(urls), 0)
-        for url in urls:
-            self.assertTrue(url.startswith("http://127.0.0.1:5150/image?url="))
-        self.assertIn("img1mw.xyz", urls[0])
+        pages = manhwaweb_source.map_pages(CHAPTER)
+        self.assertGreater(len(pages), 0)
+        self.assertEqual([page["page"] for page in pages], list(range(1, len(pages) + 1)))
+        for page in pages:
+            self.assertTrue(page["img"].startswith("http://127.0.0.1:5150/image?url="))
+        self.assertIn("img1mw.xyz", pages[0]["img"])
 
 
 class CacheTest(unittest.TestCase):

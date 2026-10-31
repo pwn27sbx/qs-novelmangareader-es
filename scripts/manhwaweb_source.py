@@ -196,10 +196,16 @@ def map_info(raw):
 
 
 def map_pages(raw):
-    """Chapter document -> image URLs behind the app's proxy."""
+    """Chapter document -> ``[{page, img}]`` behind the app's proxy.
+
+    Every other source answers that shape and the reader reads ``p.img``; this
+    one used to return bare URL strings, so a ManhwaWeb chapter rendered as a
+    list of pages with empty urls (found by the canary, 2026-10-31).
+    """
     chapter = (raw or {}).get("chapter") or {}
     images = chapter.get("img") or (raw or {}).get("img") or []
-    return [proxy_url(url) for url in images if url]
+    return [{"page": number, "img": proxy_url(url)}
+            for number, url in enumerate((u for u in images if u), 1)]
 
 
 # ── public API (mirrors manga_server.py) ───────────────────────────────────

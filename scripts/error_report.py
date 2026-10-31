@@ -23,25 +23,37 @@ import re
 import time
 import traceback
 import urllib.error
+import warnings
 import urllib.parse
 import urllib.request
 
 DEDUPE_TTL = 3600          # one event per (source, op, type) per hour
+FAILED_BACKOFF = 300       # after a failed send, wait before trying that key again
 TIMEOUT = 2                # the reader must not wait on an alert
 MAX_MESSAGE = 500
 MAX_TRACEBACK = 2000
 USER_AGENT = "qs-nmr-backend/1.0 (+https://github.com/pwn27sbx/qs-novelmangareader-es)"
 
 _sent = {}
+_failed = {}
+_warned_insecure = False
+_LOOPBACK = {"localhost", "127.0.0.1", "::1"}
 
 # Exception messages raised while scraping carry the request URL, and its query
 # holds what the user was looking for. The query never leaves the machine.
-_URL = re.compile(r"https?://[^\s'\"<>]+")
+_URL = re.compile(r"(?:https?:)?//[^\s'\"<>]+")
+
+
+def _without_secrets(url):
+    """Cut the query and the fragment: both carry tokens and search terms."""
+    for separator in ("?", "#"):
+        url = url.split(separator, 1)[0]
+    return url
 
 
 def scrub(text):
-    """Drop the query string of every URL in `text` (search terms live there)."""
-    return _URL.sub(lambda match: match.group(0).split("?", 1)[0], str(text or ""))
+    """Drop the query and fragment of every URL in `text`, absolute or not."""
+    return _URL.sub(lambda match: _without_secrets(match.group(0)), str(text or ""))
 
 
 def parse_dsn(dsn):
@@ -57,8 +69,19 @@ def parse_dsn(dsn):
         if parts.scheme not in ("http", "https") or not parts.hostname or not key or not project:
             return None
         # hostname + port, never netloc: netloc still carries "key@".
+        scheme = parts.scheme
+        if scheme == "http" and parts.hostname not in _LOOPBACK:
+            # Cleartext to a public host would ship the key and the traceback in
+            # the open. A self-hosted Sentry on localhost keeps http; anything
+            # else is upgraded, with one warning.
+            global _warned_insecure
+            if not _warned_insecure:
+                warnings.warn("QS_SENTRY_DSN uses http for a non-loopback host; "
+                              "reporting over https instead", RuntimeWarning)
+                _warned_insecure = True
+            scheme = "https"
         port = f":{parts.port}" if parts.port else ""
-        return f"{parts.scheme}://{parts.hostname}{port}", project, key
+        return f"{scheme}://{parts.hostname}{port}", project, key
     except Exception:  # noqa: BLE001 — a broken DSN means "reporting off"
         return None
 
@@ -124,6 +147,10 @@ def report(error, source="", op="", dsn=None, sink=None, now=None):
     stamp = time.time() if now is None else now
     if not should_send(source, op, kind, stamp):
         return False
+    dedupe_key = (source, op, kind)
+    last_failure = _failed.get(dedupe_key)
+    if last_failure is not None and stamp - last_failure < FAILED_BACKOFF:
+        return False  # a burst must not turn one broken site into N requests
     url = f"{base_url}/api/{project}/store/?sentry_key={key}&sentry_version=7"
     try:
         delivered = bool((sink or _post)(url, build_event(error, source, op)))
@@ -131,4 +158,7 @@ def report(error, source="", op="", dsn=None, sink=None, now=None):
         return False
     if delivered:
         mark_sent(source, op, kind, stamp)
+        _failed.pop(dedupe_key, None)
+    else:
+        _failed[dedupe_key] = stamp
     return delivered
