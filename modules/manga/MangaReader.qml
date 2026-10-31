@@ -10,6 +10,13 @@ import qs.Ui
 
 Item {
     id: root
+
+    // El panel se atenúa cuando el puntero no está encima (pintado sobre la
+    // pantalla, ver shell.qml). HoverHandler escucha el área completa del panel,
+    // no solo sus hijos.
+    HoverHandler { id: pointer }
+
+    readonly property bool pointerInside: pointer.hovered
     anchors {
         top: parent.top
         bottom: parent.bottom

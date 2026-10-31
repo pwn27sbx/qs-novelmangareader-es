@@ -33,11 +33,15 @@ ShellRoot {
         // reads as invisible, so item.visible can't say what should show.
         property bool open: false
 
+        // Only one panel at a time: whoever opens asks the root to close the rest.
+        signal opened
+
         function toggle() {
             if (!active) {
                 active = true;
                 item.visible = true;
                 open = true;
+                opened();
             } else if (open) {
                 item.visible = false;
             } else {
@@ -45,6 +49,7 @@ ShellRoot {
                 item.minimized = false;
                 item.visible = true;
                 open = true;
+                opened();
             }
         }
 
@@ -109,11 +114,14 @@ ShellRoot {
             ReaderSlot {
                 id: mangaSlot
                 anchors {
-                    left: parent.left
+                    right: parent.right
                     top: parent.top
                     bottom: parent.bottom
                 }
                 sourceComponent: MangaReader {}
+                onOpened: root.closeOthers(mangaSlot)
+                opacity: root.panelOpacity(mangaSlot)
+                Behavior on opacity { NumberAnimation { duration: 120 } }
             }
 
             ReaderSlot {
@@ -124,21 +132,49 @@ ShellRoot {
                     bottom: parent.bottom
                 }
                 sourceComponent: NovelReader {}
+                onOpened: root.closeOthers(novelSlot)
+                opacity: root.panelOpacity(novelSlot)
+                Behavior on opacity { NumberAnimation { duration: 120 } }
             }
 
             ReaderSlot {
                 id: animeSlot
                 anchors {
-                    left: parent.left
+                    right: parent.right
                     top: parent.top
                     bottom: parent.bottom
                 }
                 sourceComponent: AnimePanel {}
+                onOpened: root.closeOthers(animeSlot)
+                opacity: root.panelOpacity(animeSlot)
+                Behavior on opacity { NumberAnimation { duration: 120 } }
             }
 
             // Omarchy adoption smoke test (Plan C, R-C1): invisible.
             OmarchySmoke {}
         }
+    }
+
+    // One panel at a time: the others close (their state survives; the existing
+    // unload timer frees them later).
+    function closeOthers(keep) {
+        var slots = [mangaSlot, novelSlot, animeSlot]
+        for (var i = 0; i < slots.length; i++) {
+            var other = slots[i]
+            if (other !== keep && other.open && other.item)
+                other.item.visible = false
+        }
+    }
+
+    // Ghost mode: painted over the whole screen, so when the pointer is
+    // elsewhere it drops to idleOpacity. No delay, and the mask is untouched,
+    // which is what lets the panel notice the pointer coming back by itself.
+    readonly property real idleOpacity: 0.15
+
+    function panelOpacity(slot) {
+        if (!slot.open || !slot.item)
+            return 1
+        return slot.item.pointerInside ? 1 : root.idleOpacity
     }
 
     function maskItem(slot) {
