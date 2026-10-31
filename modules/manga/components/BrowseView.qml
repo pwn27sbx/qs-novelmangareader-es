@@ -7,12 +7,19 @@ import qs.Commons
 import qs.services
 import qs.components
 import qs.Ui
+import "../../../services/manga_card.js" as MangaCard
 
 Item {
     id: browseView
 
     // ── Exposed API ──────────────────────────────────────────────────────────
     readonly property string fontBody: Style.font.family
+
+    // metaLine composes "chapter · status"; this is the one place Browse says
+    // how a chapter segment is worded ("Cap. 105" / "Ch. 105").
+    readonly property var cardTranslator: MangaCard.tSegment(function (key, params) {
+        return I18n.t(key, params)
+    })
 
     // One number for the grid and its skeleton: they must not disagree.
     readonly property int columnCount: 3
@@ -156,113 +163,28 @@ Item {
                     width: mangaGrid.cellWidth
                     height: mangaGrid.cellHeight
 
-                    ClickableRect {
-                        id: card
-                        anchors { fill: parent; margins: Style.space(5) }
-                        radius: Style.cornerRadius
-                        color: Colors.surface_container
-                        clip: true
-
-                        CoverPlaceholder {
-                            anchors.fill: coverImg
-                            status: coverImg.status
-                        }
-
-                        // Cover image
-                        Image {
-                            id: coverImg
-                            anchors { top: parent.top; left: parent.left; right: parent.right }
-                            height: parent.height - titleBar.height
-                            source: modelData.thumbUrl || ""
-                            fillMode: Image.PreserveAspectCrop
-                            asynchronous: true
-                            cache: true
-                            opacity: status === Image.Ready ? 1 : 0
-                            Behavior on opacity { NumberAnimation { duration: Motion.slow } }
-
-                            // Type badge
-                            Rectangle {
-                                visible: modelData.type && modelData.type.length > 0
-                                anchors { top: parent.top; right: parent.right; topMargin: Style.spacing.lg; rightMargin: Style.spacing.lg }
-                                height: 20
-                                radius: Style.cornerRadius
-                                width: typeText.implicitWidth + 14
-                                color: Qt.rgba(0, 0, 0, 0.7)
-
-                                StyledText {
-                                    id: typeText
-                                    anchors.centerIn: parent
-                                    text: I18n.tData(modelData.type || "").toUpperCase()
-                                    font.family: browseView.fontBody
-                                    font.pixelSize: 8 // style-ignore — bespoke size
-                                    font.letterSpacing: 1
-                                    font.bold: true
-                                    color: Colors.primary_fixed_dim
-                                }
-                            }
-
-                            // Gradient vignette at bottom of cover
-                            Rectangle {
-                                anchors { bottom: parent.bottom; left: parent.left; right: parent.right }
-                                height: 56
-                                gradient: Gradient {
-                                    GradientStop { position: 0.0; color: "transparent" }
-                                    GradientStop { position: 1.0; color: Colors.surface_container }
-                                }
-                            }
-                        }
-
-                        // Title bar
-                        Rectangle {
-                            id: titleBar
-                            anchors { bottom: parent.bottom; left: parent.left; right: parent.right }
-                            height: titleText.implicitHeight + 18
-                            color: Colors.surface_container
-                            radius: Style.cornerRadius
-
-                            StyledText {
-                                id: titleText
-                                anchors {
-                                    left: parent.left; right: parent.right
-                                    verticalCenter: parent.verticalCenter
-                                    leftMargin: Style.spacing.xl; rightMargin: Style.spacing.xl
-                                }
-                                text: modelData.title || ""
-                                font.family: browseView.fontBody
-                                font.pixelSize: Style.font.bodySmall
-                                font.letterSpacing: 0.2
-                                wrapMode: Text.Wrap
-                                maximumLineCount: 2
-                                elide: Text.ElideRight
-                                lineHeight: 1.3
-                            }
-                        }
-
-                        // Hover + press overlay
-                        Rectangle {
-                            anchors.fill: parent
-                            radius: Style.cornerRadius
-                            color: Colors.primary
-                            opacity: card.pressed
-                                ? Style.pressedFillAlpha
-                                : (card.hovered ? Style.hoverFillAlpha : 0)
-                            Behavior on opacity { NumberAnimation { duration: Motion.base } }
-                        }
-
-                        // Scale effect on hover
-                        transform: Scale {
-                            origin.x: card.width / 2
-                            origin.y: card.height / 2
-                            xScale: card.pressed ? 0.97 : 1.0
-                            yScale: card.pressed ? 0.97 : 1.0
-                            Behavior on xScale { NumberAnimation { duration: Motion.fast; easing.type: Motion.easeOut } }
-                            Behavior on yScale { NumberAnimation { duration: Motion.fast; easing.type: Motion.easeOut } }
-                        }
+                    CoverCard {
+                        anchors.fill: parent
+                        source: modelData.thumbUrl || ""
+                        title: modelData.title || ""
+                        bodyFont: browseView.fontBody
+                        // Kept from the inline delegate this replaces: this grid
+                        // faded 56 px and padded the title bar 18 px, so the
+                        // cover stays exactly where it was.
+                        gradientHeight: 56
+                        titlePadding: 18
+                        typeBadge: I18n.tData(modelData.type || "").toUpperCase()
+                        // The work's chapter · status. The search of some
+                        // sources carries no chapter, and the line then drops
+                        // that segment instead of leaving an orphan dot.
+                        meta: MangaCard.metaLine(modelData.chapter,
+                                                 I18n.tData(modelData.status || ""),
+                                                 browseView.cardTranslator)
 
                         onClicked: {
-                                Manga.fetchMangaDetail(modelData.id)
-                                browseView.mangaSelected(modelData.id)
-                            }
+                            Manga.fetchMangaDetail(modelData.id)
+                            browseView.mangaSelected(modelData.id)
+                        }
                     }
                 }
             }

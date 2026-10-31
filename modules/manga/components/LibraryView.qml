@@ -6,12 +6,19 @@ import qs.Commons
 import qs.services
 import qs.components
 import qs.Ui
+import "../../../services/manga_card.js" as MangaCard
 
 Item {
     id: libraryView
 
     readonly property string fontDisplay: Style.font.family
     readonly property string fontBody:    Style.font.family
+
+    // metaLine composes "chapter · status"; this is the one place Library says
+    // how a chapter segment is worded ("Cap. 105" / "Ch. 105").
+    readonly property var cardTranslator: MangaCard.tSegment(function (key, params) {
+        return I18n.t(key, params)
+    })
 
     // One number for the grid and its skeleton: they must not disagree.
     readonly property int columnCount: 3
@@ -100,6 +107,14 @@ Item {
                     bodyFont: libraryView.fontBody
                     gradientHeight: 48
                     footerHeight: 30
+                    // The work's own metadata, NOT this reader's progress: the
+                    // progress bar below keeps "Cap. N" for the user. Today's
+                    // entries store no work metadata, so the line stays hidden
+                    // rather than inventing it; an entry that carries either
+                    // field shows it here.
+                    meta: MangaCard.metaLine(libEntry.chapter,
+                                             I18n.tData(libEntry.status || ""),
+                                             libraryView.cardTranslator)
 
                     CoverProgressBar {
                         height: 30

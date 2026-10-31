@@ -312,6 +312,10 @@ Singleton {
                 title:    item.title  || "",
                 thumbUrl: item.image  || "",
                 status:   item.status || "",
+                // Optional: the listings carry it, the searches of zonatmo.org /
+                // WeebCentral / InManga do not. Missing is normal, so the card
+                // just omits the segment instead of showing an orphan.
+                chapter:  item.chapter || "",
                 type:     item.type   || "",
                 author:   ""
             }))
