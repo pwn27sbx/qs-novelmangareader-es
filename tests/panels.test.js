@@ -9,15 +9,21 @@ const assert = require("node:assert/strict");
 const p = require("../services/panels.js");
 
 test("toggleAction: las tres ramas de toggle() (active, no item)", () => {
-    assert.equal(p.toggleAction({ active: false, open: false }), "load");
-    assert.equal(p.toggleAction({ active: true, open: true }), "hide");
-    assert.equal(p.toggleAction({ active: true, open: false }), "restore");
+    assert.equal(p.toggleAction({ active: false, open: false }), p.ACTION.LOAD);
+    assert.equal(p.toggleAction({ active: true, open: true }), p.ACTION.HIDE);
+    assert.equal(p.toggleAction({ active: true, open: false }), p.ACTION.RESTORE);
 });
 
-test("togglePatch: hide NO limpia open, restore limpia minimized (bug 727733a)", () => {
-    assert.deepEqual(p.togglePatch("hide"), { open: true, minimized: false, visible: false });
-    assert.deepEqual(p.togglePatch("restore"), { open: true, minimized: false, visible: true });
-    assert.deepEqual(p.togglePatch("load"), { open: true, minimized: false, visible: true });
+test("togglePatch: cada acción escribe SOLO sus campos", () => {
+    // hide no toca open ni minimized: la cascada (afterHide) es la que cierra open.
+    assert.deepEqual(p.togglePatch(p.ACTION.HIDE), { visible: false });
+    assert.deepEqual(p.togglePatch(p.ACTION.RESTORE), { open: true, minimized: false, visible: true });
+    assert.deepEqual(p.togglePatch(p.ACTION.LOAD), { open: true, visible: true });
+});
+
+test("togglePatch: una acción desconocida falla en vez de restaurar", () => {
+    assert.throws(() => p.togglePatch("nueva"), /unknown toggle action/);
+    assert.throws(() => p.togglePatch(undefined), /unknown toggle action/);
 });
 
 test("afterHide: la guarda devuelve el open recibido", () => {
@@ -41,8 +47,8 @@ test("closePatch: open/minimized/visible, y no toca un slot sin item", () => {
 
 test("vuelta en el primer toque tras closePatch", () => {
     const closed = p.closePatch({ loaded: true });
-    assert.equal(p.toggleAction({ active: true, open: closed.open }), "restore");
-    assert.equal(p.togglePatch("restore").minimized, false);
+    assert.equal(p.toggleAction({ active: true, open: closed.open }), p.ACTION.RESTORE);
+    assert.equal(p.togglePatch(p.ACTION.RESTORE).minimized, false);
 });
 
 test("shouldUnload: el minimizado se queda, el cerrado a mano se va, el item nulo se va", () => {

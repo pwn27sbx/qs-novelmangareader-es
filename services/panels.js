@@ -11,23 +11,37 @@
 
 var IDLE_OPACITY = 0.15;
 
+// The actions travel as these constants, never as bare strings: the QML compares
+// against them, so a typo or a new action cannot fall silently into the restore
+// branch — togglePatch throws instead.
+var ACTION = {
+    LOAD: "load",
+    HIDE: "hide",
+    RESTORE: "restore"
+};
+
 // What the toggle must do, given the slot's state.
 function toggleAction(state) {
     state = state || {};
     if (!state.active)
-        return "load";
-    return state.open ? "hide" : "restore";
+        return ACTION.LOAD;
+    return state.open ? ACTION.HIDE : ACTION.RESTORE;
 }
 
-// The properties each action writes.
+// Only the properties THAT action writes; a field absent from the patch is a
+// field the caller must not touch.
 //
-// "hide" deliberately returns `open: true`: the visible-changed cascade is what
-// clears `open` (afterHide), and clearing it early would disarm the unload
+// "hide" writes `visible` alone on purpose: the visible-changed cascade is what
+// clears `open` (see afterHide), and clearing it early would disarm the unload
 // timer, keeping the panel loaded forever.
 function togglePatch(action) {
-    if (action === "hide")
-        return { open: true, minimized: false, visible: false };
-    return { open: true, minimized: false, visible: true };
+    if (action === ACTION.HIDE)
+        return { visible: false };
+    if (action === ACTION.RESTORE)
+        return { open: true, minimized: false, visible: true };
+    if (action === ACTION.LOAD)
+        return { open: true, visible: true };
+    throw new Error("panels: unknown toggle action " + String(action));
 }
 
 // The visible-changed cascade: a panel that was open and got hidden closes its
@@ -82,6 +96,7 @@ function opacityFor(state) {
 if (typeof module !== "undefined" && module.exports) {
     module.exports = {
         IDLE_OPACITY: IDLE_OPACITY,
+        ACTION: ACTION,
         toggleAction: toggleAction,
         togglePatch: togglePatch,
         afterHide: afterHide,

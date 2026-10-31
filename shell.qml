@@ -41,17 +41,21 @@ ShellRoot {
         function toggle() {
             var action = Panels.toggleAction({ active: slot.active, open: slot.open })
             var patch = Panels.togglePatch(action)
-            if (action === "load")
+            if (action === Panels.ACTION.LOAD) {
+                // The Loader creates `item` synchronously here; the guard below
+                // covers a source that ever becomes asynchronous.
                 slot.active = true
+            }
             if (slot.item) {
-                if (action !== "hide")
+                if (patch.minimized !== undefined)
                     slot.item.minimized = patch.minimized
-                slot.item.visible = patch.visible
+                if (patch.visible !== undefined)
+                    slot.item.visible = patch.visible
             }
-            if (action !== "hide") {
+            if (patch.open !== undefined)
                 slot.open = patch.open
+            if (action !== Panels.ACTION.HIDE)
                 slot.opened()
-            }
         }
 
         active: false
