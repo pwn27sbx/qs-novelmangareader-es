@@ -7,6 +7,7 @@ import qs.services
 import qs.components
 import qs.Ui
 import "../../../services/manga_card.js" as MangaCard
+import "../../../services/list_metrics.js" as ListMetrics
 
 Item {
     id: libraryView
@@ -31,37 +32,6 @@ Item {
     // One segment of the grid/list toggle: a square glyph chip that shows
     // whether its layout is the one on screen. The hover tooltip carries the
     // name, so the header stays compact.
-    component ViewModeChip: ClickableRect {
-        id: chip
-
-        property string glyph: ""
-        property string label: ""
-        property bool current: false
-        property string bodyFont: ""
-
-        implicitWidth: Style.spacing.controlHeight
-        implicitHeight: Style.spacing.controlHeight
-        cursorShape: Qt.PointingHandCursor
-        color: chip.pressed ? Style.pressedFillFor(Colors.text, Colors.primary)
-            : chip.current ? Style.selectedFillFor(Colors.text, Colors.primary)
-            : "transparent"
-        border.color: chip.hovered ? Style.hoverBorderFor(Colors.text, Colors.primary) : "transparent"
-        border.width: chip.hovered ? 1 : 0
-
-        StyledText {
-            anchors.centerIn: parent
-            text: chip.glyph
-            font.family: chip.bodyFont
-            font.pixelSize: Style.font.body
-            color: chip.current ? Style.selectedStateColor(Colors.text, Colors.primary) : Colors.muted
-        }
-
-        PanelToolTip {
-            visible: chip.hovered
-            text: chip.label
-            fontFamily: chip.bodyFont
-        }
-    }
 
     // ── Background ────────────────────────────────────────────────────────────
     Rectangle { anchors.fill: parent; color: Colors.background }
@@ -141,7 +111,7 @@ Item {
         SkeletonList {
             Layout.fillWidth: true
             Layout.fillHeight: true
-            rowHeight: Style.space(72)
+            rowHeight: Style.space(ListMetrics.ROW_HEIGHT_BASE)
             dividerInset: Style.spacing.lg
             active: !Manga.libraryLoaded && libraryView.listMode
         }

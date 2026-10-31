@@ -26,9 +26,10 @@ Rectangle {
     property bool online: false
     property string fontFamily: Style.font.family
 
-    // install_config copies the whole folder to <config>/qs-novelmangareader,
-    // so the manifest is next to the running copy. `UiPrefs.settingsDir` is the
-    // one place that directory is spelled out.
+    // install_config copies the plugin folder next to the running config, so
+    // the manifest ships with it. `UiPrefs.settingsDir` owns the config root;
+    // the module folder below is the one segment this file adds, and it is the
+    // same name the installer uses (`pwnsxb.novelmangareader`).
     readonly property string manifestPath: UiPrefs.settingsDir
         + "/omarchy/pwnsxb.novelmangareader/manifest.json"
 

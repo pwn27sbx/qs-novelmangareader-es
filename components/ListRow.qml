@@ -1,6 +1,7 @@
 import QtQuick
 import qs.Commons
 import qs.app
+import "../services/list_metrics.js" as ListMetrics
 
 // One row of a manga list view: a small cover, the title, the work's metadata
 // line and — when the caller has one — the reader's own progress.
@@ -42,7 +43,8 @@ ClickableRect {
         return base + (base.indexOf("?") >= 0 ? "&" : "?") + "retry=" + root._attempt
     }
 
-    implicitHeight: Style.space(72)
+    // Shared with the skeleton that stands in for these rows while loading.
+    implicitHeight: Style.space(ListMetrics.ROW_HEIGHT_BASE)
     color: "transparent"
 
     // Hover/press tint behind the content. Declared first so it stays under
