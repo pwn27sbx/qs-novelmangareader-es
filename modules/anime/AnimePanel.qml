@@ -66,6 +66,31 @@ Item {
         browseView.resetList()
     }
 
+    // Header brand: the app glyph plus this panel's short name (decision 1).
+    Component {
+        id: brandComponent
+
+        Row {
+            spacing: Style.spacing.sm
+
+            MaterialIcon {
+                anchors.verticalCenter: parent.verticalCenter
+                text: "󰂺"
+                font.pixelSize: Style.font.icon
+                color: Colors.primary
+            }
+
+            StyledText {
+                anchors.verticalCenter: parent.verticalCenter
+                text: I18n.t("brand.anime")
+                color: Colors.on_surface
+                font.family: root.fontBody
+                font.pixelSize: Style.font.title
+                font.bold: true
+            }
+        }
+    }
+
     // ── Background ────────────────────────────────────────────────────────────
     Rectangle {
         anchors.fill: parent
@@ -87,6 +112,7 @@ Item {
             z: 2
             tabs: [I18n.t("tab.browse"), I18n.t("tab.library")]
             tabIndex: root.tabIndex
+            brand: brandComponent
             searchOpen: root.searchOpen
             showMode: true
             mode: Anime.currentMode

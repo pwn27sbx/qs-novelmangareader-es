@@ -123,6 +123,27 @@ test("t() translates the no-Spanish notice keys", () => {
     assert.equal(i18n.t("en", "manga.sourcesTried", { 1: "MangaDex" }), "Sources checked: MangaDex");
 });
 
+test("t() labels the section headers above the grids", () => {
+    assert.equal(i18n.t("es", "header.results"), "Resultados");
+    assert.equal(i18n.t("en", "header.results"), "Results");
+});
+
+test("tn() pluralizes the loaded-results count", () => {
+    assert.equal(i18n.tn("es", "header.loaded", 1), "1 cargada");
+    assert.equal(i18n.tn("es", "header.loaded", 7), "7 cargadas");
+    assert.equal(i18n.tn("en", "header.loaded", 0), "0 loaded");
+    assert.equal(i18n.tn("en", "header.loaded", 7), "7 loaded");
+});
+
+test("t() names each panel's header brand", () => {
+    assert.equal(i18n.t("es", "brand.manga"), "Manga");
+    assert.equal(i18n.t("es", "brand.anime"), "Anime");
+    assert.equal(i18n.t("es", "brand.novel"), "Novela");
+    assert.equal(i18n.t("en", "brand.manga"), "Manga");
+    assert.equal(i18n.t("en", "brand.anime"), "Anime");
+    assert.equal(i18n.t("en", "brand.novel"), "Novel");
+});
+
 test("tSource() labels the known manga sources", () => {
     assert.equal(i18n.tSource("mangadex"), "MangaDex");
     assert.equal(i18n.tSource("inmanga"), "InManga");

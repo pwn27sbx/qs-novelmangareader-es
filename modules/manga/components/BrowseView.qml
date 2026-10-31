@@ -59,17 +59,32 @@ Item {
             }
         }
 
+        // ── Section header ───────────────────────────────────────────────────
+        // How many results are already in. The contract only exposes `hasMore`,
+        // so this is the loaded count — never a catalogue total.
+        PanelSectionHeader {
+            Layout.fillWidth: true
+            Layout.leftMargin: Style.spacing.xl
+            Layout.rightMargin: Style.spacing.xl
+            visible: Manga.mangaList.length > 0
+            fontFamily: browseView.fontBody
+            text: I18n.t("header.results") + " · "
+                + I18n.tn("header.loaded", Manga.mangaList.length)
+        }
+
         // ── Main content area ────────────────────────────────────────────────
         Item {
             Layout.fillWidth: true
             Layout.fillHeight: true
 
-            // Loading state: ghost cards where the first page will land
+            // Loading state: ghost cards where the first page will land. The
+            // cell width comes from SkeletonGrid's own padding, which matches
+            // the grid's margins below.
             SkeletonGrid {
                 anchors.fill: parent
                 z: 10
                 active: Manga.isFetchingManga && Manga.mangaList.length === 0
-                cellWidth: (width - 30) / 4
+                columns: 3
                 ratio: 1.58
             }
 
@@ -115,7 +130,10 @@ Item {
                 id: mangaGrid
                 anchors.fill: parent
                 anchors.margins: Style.spacing.xl
-                cellWidth: (width - 10) / 4
+                // `width` already excludes the margins above, so the three
+                // columns share it whole (the old `(width - 10) / 4` left a
+                // stray 10 px on the right).
+                cellWidth: width / 3
                 cellHeight: cellWidth * 1.58
                 clip: true
                 boundsBehavior: Flickable.StopAtBounds

@@ -6,6 +6,9 @@ import qs.Ui
 
 // One header row shared by the three panels (plan R2 §2.1).
 //
+// Far left: the optional panel brand (`brand`, a Component); the tabs follow
+// it and shift right when it is present. Absent on callers that do not pass
+// one, which keeps their header exactly as it was.
 // Left: the Browse / Library tabs as tinted text — the active one carries the
 // selected fill, the other is muted, and neither has a border or a box.
 // Right: search, the optional SUB/DUB pair, the EN/ES chip and minimize, all
@@ -18,6 +21,14 @@ Item {
     id: root
 
     property var tabs: []
+    // Counters for the tabs above, one entry per tab. A `-1` (or a missing
+    // entry) means "no counter". Kept parallel and separate on purpose: `tabs`
+    // stays a string[], so the delegates keep rendering `String(modelData)`
+    // instead of `[object Object]`.
+    property var tabCounts: []
+    // Short panel name + glyph, supplied by the panel (Component). `null` here
+    // is the default, so a caller without a brand is untouched.
+    property Component brand: null
     property int tabIndex: 0
     property bool showSearch: true
     property bool searchOpen: false
@@ -43,16 +54,33 @@ Item {
     implicitHeight: Style.space(48)
     implicitWidth: parent ? parent.width : 0
 
+    // The brand is part of the tab row: it disappears with it while the
+    // search field covers the left region.
+    readonly property bool showBrand: root.brand !== null && !root.searchOpen
+
     Rectangle {
         anchors.fill: parent
         color: Colors.surface_container_low
+    }
+
+    // Brand block. An inactive Loader has no width, so the tabs fall back to
+    // their original left margin when no brand is loaded.
+    Loader {
+        id: brandLoader
+        anchors {
+            left: parent.left
+            leftMargin: Style.spacing.md
+            verticalCenter: parent.verticalCenter
+        }
+        active: root.showBrand
+        sourceComponent: root.brand
     }
 
     Row {
         id: tabsRow
         visible: !root.searchOpen
         anchors {
-            left: parent.left
+            left: brandLoader.active ? brandLoader.right : parent.left
             leftMargin: Style.spacing.md
             verticalCenter: parent.verticalCenter
         }
@@ -66,8 +94,16 @@ Item {
                 required property int index
 
                 readonly property bool active: index === root.tabIndex
+                // -1 / missing entry: this tab carries no counter.
+                readonly property int count: {
+                    var counts = root.tabCounts
+                    if (!counts || index >= counts.length)
+                        return -1
+                    var value = Number(counts[index])
+                    return isFinite(value) ? value : -1
+                }
 
-                text: String(modelData)
+                text: count >= 0 ? String(modelData) + " · " + count : String(modelData)
                 bordered: false
                 selected: active
                 foreground: active ? Colors.text : Colors.muted

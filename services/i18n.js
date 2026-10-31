@@ -14,6 +14,12 @@ var tables = {
         // ── Shared chrome ───────────────────────────────────────────────
         "tab.browse": "Explorar",
         "tab.library": "Biblioteca",
+        // ── Header (brand per panel + section counters) ──────────────────
+        "brand.manga": "Manga",
+        "brand.anime": "Anime",
+        "brand.novel": "Novela",
+        "header.results": "Resultados",
+        "header.loaded": { one: "%1 cargada", other: "%1 cargadas" },
         // ── Settings view ───────────────────────────────────────────────
         "settings.title": "Ajustes",
         "settings.open": "Ajustes",
@@ -97,6 +103,12 @@ var tables = {
         // ── Shared chrome ───────────────────────────────────────────────
         "tab.browse": "Browse",
         "tab.library": "Library",
+        // ── Header (brand per panel + section counters) ──────────────────
+        "brand.manga": "Manga",
+        "brand.anime": "Anime",
+        "brand.novel": "Novel",
+        "header.results": "Results",
+        "header.loaded": { one: "%1 loaded", other: "%1 loaded" },
         // ── Settings view ───────────────────────────────────────────────
         "settings.title": "Settings",
         "settings.open": "Settings",

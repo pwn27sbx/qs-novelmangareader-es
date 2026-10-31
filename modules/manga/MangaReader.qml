@@ -82,6 +82,43 @@ Item {
             browseView.resetList()
     }
 
+    // "/" opens the header search. The panel stays loaded while minimized, so
+    // the visibility guard is what keeps it from opening over another panel;
+    // the search guard keeps a "/" typed in the field (or the settings page
+    // showing) from being swallowed by the shortcut.
+    Shortcut {
+        sequence: "/"
+        context: Qt.WindowShortcut
+        enabled: root.visible && !root.searchOpen && !root.settingsMode
+        onActivated: root.openSearch()
+    }
+
+    // Header brand: the app glyph plus this panel's short name (decision 1).
+    // The other two panels pass their own; the shared PanelHeader renders it.
+    Component {
+        id: brandComponent
+
+        Row {
+            spacing: Style.spacing.sm
+
+            MaterialIcon {
+                anchors.verticalCenter: parent.verticalCenter
+                text: "󰂺"
+                font.pixelSize: Style.font.icon
+                color: Colors.primary
+            }
+
+            StyledText {
+                anchors.verticalCenter: parent.verticalCenter
+                text: I18n.t("brand.manga")
+                color: Colors.on_surface
+                font.family: root.fontBody
+                font.pixelSize: Style.font.title
+                font.bold: true
+            }
+        }
+    }
+
     Rectangle { anchors.fill: parent; color: Colors.background }
 
     ColumnLayout {
@@ -94,6 +131,8 @@ Item {
             z: 2
             tabs: [I18n.t("tab.browse"), I18n.t("tab.library")]
             tabIndex: root.tabIndex
+            brand: brandComponent
+            tabCounts: [Manga.mangaList.length, Manga.libraryList.length]
             searchOpen: root.searchOpen
             fontFamily: root.fontBody
             settingsMode: root.settingsMode

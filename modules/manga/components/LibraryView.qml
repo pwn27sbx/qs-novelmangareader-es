@@ -5,6 +5,7 @@ import qs.app
 import qs.Commons
 import qs.services
 import qs.components
+import qs.Ui
 
 Item {
     id: libraryView
@@ -21,6 +22,17 @@ Item {
     ColumnLayout {
         anchors.fill: parent
         spacing: Style.space(0)
+
+        // ── Section header ───────────────────────────────────────────────────
+        // The library has an exact number (unlike Browse's loaded count).
+        PanelSectionHeader {
+            Layout.fillWidth: true
+            Layout.leftMargin: Style.spacing.lg
+            Layout.rightMargin: Style.spacing.lg
+            visible: Manga.libraryList.length > 0
+            fontFamily: libraryView.fontBody
+            text: I18n.t("tab.library") + " · " + Manga.libraryList.length
+        }
 
         // ── Empty state ───────────────────────────────────────────────────────
         Item {
@@ -42,6 +54,10 @@ Item {
             Layout.fillHeight: true
             visible: !Manga.libraryLoaded
             active: !Manga.libraryLoaded
+            // Three columns, like the grid below. The default stays at 4 for
+            // the anime and novel libraries, which keep their own 4-column
+            // grids; this panel passes its count explicitly.
+            columns: 3
             padding: Style.spacing.lg
             ratio: 1.72
             footerHeight: 30
@@ -56,7 +72,7 @@ Item {
             leftMargin: Style.spacing.lg
             rightMargin: Style.spacing.lg
             bottomMargin: Style.spacing.xl
-            cellWidth: Math.floor((width - leftMargin - rightMargin) / 4)
+            cellWidth: Math.floor((width - leftMargin - rightMargin) / 3)
             cellHeight: cellWidth * 1.72
             clip: true
             boundsBehavior: Flickable.StopAtBounds
