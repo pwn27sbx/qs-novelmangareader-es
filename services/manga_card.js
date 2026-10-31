@@ -45,11 +45,11 @@ function tSegment(t) {
 }
 
 // Exposed for the Node test runner only; QML's import ignores `module`.
-// The adapter both views used to copy: turns a segment key into display text.
+// The adapter both views share: decodes metaLine's segment ("ch|105") and words
+// it with `t`. Forwarding the raw key here would print "ch|105" on screen — the
+// decode is the whole point.
 function translator(t) {
-    return function (key, params) {
-        return t(key, params);
-    };
+    return tSegment(t);
 }
 
 if (typeof module !== "undefined" && module.exports) {

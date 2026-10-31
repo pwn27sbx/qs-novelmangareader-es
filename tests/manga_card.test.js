@@ -36,9 +36,12 @@ test("a numeric zero chapter survives the model mapping", () => {
     assert.equal(card.metaLine("0", "Ongoing", t), "ch|0 · Ongoing");
 });
 
-test("translator adapts a translate function for a segment", () => {
-    const adapter = card.translator(t);
-    assert.equal(adapter("ch", { 1: "9" }), "ch");
+test("translator decodes the segment, it does not forward it raw", () => {
+    // A forwarding adapter printed "ch|9" on screen; this must decode.
+    const fake = (key, params) => key + "(" + (params ? params[1] : "") + ")";
+    const adapter = card.translator(fake);
+    assert.equal(adapter("ch|9"), "ch(9)");
+    assert.equal(adapter("plain"), "plain()");
 });
 
 test("metaLine never renders a dangling dot for either-missing input", () => {
