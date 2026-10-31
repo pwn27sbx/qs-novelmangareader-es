@@ -14,6 +14,9 @@ Item {
     // ── Exposed API ──────────────────────────────────────────────────────────
     readonly property string fontBody: Style.font.family
 
+    // One number for the grid and its skeleton: they must not disagree.
+    readonly property int columnCount: 3
+
     // Emitted when the user taps a manga card
     signal mangaSelected(string mangaId)
 
@@ -84,7 +87,7 @@ Item {
                 anchors.fill: parent
                 z: 10
                 active: Manga.isFetchingManga && Manga.mangaList.length === 0
-                columns: 3
+                columns: browseView.columnCount
                 ratio: 1.58
             }
 
@@ -133,7 +136,7 @@ Item {
                 // `width` already excludes the margins above, so the three
                 // columns share it whole (the old `(width - 10) / 4` left a
                 // stray 10 px on the right).
-                cellWidth: width / 3
+                cellWidth: width / browseView.columnCount
                 cellHeight: cellWidth * 1.58
                 clip: true
                 boundsBehavior: Flickable.StopAtBounds

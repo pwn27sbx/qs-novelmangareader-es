@@ -13,6 +13,9 @@ Item {
     readonly property string fontDisplay: Style.font.family
     readonly property string fontBody:    Style.font.family
 
+    // One number for the grid and its skeleton: they must not disagree.
+    readonly property int columnCount: 3
+
     // Emitted when the user taps an entry — parent handles navigation
     signal mangaSelected(string mangaId)
 
@@ -57,7 +60,7 @@ Item {
             // Three columns, like the grid below. The default stays at 4 for
             // the anime and novel libraries, which keep their own 4-column
             // grids; this panel passes its count explicitly.
-            columns: 3
+            columns: libraryView.columnCount
             padding: Style.spacing.lg
             ratio: 1.72
             footerHeight: 30
@@ -72,7 +75,7 @@ Item {
             leftMargin: Style.spacing.lg
             rightMargin: Style.spacing.lg
             bottomMargin: Style.spacing.xl
-            cellWidth: Math.floor((width - leftMargin - rightMargin) / 3)
+            cellWidth: Math.floor((width - leftMargin - rightMargin) / libraryView.columnCount)
             cellHeight: cellWidth * 1.72
             clip: true
             boundsBehavior: Flickable.StopAtBounds

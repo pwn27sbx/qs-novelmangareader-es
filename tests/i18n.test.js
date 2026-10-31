@@ -129,8 +129,8 @@ test("t() labels the section headers above the grids", () => {
 });
 
 test("tn() pluralizes the loaded-results count", () => {
-    assert.equal(i18n.tn("es", "header.loaded", 1), "1 cargada");
-    assert.equal(i18n.tn("es", "header.loaded", 7), "7 cargadas");
+    assert.equal(i18n.tn("es", "header.loaded", 1), "1 cargado");
+    assert.equal(i18n.tn("es", "header.loaded", 7), "7 cargados");
     assert.equal(i18n.tn("en", "header.loaded", 0), "0 loaded");
     assert.equal(i18n.tn("en", "header.loaded", 7), "7 loaded");
 });

@@ -19,7 +19,7 @@ var tables = {
         "brand.anime": "Anime",
         "brand.novel": "Novela",
         "header.results": "Resultados",
-        "header.loaded": { one: "%1 cargada", other: "%1 cargadas" },
+        "header.loaded": { one: "%1 cargado", other: "%1 cargados" },
         // ── Settings view ───────────────────────────────────────────────
         "settings.title": "Ajustes",
         "settings.open": "Ajustes",
