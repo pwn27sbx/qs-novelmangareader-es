@@ -8,6 +8,7 @@ import qs.modules.novel
 import qs.app
 import qs.components
 import qs.services
+import "services/panels.js" as Panels
 
 // Anime player, manga reader and novel reader as side panels. Each one is
 // loaded on its first toggle, kept while minimized, and unloaded shortly
@@ -38,19 +39,18 @@ ShellRoot {
         signal opened
 
         function toggle() {
-            if (!active) {
-                active = true;
-                item.visible = true;
-                open = true;
-                opened();
-            } else if (open) {
-                item.visible = false;
-            } else {
-                // restoring a minimized panel; closing it next time unloads it
-                item.minimized = false;
-                item.visible = true;
-                open = true;
-                opened();
+            var action = Panels.toggleAction({ active: slot.active, open: slot.open })
+            var patch = Panels.togglePatch(action)
+            if (action === "load")
+                slot.active = true
+            if (slot.item) {
+                if (action !== "hide")
+                    slot.item.minimized = patch.minimized
+                slot.item.visible = patch.visible
+            }
+            if (action !== "hide") {
+                slot.open = patch.open
+                slot.opened()
             }
         }
 
@@ -60,17 +60,23 @@ ShellRoot {
             id: unloadTimer
             interval: 600
             // unless it was reopened or minimized in the meantime
-            onTriggered: if (!slot.open && !slot.item?.minimized) slot.active = false
+            onTriggered: if (Panels.shouldUnload({
+                open: slot.open,
+                minimized: slot.item ? !!slot.item.minimized : false
+            })) slot.active = false
         }
 
         Connections {
             target: slot.item
             // Closed from the toggle or its own minimize button.
             function onVisibleChanged() {
-                if (!slot.open || slot.item.visible)
-                    return;
-                slot.open = false;
-                if (!slot.item.minimized)
+                var next = Panels.afterHide({
+                    open: slot.open,
+                    visible: slot.item ? slot.item.visible : false,
+                    minimized: slot.item ? !!slot.item.minimized : false
+                })
+                slot.open = next.open
+                if (next.startUnload)
                     unloadTimer.start();
             }
         }
@@ -164,31 +170,28 @@ ShellRoot {
     // stale true would keep a hidden panel in the input mask.
     function closeOthers(keep) {
         var slots = [mangaSlot, novelSlot, animeSlot]
-        for (var i = 0; i < slots.length; i++) {
-            var other = slots[i]
-            if (other === keep || !other.open)
-                continue
-            other.open = false
+        var states = slots.map(function(slot) { return { open: slot.open } })
+        var closing = Panels.othersToClose(states, slots.indexOf(keep))
+        for (var i = 0; i < closing.length; i++) {
+            var other = slots[closing[i]]
+            var patch = Panels.closePatch({ loaded: !!other.item })
+            other.open = patch.open
             if (other.item) {
-                other.item.minimized = true
-                other.item.visible = false
+                other.item.minimized = patch.minimized
+                other.item.visible = patch.visible
             }
         }
     }
 
     // Ghost mode: painted over the whole screen, so when the pointer is
-    // elsewhere it drops to idleOpacity. No delay, and the mask is untouched,
-    // which is what lets the panel notice the pointer coming back by itself.
-    readonly property real idleOpacity: 0.15
-
-    // The slot contract: a panel may expose `pointerInside`. One that does not
-    // (a future panel) stays fully opaque instead of ghosting forever.
+    // elsewhere it drops to Panels.IDLE_OPACITY. No delay, and the mask is
+    // untouched, which is what lets the panel notice the pointer coming back.
     function panelOpacity(slot) {
-        if (!slot.open || !slot.item)
-            return 1
-        if (typeof slot.item.pointerInside !== "boolean")
-            return 1
-        return slot.item.pointerInside ? 1 : root.idleOpacity
+        return Panels.opacityFor({
+            open: slot.open,
+            loaded: !!slot.item,
+            pointerInside: slot.item ? slot.item.pointerInside : undefined
+        })
     }
 
     function maskItem(slot) {
