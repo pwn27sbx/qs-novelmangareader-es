@@ -62,10 +62,17 @@ function togglePatch(action) {
 function togglePlan(state) {
     var action = toggleAction(state);
     var patch = togglePatch(action);
+    // `fields` are the panel properties to write; `open` is the slot's own flag
+    // and travels separately, so it is not duplicated inside the field map.
+    var fields = {};
+    if (patch.minimized !== undefined)
+        fields.minimized = patch.minimized;
+    if (patch.visible !== undefined)
+        fields.visible = patch.visible;
     return {
         action: action,
         activate: action === ACTION.LOAD,
-        item: patch,
+        fields: fields,
         open: patch.open,
         notify: action !== ACTION.HIDE
     };

@@ -47,10 +47,10 @@ ShellRoot {
             if (plan.activate)
                 slot.active = true
             if (slot.item) {
-                if (plan.item.minimized !== undefined)
-                    slot.item.minimized = plan.item.minimized
-                if (plan.item.visible !== undefined)
-                    slot.item.visible = plan.item.visible
+                if (plan.fields.minimized !== undefined)
+                    slot.item.minimized = plan.fields.minimized
+                if (plan.fields.visible !== undefined)
+                    slot.item.visible = plan.fields.visible
             }
             if (plan.open !== undefined)
                 slot.open = plan.open

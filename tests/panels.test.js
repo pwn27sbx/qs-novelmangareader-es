@@ -35,7 +35,7 @@ test("togglePlan: el cableado no vuelve a decidir la acción", () => {
     assert.equal(hide.activate, false);
     assert.equal(hide.open, undefined);   // la cascada cierra open, no el toggle
     assert.equal(hide.notify, false);
-    assert.deepEqual(hide.item, { visible: false });
+    assert.deepEqual(hide.fields, { visible: false });
 
     const restore = p.togglePlan({ active: true, open: false });
     assert.equal(restore.activate, false);
