@@ -7,14 +7,16 @@ import "prefs.js" as Core
 // The app's preferences, and the ONLY writer of
 // <config>/qs-novelmangareader/settings.json.
 //
-// Two features own a key here: the language row (`language`) and the readers
-// (`scrollFactor`). There used to be two writers with two in-memory copies of
-// the file, which is how one key could clobber the other; every write now goes
-// through `setSetting()`, which merges into what is on disk-as-loaded and
-// preserves the rest (services/prefs.js).
+// Three features own a key here: the language row (`language`), the readers
+// (`scrollFactor`) and the manga Browse/Library layout (`viewMode`). There used
+// to be two writers with two in-memory copies of the file, which is how one key
+// could clobber the other; every write now goes through `setSetting()`, which
+// merges into what is on disk-as-loaded and preserves the rest
+// (services/prefs.js).
 //
 // The values are reactive: `scrollFactor` is read by the readers' wheel
-// handlers and `language` by I18n, so a change applies without a restart.
+// handlers, `language` by I18n and `viewMode` by the two manga views, so a
+// change applies without a restart.
 Singleton {
     id: root
 
@@ -47,6 +49,10 @@ Singleton {
     readonly property real scrollFactorMax: Core.MAX_SCROLL_FACTOR
     readonly property real scrollFactor: Core.normalizeScrollFactor(Core.parseSettings(root.raw).scrollFactor)
 
+    // "grid" | "list"; a missing or broken value normalizes to "grid", so the
+    // views never have to guard against anything else.
+    readonly property string viewMode: Core.normalizeViewMode(Core.parseSettings(root.raw).viewMode)
+
     function setSetting(key, value) {
         if (!root._loaded) {
             root._pending[key] = value
@@ -74,6 +80,12 @@ Singleton {
 
     function setScrollFactor(value) {
         root.setSetting("scrollFactor", Core.normalizeScrollFactor(value))
+    }
+
+    // The views pass "grid" / "list"; normalizing here means a typo can never
+    // be what lands in the file (and the next read would ignore it anyway).
+    function setViewMode(value) {
+        root.setSetting("viewMode", Core.normalizeViewMode(value))
     }
 
     FileView {

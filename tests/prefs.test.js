@@ -65,3 +65,24 @@ test("withSetting() keeps the reader's scrollFactor when the language changes", 
 test("withSetting() starts from an empty document when the file is broken", () => {
     assert.deepEqual(JSON.parse(prefs.withSetting("}{", "language", "es")), { language: "es" });
 });
+
+test("normalizeViewMode() defaults to grid and accepts only the two modes", () => {
+    assert.equal(prefs.DEFAULT_VIEW_MODE, "grid");
+    assert.equal(prefs.normalizeViewMode(undefined), "grid");
+    assert.equal(prefs.normalizeViewMode(null), "grid");
+    assert.equal(prefs.normalizeViewMode(""), "grid");
+    assert.equal(prefs.normalizeViewMode("garbage"), "grid");
+    assert.equal(prefs.normalizeViewMode(42), "grid");
+    assert.equal(prefs.normalizeViewMode("grid"), "grid");
+    assert.equal(prefs.normalizeViewMode("list"), "list");
+    // Tolerant of case and stray whitespace from a hand-edited settings.json.
+    assert.equal(prefs.normalizeViewMode(" LIST "), "list");
+});
+
+test("withSetting() persists viewMode without dropping the other keys", () => {
+    const before = JSON.stringify({ language: "es", scrollFactor: 4, viewMode: "grid" });
+    const after = JSON.parse(prefs.withSetting(before, "viewMode", "list"));
+    assert.equal(after.viewMode, "list");
+    assert.equal(after.language, "es");
+    assert.equal(after.scrollFactor, 4);
+});

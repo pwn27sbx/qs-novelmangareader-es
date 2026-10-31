@@ -20,6 +20,14 @@ var tables = {
         "brand.novel": "Novela",
         "header.results": "Resultados",
         "header.loaded": { one: "%1 cargado", other: "%1 cargados" },
+        // ── View mode (Browse / Library) ────────────────────────────────
+        "view.grid": "Cuadrícula",
+        "view.list": "Lista",
+        // ── Status bar (bottom of the manga panel) ──────────────────────
+        "status.online": "En línea",
+        "status.offline": "Sin conexión",
+        "status.search": "Buscar",
+        "status.close": "Cerrar",
         // ── Settings view ───────────────────────────────────────────────
         "settings.title": "Ajustes",
         "settings.open": "Ajustes",
@@ -109,6 +117,14 @@ var tables = {
         "brand.novel": "Novel",
         "header.results": "Results",
         "header.loaded": { one: "%1 loaded", other: "%1 loaded" },
+        // ── View mode (Browse / Library) ────────────────────────────────
+        "view.grid": "Grid",
+        "view.list": "List",
+        // ── Status bar (bottom of the manga panel) ──────────────────────
+        "status.online": "Online",
+        "status.offline": "Offline",
+        "status.search": "Search",
+        "status.close": "Close",
         // ── Settings view ───────────────────────────────────────────────
         "settings.title": "Settings",
         "settings.open": "Settings",

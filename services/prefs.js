@@ -5,7 +5,8 @@
 //
 //   {
 //     "language": "es",       // UI language (WU-11)
-//     "scrollFactor": 2       // reader wheel speed, 1..10
+//     "scrollFactor": 2,      // reader wheel speed, 0.5..5
+//     "viewMode": "grid"      // manga Browse/Library layout: "grid" | "list"
 //   }
 //
 // Every writer must preserve the keys it does not own: the language toggle
@@ -17,6 +18,11 @@ var DEFAULT_SCROLL_FACTOR = 2;
 // moves ~1.3 notches per page, so 10 was a jump bigger than a page.
 var MIN_SCROLL_FACTOR = 0.5;
 var MAX_SCROLL_FACTOR = 5;
+
+// The manga Browse/Library layout. Grid is what every user had before the
+// toggle existed, so it is the default when the key is missing or unreadable.
+var DEFAULT_VIEW_MODE = "grid";
+var VIEW_MODES = ["grid", "list"];
 
 function parseSettings(text) {
     try {
@@ -43,6 +49,14 @@ function normalizeLanguage(value) {
     return String(value || "").trim().toLowerCase().indexOf("es") === 0 ? "es" : "en";
 }
 
+// "grid" | "list", and nothing else: a hand-edited settings.json, an older
+// file without the key, or an object where a string belongs all fall back to
+// the default instead of leaving the views with a layout they cannot build.
+function normalizeViewMode(value) {
+    var mode = String(value === undefined || value === null ? "" : value).trim().toLowerCase();
+    return VIEW_MODES.indexOf(mode) >= 0 ? mode : DEFAULT_VIEW_MODE;
+}
+
 // Same document with ONE key set and everything else left alone. This is the
 // only writer shape the app uses: the language row and the scroll slider each
 // own their key, and neither may drop the other's.
@@ -60,6 +74,8 @@ if (typeof module !== "undefined" && module.exports) {
         parseSettings: parseSettings,
         normalizeScrollFactor: normalizeScrollFactor,
         withSetting: withSetting,
-        normalizeLanguage: normalizeLanguage
+        normalizeLanguage: normalizeLanguage,
+        DEFAULT_VIEW_MODE: DEFAULT_VIEW_MODE,
+        normalizeViewMode: normalizeViewMode
     };
 }

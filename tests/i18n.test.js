@@ -144,6 +144,24 @@ test("t() names each panel's header brand", () => {
     assert.equal(i18n.t("en", "brand.novel"), "Novel");
 });
 
+test("t() labels the grid/list toggle", () => {
+    assert.equal(i18n.t("es", "view.grid"), "Cuadrícula");
+    assert.equal(i18n.t("en", "view.grid"), "Grid");
+    assert.equal(i18n.t("es", "view.list"), "Lista");
+    assert.equal(i18n.t("en", "view.list"), "List");
+});
+
+test("t() labels the status bar", () => {
+    assert.equal(i18n.t("es", "status.online"), "En línea");
+    assert.equal(i18n.t("en", "status.online"), "Online");
+    assert.equal(i18n.t("es", "status.offline"), "Sin conexión");
+    assert.equal(i18n.t("en", "status.offline"), "Offline");
+    assert.equal(i18n.t("es", "status.search"), "Buscar");
+    assert.equal(i18n.t("en", "status.search"), "Search");
+    assert.equal(i18n.t("es", "status.close"), "Cerrar");
+    assert.equal(i18n.t("en", "status.close"), "Close");
+});
+
 test("tSource() labels the known manga sources", () => {
     assert.equal(i18n.tSource("mangadex"), "MangaDex");
     assert.equal(i18n.tSource("inmanga"), "InManga");

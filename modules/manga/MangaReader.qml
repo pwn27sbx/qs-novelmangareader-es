@@ -301,6 +301,15 @@ Item {
                 onCloseRequested: root.settingsMode = false
             }
         }
+
+        // ── Status bar ────────────────────────────────────────────────────────
+        // Online state, the installed version and the shortcuts that work.
+        // No cache size and no tracker (owner decision 3).
+        StatusBar {
+            Layout.fillWidth: true
+            online: Manga.serverReady
+            fontFamily: root.fontBody
+        }
     }
 
     PanelDecor {

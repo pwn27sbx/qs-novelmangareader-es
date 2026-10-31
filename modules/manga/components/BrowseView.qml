@@ -22,6 +22,11 @@ Item {
     // One number for the grid and its skeleton: they must not disagree.
     readonly property int columnCount: 3
 
+    // The layout the user picked (persisted in settings.json). Both branches
+    // below read this one value, so the toggle in the section header and the
+    // model wiring can never disagree about which one is showing.
+    readonly property bool listMode: UiPrefs.viewMode === "list"
+
     // Emitted when the user taps a manga card
     signal mangaSelected(string mangaId)
 
@@ -33,6 +38,41 @@ Item {
 
     function resetList() {
         Manga.fetchByOrigin(currentTagId, true)
+    }
+
+    // One segment of the grid/list toggle: a square glyph chip that shows
+    // whether its layout is the one on screen. The hover tooltip carries the
+    // name, so the header stays compact.
+    component ViewModeChip: ClickableRect {
+        id: chip
+
+        property string glyph: ""
+        property string label: ""
+        property bool current: false
+        property string bodyFont: ""
+
+        implicitWidth: Style.spacing.controlHeight
+        implicitHeight: Style.spacing.controlHeight
+        cursorShape: Qt.PointingHandCursor
+        color: chip.pressed ? Style.pressedFillFor(Colors.text, Colors.primary)
+            : chip.current ? Style.selectedFillFor(Colors.text, Colors.primary)
+            : "transparent"
+        border.color: chip.hovered ? Style.hoverBorderFor(Colors.text, Colors.primary) : "transparent"
+        border.width: chip.hovered ? 1 : 0
+
+        StyledText {
+            anchors.centerIn: parent
+            text: chip.glyph
+            font.family: chip.bodyFont
+            font.pixelSize: Style.font.body
+            color: chip.current ? Style.selectedStateColor(Colors.text, Colors.primary) : Colors.muted
+        }
+
+        PanelToolTip {
+            visible: chip.hovered
+            text: chip.label
+            fontFamily: chip.bodyFont
+        }
     }
 
     ColumnLayout {
@@ -67,17 +107,44 @@ Item {
             }
         }
 
-        // ── Section header ───────────────────────────────────────────────────
+        // ── Section header (+ grid/list toggle) ──────────────────────────────
         // How many results are already in. The contract only exposes `hasMore`,
         // so this is the loaded count — never a catalogue total.
-        PanelSectionHeader {
+        RowLayout {
             Layout.fillWidth: true
             Layout.leftMargin: Style.spacing.xl
             Layout.rightMargin: Style.spacing.xl
+            spacing: Style.spacing.sm
             visible: Manga.mangaList.length > 0
-            fontFamily: browseView.fontBody
-            text: I18n.t("header.results") + " · "
-                + I18n.tn("header.loaded", Manga.mangaList.length)
+
+            PanelSectionHeader {
+                Layout.fillWidth: true
+                Layout.alignment: Qt.AlignVCenter
+                fontFamily: browseView.fontBody
+                text: I18n.t("header.results") + " · "
+                    + I18n.tn("header.loaded", Manga.mangaList.length)
+            }
+
+            // Grid/list toggle. Its twin lives in LibraryView.qml: the shared
+            // section header is a bare Text in qs.Ui, and giving it children
+            // would reach into a component every panel uses.
+            ViewModeChip {
+                Layout.alignment: Qt.AlignVCenter
+                glyph: "▦"
+                label: I18n.t("view.grid")
+                current: !browseView.listMode
+                bodyFont: browseView.fontBody
+                onClicked: UiPrefs.setViewMode("grid")
+            }
+
+            ViewModeChip {
+                Layout.alignment: Qt.AlignVCenter
+                glyph: "☰"
+                label: I18n.t("view.list")
+                current: browseView.listMode
+                bodyFont: browseView.fontBody
+                onClicked: UiPrefs.setViewMode("list")
+            }
         }
 
         // ── Main content area ────────────────────────────────────────────────
@@ -87,13 +154,22 @@ Item {
 
             // Loading state: ghost cards where the first page will land. The
             // cell width comes from SkeletonGrid's own padding, which matches
-            // the grid's margins below.
+            // the grid's margins below. In list mode the grid shape does not
+            // apply, so the row skeleton takes over.
             SkeletonGrid {
                 anchors.fill: parent
                 z: 10
-                active: Manga.isFetchingManga && Manga.mangaList.length === 0
+                active: !browseView.listMode && Manga.isFetchingManga && Manga.mangaList.length === 0
                 columns: browseView.columnCount
                 ratio: 1.58
+            }
+
+            SkeletonList {
+                anchors.fill: parent
+                z: 10
+                rowHeight: Style.space(72)
+                dividerInset: Style.spacing.xl
+                active: browseView.listMode && Manga.isFetchingManga && Manga.mangaList.length === 0
             }
 
             // More pages on the way
@@ -138,6 +214,7 @@ Item {
                 id: mangaGrid
                 anchors.fill: parent
                 anchors.margins: Style.spacing.xl
+                visible: !browseView.listMode
                 // `width` already excludes the margins above, so the three
                 // columns share it whole (the old `(width - 10) / 4` left a
                 // stray 10 px on the right).
@@ -183,6 +260,45 @@ Item {
                             Manga.fetchMangaDetail(modelData.id)
                             browseView.mangaSelected(modelData.id)
                         }
+                    }
+                }
+            }
+
+            // ── Manga list ───────────────────────────────────────────────────
+            // Same model and same fetch contract as the grid; only the row
+            // shape changes. A ScriptModel is kept so appending a page inserts
+            // rows instead of resetting the view (and its scroll).
+            ListView {
+                id: mangaRows
+                anchors.fill: parent
+                anchors.topMargin: Style.spacing.xl
+                anchors.bottomMargin: Style.spacing.xl
+                visible: browseView.listMode
+                clip: true
+                boundsBehavior: Flickable.StopAtBounds
+                model: ScriptModel { values: Manga.mangaList }
+
+                ScrollBar.vertical: StyledScrollBar {
+                }
+
+                onContentYChanged: {
+                    if (contentY + height > contentHeight - height / 2)
+                        Manga.fetchNextMangaPage()
+                }
+
+                delegate: ListRow {
+                    width: mangaRows.width
+                    height: implicitHeight
+                    source: modelData.thumbUrl || ""
+                    title: modelData.title || ""
+                    bodyFont: browseView.fontBody
+                    meta: MangaCard.metaLine(modelData.chapter,
+                                             I18n.tData(modelData.status || ""),
+                                             browseView.cardTranslator)
+
+                    onClicked: {
+                        Manga.fetchMangaDetail(modelData.id)
+                        browseView.mangaSelected(modelData.id)
                     }
                 }
             }
