@@ -22,6 +22,10 @@ ShellRoot {
     // line; the panels keep working, the log names what may have changed.
     Component.onCompleted: OmarchyVersion.check()
 
+    // Live theme switches: the panels follow the palette the desktop is on,
+    // not the one it had when they started.
+    ThemeWatcher {}
+
     component ReaderSlot: Loader {
         id: slot
 
