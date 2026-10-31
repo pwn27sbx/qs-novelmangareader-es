@@ -5,6 +5,7 @@ import qs.app
 import qs.Commons
 import qs.services
 import qs.components
+import "../../../services/chapters.js" as Chapters
 
 Item {
     id: detailView
@@ -37,9 +38,24 @@ Item {
 
     // ── Helper ────────────────────────────────────────────────────────────────
     function formatChapter(ch) {
-        if (!ch) return "?"
-        const match = ch.match(/\d+(\.\d+)?/)
-        return match ? match[0] : ch
+        return Chapters.formatChapter(ch)
+    }
+
+    // "Last: Ch. N" is the way back to where the reading stopped. The stored
+    // chapter id belongs to whichever source answered last time, so the row is
+    // matched by chapter number (services/chapters.js) and scrolled into view.
+    function jumpToLastRead() {
+        if (!Manga.currentManga) return
+        const entry = Manga.getLibraryEntry(Manga.currentManga.id)
+        if (!entry || !entry.lastReadChapterNum) return
+        // An active filter could hide the very row we are looking for.
+        detailView._chapterFilter = ""
+        chapterSearch.text = ""
+        Qt.callLater(function() {
+            const index = Chapters.chapterIndex(detailView._processedChapters, entry.lastReadChapterNum)
+            if (index >= 0)
+                chapterList.positionViewAtIndex(index, ListView.Beginning)
+        })
     }
 
     // ── Processed (filtered + sorted) chapter list ────────────────────────────
@@ -348,16 +364,20 @@ Item {
 
                 Item { Layout.fillWidth: true }
 
-                // Last-read badge
+                // Last-read badge — click it to jump to that chapter
                 Rectangle {
+                    id: lastReadBadge
                     readonly property var _entry: Manga.currentManga
                         ? Manga.getLibraryEntry(Manga.currentManga.id) : null
                     visible: _entry !== null && _entry !== undefined
                         && _entry.lastReadChapterNum !== ""
                         && _entry.lastReadChapterNum !== undefined
                     height: 20; width: lastReadText.implicitWidth + 18; radius: Style.cornerRadius
-                    color: Style.selectedFillFor(Colors.primary)
+                    color: lastReadArea.containsMouse
+                        ? Colors.primary_container
+                        : Style.selectedFillFor(Colors.primary)
                     border.color: Colors.primary; border.width: 1
+                    Behavior on color { ColorAnimation { duration: Motion.fast } }
 
                     Text {
                         id: lastReadText; anchors.centerIn: parent
@@ -367,7 +387,16 @@ Item {
                             return e ? I18n.t("last.ch", { 1: detailView.formatChapter(e.lastReadChapterNum) }) : ""
                         }
                         font.family: detailView.fontBody
-                        font.pixelSize: 9; font.letterSpacing: 0.8; color: Colors.primary // style-ignore — bespoke size
+                        font.pixelSize: 9; font.letterSpacing: 0.8 // style-ignore — bespoke size
+                        color: lastReadArea.containsMouse ? Colors.on_primary_container : Colors.primary
+                        Behavior on color { ColorAnimation { duration: Motion.fast } }
+                    }
+
+                    MouseArea {
+                        id: lastReadArea
+                        anchors.fill: parent; hoverEnabled: true
+                        cursorShape: Qt.PointingHandCursor
+                        onClicked: detailView.jumpToLastRead()
                     }
                 }
             }
@@ -524,7 +553,8 @@ Item {
                         ? Manga.getLibraryEntry(Manga.currentManga.id) : null
                     readonly property bool isLastRead:
                         _libEntry !== null && _libEntry !== undefined
-                        && _libEntry.lastReadChapterId === modelData.id
+                        && (_libEntry.lastReadChapterId === modelData.id
+                            || Chapters.sameChapter(modelData.chapter, _libEntry.lastReadChapterNum))
 
                     color: isLastRead
                         ? Style.selectedFillFor(Colors.primary)
