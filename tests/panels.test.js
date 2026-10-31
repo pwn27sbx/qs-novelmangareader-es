@@ -18,7 +18,9 @@ test("togglePatch: cada acción escribe SOLO sus campos", () => {
     // hide no toca open ni minimized: la cascada (afterHide) es la que cierra open.
     assert.deepEqual(p.togglePatch(p.ACTION.HIDE), { visible: false });
     assert.deepEqual(p.togglePatch(p.ACTION.RESTORE), { open: true, minimized: false, visible: true });
-    assert.deepEqual(p.togglePatch(p.ACTION.LOAD), { open: true, visible: true });
+    // LOAD resets minimized explicitly: the baseline did, and a panel whose
+    // default ever changed would otherwise open still "minimized".
+    assert.deepEqual(p.togglePatch(p.ACTION.LOAD), { open: true, minimized: false, visible: true });
 });
 
 test("togglePatch: una acción desconocida falla en vez de restaurar", () => {

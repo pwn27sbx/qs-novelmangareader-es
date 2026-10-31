@@ -42,8 +42,10 @@ ShellRoot {
             var action = Panels.toggleAction({ active: slot.active, open: slot.open })
             var patch = Panels.togglePatch(action)
             if (action === Panels.ACTION.LOAD) {
-                // The Loader creates `item` synchronously here; the guard below
-                // covers a source that ever becomes asynchronous.
+                // The Loader creates `item` synchronously here. The guard below
+                // only protects the two item writes (a null item would crash);
+                // `open` and `opened()` still run, so an asynchronous source
+                // would need more than this guard.
                 slot.active = true
             }
             if (slot.item) {

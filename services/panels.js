@@ -40,7 +40,7 @@ function togglePatch(action) {
     if (action === ACTION.RESTORE)
         return { open: true, minimized: false, visible: true };
     if (action === ACTION.LOAD)
-        return { open: true, visible: true };
+        return { open: true, minimized: false, visible: true };
     throw new Error("panels: unknown toggle action " + String(action));
 }
 
