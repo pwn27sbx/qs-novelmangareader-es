@@ -23,11 +23,32 @@ DSN = "https://abc123@o42.ingest.us.sentry.io/77"
 
 class ParseDsnTest(unittest.TestCase):
     def test_a_normal_dsn_is_split(self):
-        self.assertEqual(error_report.parse_dsn(DSN), ("o42.ingest.us.sentry.io", "77", "abc123"))
+        self.assertEqual(error_report.parse_dsn(DSN),
+                         ("https://o42.ingest.us.sentry.io", "77", "abc123"))
+
+    def test_an_explicit_port_survives(self):
+        base, project, key = error_report.parse_dsn("http://key@localhost:9000/9")
+        self.assertEqual(base, "http://localhost:9000")
+        self.assertEqual((project, key), ("9", "key"))
 
     def test_a_missing_or_broken_dsn_is_none(self):
         for value in ("", None, "nonsense", "https://host/no-key"):
             self.assertIsNone(error_report.parse_dsn(value), value)
+
+
+class ScrubTest(unittest.TestCase):
+    def test_a_url_loses_its_query(self):
+        text = "GET https://cdn.example/a.webp?token=SECRET&q=solo+leveling failed"
+        cleaned = error_report.scrub(text)
+        self.assertIn("https://cdn.example/a.webp", cleaned)
+        self.assertNotIn("SECRET", cleaned)
+        self.assertNotIn("solo+leveling", cleaned)
+
+    def test_the_event_message_is_scrubbed(self):
+        error = RuntimeError("boom https://x/y?q=user-search")
+        event = error_report.build_event(error, "zonatmo", "search")
+        self.assertNotIn("user-search", event["message"])
+        self.assertNotIn("user-search", event["extra"]["traceback"])
 
 
 class EventTest(unittest.TestCase):
@@ -52,6 +73,7 @@ class DedupeTest(unittest.TestCase):
     def test_one_event_per_source_operation_and_type_per_hour(self):
         sent = {}
         self.assertTrue(error_report.should_send("zonatmo", "info", "HTTPError", 1000, sent))
+        error_report.mark_sent("zonatmo", "info", "HTTPError", 1000, sent)
         self.assertFalse(error_report.should_send("zonatmo", "info", "HTTPError", 1001, sent))
         self.assertTrue(error_report.should_send("zonatmo", "info", "HTTPError", 1000 + 3601, sent))
         self.assertTrue(error_report.should_send("zonatmo", "pages", "HTTPError", 1002, sent))
@@ -85,6 +107,13 @@ class ReportTest(unittest.TestCase):
 
         self.assertFalse(error_report.report(ValueError("x"), "s", "o", dsn=DSN, sink=sink, now=1))
         self.assertFalse(error_report.report(ValueError("y"), "s", "o", dsn=DSN, sink=lambda u, p: False, now=2))
+
+    def test_a_failed_delivery_does_not_silence_the_next_one(self):
+        error_report._sent.clear()
+        self.assertFalse(error_report.report(ValueError("x"), "s", "o", dsn=DSN,
+                                             sink=lambda u, p: False, now=1))
+        self.assertTrue(error_report.report(ValueError("x"), "s", "o", dsn=DSN,
+                                            sink=lambda u, p: True, now=2))
 
 
 class ChainInstrumentationTest(unittest.TestCase):

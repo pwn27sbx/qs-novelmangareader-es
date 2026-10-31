@@ -19,6 +19,7 @@ Rules this module keeps:
 
 import json
 import os
+import re
 import time
 import traceback
 import urllib.error
@@ -26,43 +27,64 @@ import urllib.parse
 import urllib.request
 
 DEDUPE_TTL = 3600          # one event per (source, op, type) per hour
-TIMEOUT = 5                # the reader must not wait on an alert
+TIMEOUT = 2                # the reader must not wait on an alert
 MAX_MESSAGE = 500
 MAX_TRACEBACK = 2000
 USER_AGENT = "qs-nmr-backend/1.0 (+https://github.com/pwn27sbx/qs-novelmangareader-es)"
 
 _sent = {}
 
+# Exception messages raised while scraping carry the request URL, and its query
+# holds what the user was looking for. The query never leaves the machine.
+_URL = re.compile(r"https?://[^\s'\"<>]+")
+
+
+def scrub(text):
+    """Drop the query string of every URL in `text` (search terms live there)."""
+    return _URL.sub(lambda match: match.group(0).split("?", 1)[0], str(text or ""))
+
 
 def parse_dsn(dsn):
-    """(host, project_id, public_key) from a DSN, or None when unusable."""
+    """(base_url, project_id, public_key) from a DSN, or None when unusable.
+
+    `base_url` keeps the scheme and any explicit port, so a self-hosted or
+    plain-HTTP install is not silently sent to https://host without its port.
+    """
     try:
         parts = urllib.parse.urlsplit(str(dsn or "").strip())
         key = parts.username or ""
         project = (parts.path or "").strip("/")
         if parts.scheme not in ("http", "https") or not parts.hostname or not key or not project:
             return None
-        return parts.hostname, project, key
+        # hostname + port, never netloc: netloc still carries "key@".
+        port = f":{parts.port}" if parts.port else ""
+        return f"{parts.scheme}://{parts.hostname}{port}", project, key
     except Exception:  # noqa: BLE001 — a broken DSN means "reporting off"
         return None
 
 
 def should_send(source, op, kind, now, sent=None, ttl=DEDUPE_TTL):
-    """True when this (source, op, kind) was not reported within the TTL."""
+    """True when this (source, op, kind) was not DELIVERED within the TTL.
+
+    Recording happens in `mark_sent`, after a successful delivery: an attempt
+    that failed (offline, DNS, timeout) must not silence the next one for an
+    hour, which is exactly the outage the reporter exists for.
+    """
     sent = _sent if sent is None else sent
-    key = (source, op, kind)
-    last = sent.get(key)
-    if last is not None and now - last < ttl:
-        return False
-    sent[key] = now
-    return True
+    last = sent.get((source, op, kind))
+    return last is None or now - last >= ttl
+
+
+def mark_sent(source, op, kind, now, sent=None):
+    sent = _sent if sent is None else sent
+    sent[(source, op, kind)] = now
 
 
 def build_event(error, source="", op="", module="manga_chain"):
     """The event Sentry receives: what broke, where, and a bounded traceback."""
     kind = type(error).__name__
-    detail = str(error)[:MAX_MESSAGE]
-    trace = "".join(traceback.format_exception(type(error), error, error.__traceback__))
+    detail = scrub(error)[:MAX_MESSAGE]
+    trace = scrub("".join(traceback.format_exception(type(error), error, error.__traceback__)))
     return {
         "message": f"{source or 'chain'}:{op or '?'} {kind}: {detail}"[:MAX_MESSAGE],
         "level": "error",
@@ -97,11 +119,16 @@ def report(error, source="", op="", dsn=None, sink=None, now=None):
     parsed = parse_dsn(dsn)
     if not parsed:
         return False
-    host, project, key = parsed
-    if not should_send(source, op, type(error).__name__, time.time() if now is None else now):
+    base_url, project, key = parsed
+    kind = type(error).__name__
+    stamp = time.time() if now is None else now
+    if not should_send(source, op, kind, stamp):
         return False
-    url = f"https://{host}/api/{project}/store/?sentry_key={key}&sentry_version=7"
+    url = f"{base_url}/api/{project}/store/?sentry_key={key}&sentry_version=7"
     try:
-        return bool((sink or _post)(url, build_event(error, source, op)))
+        delivered = bool((sink or _post)(url, build_event(error, source, op)))
     except Exception:  # noqa: BLE001 — reporting never breaks the caller
         return False
+    if delivered:
+        mark_sent(source, op, kind, stamp)
+    return delivered
