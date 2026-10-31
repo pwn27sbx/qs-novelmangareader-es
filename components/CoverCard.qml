@@ -21,7 +21,7 @@ ClickableRect {
     property string typeBadge: ""
     // The work's own metadata ("Cap. 105 · En curso"), never the reader's
     // progress: Library's CoverProgressBar owns that and lives in the footer.
-    // It sits in the info block, above the title — painting it over the artwork
+    // It sits in the info block, under the title — painting it over the artwork
     // was unreadable, because the cover is a photo, not a backdrop.
     property string meta: ""
     // Title bar padding. Browse's old inline delegate used 18 px and this card
@@ -136,7 +136,7 @@ ClickableRect {
         }
     }
 
-    // The solid info block under the cover: metadata line, then the title.
+    // The solid info block under the cover: the title, then the metadata line.
     // Its height is the content's own, so an empty `meta` adds nothing and the
     // anime / novel tiles keep the exact title bar they have today. Library's
     // `cellHeight` is fixed, so a card that does carry metadata takes the
