@@ -160,8 +160,9 @@ ClickableRect {
                 verticalCenter: parent.verticalCenter
             }
             width: infoBlock.width - 2 * Style.spacing.xl
-            // Only applied between the two lines; with `meta` empty the title
-            // is the sole visible child and the block is just title + padding.
+            // Order is title first, metadata second — the reference layout.
+            // `spacing` only applies BETWEEN visible children, so with `meta`
+            // empty the block is title + padding and does not grow.
             spacing: Style.spacing.xs
 
             StyledText {
