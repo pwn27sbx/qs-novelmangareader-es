@@ -2,6 +2,7 @@ pragma Singleton
 import QtQuick
 import Quickshell
 import Quickshell.Io
+import "library.js" as Library
 import qs.services
 
 Singleton {
@@ -36,17 +37,22 @@ Singleton {
     readonly property string currentLibraryId:
         currentManga ? (currentManga.originId || currentManga.id) : ""
 
-    // An entry may have been stored under the answering source's id (anything
-    // added while a fallback was active, before originId existed) or under the
-    // id the user opened. Both name the same work: look up whichever is
-    // present so the pane never reports "not in library" and duplicates it.
+    // Key of the EXISTING entry for the open title, or "" when it was never
+    // added. An entry may live under the opened id or under the answering
+    // source's id (anything added while a fallback was active, before originId
+    // existed); services/library.js picks whichever is present.
     function libraryEntryId() {
         if (!currentManga) return ""
-        var keys = [currentLibraryId, currentManga.id]
-        for (var i = 0; i < keys.length; i++) {
-            if (keys[i] && getLibraryEntry(keys[i])) return keys[i]
-        }
-        return currentLibraryId
+        var available = []
+        for (var i = 0; i < libraryList.length; i++) available.push(libraryList[i].id)
+        return Library.entryKey(available, [currentLibraryId, currentManga.id])
+    }
+
+    // Key to WRITE with: the existing entry when there is one, otherwise the id
+    // the user opened. Kept apart from libraryEntryId() on purpose — merging
+    // them made every title look "in library" and the add button unreachable.
+    function libraryWriteKey() {
+        return libraryEntryId() || currentLibraryId
     }
 
     // ── Chapter pages ────────────────────────────────────────────────────────

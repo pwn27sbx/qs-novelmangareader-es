@@ -186,7 +186,7 @@ Item {
                                 Manga.removeFromLibrary(Manga.libraryEntryId())
                             else
                                 Manga.addToLibrary({
-                                    id:       Manga.libraryEntryId(),
+                                    id:       Manga.libraryWriteKey(),
                                     title:    Manga.currentManga.title,
                                     coverUrl: Manga.currentManga.coverUrl
                                 })
@@ -636,9 +636,9 @@ Item {
                     onClicked: {
                             Manga.fetchChapterPages(modelData.id)
                             detailView.chapterSelected(modelData.id)
-                            if (Manga.currentManga && Manga.libraryEntryId() !== "") {
+                            if (Manga.currentManga && Manga.isInLibrary(Manga.libraryWriteKey())) {
                                 Manga.updateLastRead(
-                                    Manga.libraryEntryId(),
+                                    Manga.libraryWriteKey(),
                                     modelData.id,
                                     modelData.chapter
                                 )
