@@ -36,6 +36,19 @@ Singleton {
     readonly property string currentLibraryId:
         currentManga ? (currentManga.originId || currentManga.id) : ""
 
+    // An entry may have been stored under the answering source's id (anything
+    // added while a fallback was active, before originId existed) or under the
+    // id the user opened. Both name the same work: look up whichever is
+    // present so the pane never reports "not in library" and duplicates it.
+    function libraryEntryId() {
+        if (!currentManga) return ""
+        var keys = [currentLibraryId, currentManga.id]
+        for (var i = 0; i < keys.length; i++) {
+            if (keys[i] && getLibraryEntry(keys[i])) return keys[i]
+        }
+        return currentLibraryId
+    }
+
     // ── Chapter pages ────────────────────────────────────────────────────────
     property list<var> chapterPages: []
     property bool isFetchingPages: false

@@ -19,7 +19,7 @@ Item {
 
     // ── Library state ─────────────────────────────────────────────────────────
     readonly property bool _inLibrary:
-        Manga.currentManga ? Manga.isInLibrary(Manga.currentLibraryId) : false
+        Manga.currentManga ? Manga.libraryEntryId() !== "" : false
 
     // Human-readable list of the sources the ES chain tried (plan §F3).
     readonly property string _sourcesLabel: {
@@ -53,7 +53,7 @@ Item {
 
     function jumpToLastRead() {
         if (!Manga.currentManga) return
-        const entry = Manga.getLibraryEntry(Manga.currentLibraryId)
+        const entry = Manga.getLibraryEntry(Manga.libraryEntryId())
         if (!entry || !entry.lastReadChapterNum) return
         // An active filter could hide the very row we are looking for.
         detailView._chapterFilter = ""
@@ -183,10 +183,10 @@ Item {
                         anchors.fill: parent; hoverEnabled: true
                         onClicked: {
                             if (detailView._inLibrary)
-                                Manga.removeFromLibrary(Manga.currentLibraryId)
+                                Manga.removeFromLibrary(Manga.libraryEntryId())
                             else
                                 Manga.addToLibrary({
-                                    id:       Manga.currentLibraryId,
+                                    id:       Manga.libraryEntryId(),
                                     title:    Manga.currentManga.title,
                                     coverUrl: Manga.currentManga.coverUrl
                                 })
@@ -381,7 +381,7 @@ Item {
                 Rectangle {
                     id: lastReadBadge
                     readonly property var _entry: Manga.currentManga
-                        ? Manga.getLibraryEntry(Manga.currentLibraryId) : null
+                        ? Manga.getLibraryEntry(Manga.libraryEntryId()) : null
                     visible: _entry !== null && _entry !== undefined
                         && _entry.lastReadChapterNum !== ""
                         && _entry.lastReadChapterNum !== undefined
@@ -396,7 +396,7 @@ Item {
                         id: lastReadText; anchors.centerIn: parent
                         text: {
                             var e = Manga.currentManga
-                                ? Manga.getLibraryEntry(Manga.currentLibraryId) : null
+                                ? Manga.getLibraryEntry(Manga.libraryEntryId()) : null
                             return e ? I18n.t("last.ch", { 1: detailView.formatChapter(e.lastReadChapterNum) }) : ""
                         }
                         font.family: detailView.fontBody
@@ -566,7 +566,7 @@ Item {
                     width: chapterList.width; height: 58
 
                     readonly property var _libEntry: Manga.currentManga
-                        ? Manga.getLibraryEntry(Manga.currentLibraryId) : null
+                        ? Manga.getLibraryEntry(Manga.libraryEntryId()) : null
                     readonly property bool isLastRead:
                         _libEntry !== null && _libEntry !== undefined
                         && (_libEntry.lastReadChapterId === modelData.id
@@ -636,9 +636,9 @@ Item {
                     onClicked: {
                             Manga.fetchChapterPages(modelData.id)
                             detailView.chapterSelected(modelData.id)
-                            if (Manga.currentManga && Manga.isInLibrary(Manga.currentLibraryId)) {
+                            if (Manga.currentManga && Manga.libraryEntryId() !== "") {
                                 Manga.updateLastRead(
-                                    Manga.currentLibraryId,
+                                    Manga.libraryEntryId(),
                                     modelData.id,
                                     modelData.chapter
                                 )
