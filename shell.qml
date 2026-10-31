@@ -39,24 +39,22 @@ ShellRoot {
         signal opened
 
         function toggle() {
-            var action = Panels.toggleAction({ active: slot.active, open: slot.open })
-            var patch = Panels.togglePatch(action)
-            if (action === Panels.ACTION.LOAD) {
-                // The Loader creates `item` synchronously here. The guard below
-                // only protects the two item writes (a null item would crash);
-                // `open` and `opened()` still run, so an asynchronous source
-                // would need more than this guard.
+            // The plan is decided in services/panels.js; this only applies it.
+            // The Loader creates `item` synchronously on load; the guard only
+            // protects the item writes (a null item would crash), while `open`
+            // and opened() still run.
+            var plan = Panels.togglePlan({ active: slot.active, open: slot.open })
+            if (plan.activate)
                 slot.active = true
-            }
             if (slot.item) {
-                if (patch.minimized !== undefined)
-                    slot.item.minimized = patch.minimized
-                if (patch.visible !== undefined)
-                    slot.item.visible = patch.visible
+                if (plan.item.minimized !== undefined)
+                    slot.item.minimized = plan.item.minimized
+                if (plan.item.visible !== undefined)
+                    slot.item.visible = plan.item.visible
             }
-            if (patch.open !== undefined)
-                slot.open = patch.open
-            if (action !== Panels.ACTION.HIDE)
+            if (plan.open !== undefined)
+                slot.open = plan.open
+            if (plan.notify)
                 slot.opened()
         }
 

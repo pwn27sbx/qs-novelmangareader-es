@@ -24,6 +24,25 @@ test("togglePatch: cada acción escribe SOLO sus campos", () => {
     assert.deepEqual(p.togglePatch(p.ACTION.LOAD), { open: true, minimized: false, visible: true });
 });
 
+test("togglePlan: el cableado no vuelve a decidir la acción", () => {
+    const load = p.togglePlan({ active: false, open: false });
+    assert.equal(load.action, p.ACTION.LOAD);
+    assert.equal(load.activate, true);
+    assert.equal(load.open, true);
+    assert.equal(load.notify, true);
+
+    const hide = p.togglePlan({ active: true, open: true });
+    assert.equal(hide.activate, false);
+    assert.equal(hide.open, undefined);   // la cascada cierra open, no el toggle
+    assert.equal(hide.notify, false);
+    assert.deepEqual(hide.item, { visible: false });
+
+    const restore = p.togglePlan({ active: true, open: false });
+    assert.equal(restore.activate, false);
+    assert.equal(restore.open, true);
+    assert.equal(restore.notify, true);
+});
+
 test("togglePatch: una acción desconocida falla en vez de restaurar", () => {
     assert.throws(() => p.togglePatch("nueva"), /unknown toggle action/);
     assert.throws(() => p.togglePatch(undefined), /unknown toggle action/);

@@ -55,6 +55,22 @@ function togglePatch(action) {
     throw new Error("panels: unknown toggle action " + String(action));
 }
 
+// Everything the toggle needs, decided here once: the caller applies the plan
+// instead of re-deriving which action means "activate", "write these fields",
+// "set open" or "notify". Adding a fourth action must not require touching the
+// wiring, and a mismatch between the two files cannot be silent.
+function togglePlan(state) {
+    var action = toggleAction(state);
+    var patch = togglePatch(action);
+    return {
+        action: action,
+        activate: action === ACTION.LOAD,
+        item: patch,
+        open: patch.open,
+        notify: action !== ACTION.HIDE
+    };
+}
+
 // The visible-changed cascade: a panel that was open and got hidden closes its
 // `open` flag and asks for an unload unless it is minimized (kept loaded so the
 // switch back is instant).
@@ -110,6 +126,7 @@ if (typeof module !== "undefined" && module.exports) {
         ACTION: ACTION,
         toggleAction: toggleAction,
         togglePatch: togglePatch,
+        togglePlan: togglePlan,
         afterHide: afterHide,
         shouldUnload: shouldUnload,
         othersToClose: othersToClose,
