@@ -68,8 +68,6 @@ Singleton {
     property int favNewCount: 0
 
     // ── Downloads ────────────────────────────────────────────────────────────
-    property list<var> downloadsList: []
-    property var downloadProgress: ({})
 
     // ── Library ──────────────────────────────────────────────────────────────
     // Each entry: { id, title, coverUrl, lastReadChapterId, lastReadChapterNum, addedAt }
@@ -196,7 +194,6 @@ Singleton {
             console.log("[ServiceManga] Backend ready at", root.apiUrl)
             fetchByOrigin("", true)
             fetchFavorites()
-            fetchDownloads()
         }
     }
 
@@ -219,27 +216,6 @@ Singleton {
             if (!isFetchingManga) return
             isFetchingManga = false
             mangaError = I18n.t("error.request", { 1: "timeout" })
-        }
-    }
-
-    Timer {
-        id: dlPoller
-        interval: 500
-        repeat: true
-        running: false
-        onTriggered: {
-            var hasActive = false
-            var ids = Object.keys(root.downloadProgress)
-            for (var i = 0; i < ids.length; i++) {
-                var st = root.downloadProgress[ids[i]].status
-                if (st === "downloading" || st === "pending") { hasActive = true; break }
-            }
-            if (!hasActive) { dlPoller.stop(); return }
-            for (var j = 0; j < ids.length; j++) {
-                var s = root.downloadProgress[ids[j]].status
-                if (s === "downloading" || s === "pending")
-                    _pollOne(ids[j])
-            }
         }
     }
 
@@ -517,67 +493,11 @@ Singleton {
         })
     }
 
-    // ── Downloads ─────────────────────────────────────────────────────────────
-    function fetchDownloads() {
-        Http.get(root.apiUrl + "/dl/list", function(err, body) {
-            if (err) { console.warn("[ServiceManga] dl/list failed:", err); return }
-            try { downloadsList = JSON.parse(body) }
-            catch (e) { console.error("[ServiceManga] dl/list parse error:", e) }
-        })
-    }
-
-    function startDownload(chapter, manga) {
-        const rawCover = _extractRawUrl(manga.coverUrl)
-        var dp = Object.assign({}, downloadProgress)
-        dp[chapter.id] = { status: "pending", total: 0, done: 0 }
-        downloadProgress = dp
-        dlPoller.start()
-        Http.post(root.apiUrl + "/dl/start", {
-            mangaId:      manga.id,
-            chapterId:    chapter.id,
-            chapterNum:   chapter.chapter,
-            chapterTitle: chapter.title,
-            mangaTitle:   manga.title,
-            rawCoverUrl:  rawCover
-        }, function(err, body) {
-            if (err) {
-                var dp2 = Object.assign({}, downloadProgress)
-                dp2[chapter.id] = { status: "error", total: 0, done: 0 }
-                downloadProgress = dp2
-            }
-        })
-    }
-
-    function _pollOne(chapterId) {
-        Http.get(root.apiUrl + "/dl/progress?chapterId=" + encodeURIComponent(chapterId),
-                function(err, body) {
-                if (err) return
-                try {
-                    const prog = JSON.parse(body)
-                    var dp = Object.assign({}, downloadProgress)
-                    dp[chapterId] = prog
-                    downloadProgress = dp
-                    if (prog.status === "done") fetchDownloads()
-                } catch(e) {}
-            })
-    }
-
-    function getDownloadProgress(chapterId) {
-        return downloadProgress[chapterId] || { status: "not_started", total: 0, done: 0 }
-    }
-
-    function deleteDownload(chapterId) {
-        Http.post(root.apiUrl + "/dl/delete", { chapterId: chapterId },
-                function(err, body) { if (!err) fetchDownloads() })
-    }
-
     // ── Utility ───────────────────────────────────────────────────────────────
     function _extractRawUrl(proxyUrl) {
         const match = proxyUrl.match(/[?&]url=([^&]+)/)
         return match ? decodeURIComponent(match[1]) : proxyUrl
     }
-
-    function downloadMorePages(upTo) {}
 
     function refreshChapterPages() {
         if (currentChapterId.length === 0) return

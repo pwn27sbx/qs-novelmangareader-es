@@ -543,13 +543,31 @@ def dl_start(manga_id, chapter_id, chapter_num, chapter_title, manga_title, raw_
     return {"ok": True}
 
 
+def _download_pages(chapter_id):
+    """Pages for one chapter, from the source that owns its id.
+
+    The worker used to call the WeebCentral scraper for every chapter, so a
+    Spanish chapter downloaded English pages, or nothing. A prefixed id goes
+    through the chain; an unprefixed legacy id keeps the old path.
+    """
+    if ":" in str(chapter_id or ""):
+        try:
+            import manga_chain
+            pages = manga_chain.pages(chapter_id) or []
+            if pages:
+                return pages
+        except Exception:  # noqa: BLE001 — fall back rather than fail the job
+            pass
+    return _pages(chapter_id)
+
+
 def _dl_worker(manga_id, chapter_id, chapter_num, chapter_title, manga_title, raw_cover_url):
     sid    = manga_id.split("/")[0]
     ch_dir = os.path.join(DOWNLOADS_DIR, sid, chapter_id)
     os.makedirs(ch_dir, exist_ok=True)
 
     try:
-        page_list = _pages(chapter_id)
+        page_list = _download_pages(chapter_id)
         total     = len(page_list)
         with _dl_lock:
             _dl_jobs[chapter_id].update({"status": "downloading", "total": total})
