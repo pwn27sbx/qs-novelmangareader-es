@@ -36,6 +36,11 @@ class ParseDsnTest(unittest.TestCase):
         base, _, _ = error_report.parse_dsn("http://key@sentry.example.com:80/7")
         self.assertEqual(base, "https://sentry.example.com")
 
+    def test_an_explicit_https_port_80_is_kept(self):
+        # No upgrade happened, so :80 is the operator's choice (TLS proxy on 80).
+        base, _, _ = error_report.parse_dsn("https://key@sentry.example.com:80/7")
+        self.assertEqual(base, "https://sentry.example.com:80")
+
     def test_an_explicit_port_survives(self):
         base, project, key = error_report.parse_dsn("http://key@localhost:9000/9")
         self.assertEqual(base, "http://localhost:9000")

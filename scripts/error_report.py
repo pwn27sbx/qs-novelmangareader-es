@@ -84,6 +84,7 @@ def parse_dsn(dsn):
             return None
         # hostname + port, never netloc: netloc still carries "key@".
         scheme = parts.scheme
+        upgraded = False
         if scheme == "http" and not _is_local(parts.hostname):
             # Cleartext to a public host would ship the key and the traceback in
             # the open. A self-hosted Sentry on localhost keeps http; anything
@@ -94,10 +95,12 @@ def parse_dsn(dsn):
                               "reporting over https instead", RuntimeWarning)
                 _warned_insecure = True
             scheme = "https"
+            upgraded = True
         port = ""
-        if parts.port and not (scheme == "https" and parts.port == 80):
-            # 80 was http's default; after the upgrade the default is 443, and
-            # keeping :80 would point TLS at the wrong listener.
+        if parts.port and not (upgraded and parts.port == 80):
+            # 80 was http's default; only after an upgrade does it become the
+            # wrong listener. An explicit https://host:80 is the operator's
+            # choice (a TLS proxy on 80) and keeps its port.
             port = f":{parts.port}"
         return f"{scheme}://{parts.hostname}{port}", project, key
     except Exception:  # noqa: BLE001 — a broken DSN means "reporting off"
