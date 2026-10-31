@@ -34,6 +34,7 @@ Item {
     function reset() {
         _chapterFilter  = ""
         _sortAscending  = false
+        _pendingJumpNum = ""
     }
 
     // ── Helper ────────────────────────────────────────────────────────────────
@@ -44,6 +45,12 @@ Item {
     // "Last: Ch. N" is the way back to where the reading stopped. The stored
     // chapter id belongs to whichever source answered last time, so the row is
     // matched by chapter number (services/chapters.js) and scrolled into view.
+    //
+    // A click can land while the chapter list is still loading (or while a
+    // filter is being cleared): there is no row to scroll to yet, so the number
+    // is remembered and the jump completes when the model fills.
+    property string _pendingJumpNum: ""
+
     function jumpToLastRead() {
         if (!Manga.currentManga) return
         const entry = Manga.getLibraryEntry(Manga.currentManga.id)
@@ -51,11 +58,17 @@ Item {
         // An active filter could hide the very row we are looking for.
         detailView._chapterFilter = ""
         chapterSearch.text = ""
-        Qt.callLater(function() {
-            const index = Chapters.chapterIndex(detailView._processedChapters, entry.lastReadChapterNum)
-            if (index >= 0)
-                chapterList.positionViewAtIndex(index, ListView.Beginning)
-        })
+        detailView._pendingJumpNum = entry.lastReadChapterNum
+        detailView._applyPendingJump()
+        Qt.callLater(detailView._applyPendingJump)
+    }
+
+    function _applyPendingJump() {
+        if (detailView._pendingJumpNum === "") return
+        const index = Chapters.chapterIndex(detailView._processedChapters, detailView._pendingJumpNum)
+        if (index < 0) return          // still loading: onCountChanged retries
+        detailView._pendingJumpNum = ""
+        chapterList.positionViewAtIndex(index, ListView.Beginning)
     }
 
     // ── Processed (filtered + sorted) chapter list ────────────────────────────
@@ -541,6 +554,9 @@ Item {
                 anchors.fill: parent; clip: true
                 boundsBehavior: Flickable.StopAtBounds
                 model: detailView._processedChapters   // ← filtered + sorted
+
+                // The model arrives after the click that asked for a jump.
+                onCountChanged: detailView._applyPendingJump()
 
                 ScrollBar.vertical: StyledScrollBar {
                 }
