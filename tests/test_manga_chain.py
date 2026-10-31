@@ -246,6 +246,31 @@ class ChainTest(unittest.TestCase):
         data = manga_chain.info("mangadex:x")
         self.assertEqual(data.get("error"), "Sin capítulos en español")
 
+    def test_info_carries_the_id_the_caller_asked_for(self):
+        # The reader stores progress against the entry the user opened, so a
+        # fallback must not replace its identity with the answering source's.
+        class OnlyOrg(FakeSource):
+            def search(self, query, mtype=None, offset=0, sort="Best Match"):
+                return {"results": [{"id": "ORG", "title": "Tienda del Placer"}],
+                        "hasMore": False, "nextOffset": 0}
+
+        manga_chain._MODULES = {
+            "mangadex": FakeSource(found=False, chapters=False),
+            "inmanga": FakeSource(found=False, chapters=False),
+            "zonatmo": RaisingSource(),
+            "zonatmo_org": OnlyOrg(found=True, chapters=True),
+            "manhwaweb": FakeSource(found=False, chapters=False),
+        }
+        data = manga_chain.info("zonatmo:tienda-del-placer")
+        self.assertEqual(data["id"], "zonatmo_org:ORG")
+        self.assertEqual(data["originId"], "zonatmo:tienda-del-placer")
+
+    def test_info_origin_matches_when_the_same_source_answers(self):
+        self.set_modules(FakeSource(chapters=True), FakeSource())
+        data = manga_chain.info("mangadex:x")
+        self.assertEqual(data["originId"], "mangadex:x")
+        self.assertEqual(data["id"], data["originId"])
+
     def test_pages_routes_by_prefix(self):
         self.set_modules(FakeSource(), FakeSource())
         pages = manga_chain.pages("inmanga:manga/CH")

@@ -31,6 +31,11 @@ Singleton {
     // no-Spanish error carries it), so "search other sources" can prefill it.
     property string detailTitle: ""
 
+    // Identity of the open title as stored in the library: the id the user
+    // opened, even when another source answered (manga_chain.info originId).
+    readonly property string currentLibraryId:
+        currentManga ? (currentManga.originId || currentManga.id) : ""
+
     // ── Chapter pages ────────────────────────────────────────────────────────
     property list<var> chapterPages: []
     property bool isFetchingPages: false
@@ -358,6 +363,10 @@ Singleton {
             }
             currentManga = {
                 id:          data.id          || "",
+                // The entry the user opened. When the chain fell back to another
+                // source this differs from `id`, and the library must keep
+                // storing progress against it.
+                originId:    data.originId    || data.id || "",
                 title:       data.title       || "",
                 description: data.description || "",
                 status:      data.status      || "",

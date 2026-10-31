@@ -191,6 +191,15 @@ def hot():
 
 
 def info(prefixed_id):
+    """Detail for `prefixed_id`, from the first source that has Spanish chapters.
+
+    The answer carries ``originId`` — the id the caller asked for — because the
+    responding source may be a different one (zonatmo.net is down, zonatmo.org
+    answers). The reader stores reading progress against the entry the user
+    opened, not against whichever backend happened to reply; without this, a
+    fallback silently stopped updating the library.
+    """
+    requested = prefixed_id
     name, raw = split_id(prefixed_id)
     if name not in _MODULES:
         # Legacy / unprefixed id: best effort with the first source in the chain.
@@ -223,7 +232,7 @@ def info(prefixed_id):
             continue
         title = title or data.get("title", "")
         if data.get("chapters"):
-            return _prefix_info(policy, data)
+            return {**_prefix_info(policy, data), "originId": requested}
     return {"error": NO_SPANISH_MESSAGE, "title": title or hint}
 
 
