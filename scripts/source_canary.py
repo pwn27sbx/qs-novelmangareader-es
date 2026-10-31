@@ -23,8 +23,10 @@ import argparse
 import json
 import os
 import sys
+import time
 import urllib.parse
 import urllib.request
+import urllib.error
 
 QUERY = "solo leveling"          # manhwa sources: cheap and always present
 MIN_IMAGE_BYTES = 1024           # a real scan is far bigger than a placeholder
@@ -249,6 +251,78 @@ def run(sources, modules, fetch=fetch_bytes, chain=True):
     return lines, (1 if broken else 0)
 
 
+ENV_FILE = "~/.config/qs-nmr/canary.env"
+
+
+def load_env_file(path=ENV_FILE):
+    """KEY=VALUE pairs from the secret file (comments and blanks skipped)."""
+    values = {}
+    try:
+        with open(os.path.expanduser(path), encoding="utf-8") as handle:
+            for line in handle:
+                line = line.strip()
+                if not line or line.startswith("#") or "=" not in line:
+                    continue
+                name, _, value = line.partition("=")
+                values[name.strip()] = value.strip()
+    except FileNotFoundError:
+        return {}
+    return values
+
+
+def post_json(url, payload, timeout=TIMEOUT):
+    """(status, body) for one JSON POST; never raises."""
+    request = urllib.request.Request(
+        url, data=json.dumps(payload).encode(),
+        headers={"Content-Type": "application/json", "User-Agent": USER_AGENT},
+        method="POST")
+    try:
+        with urllib.request.urlopen(request, timeout=timeout) as response:
+            return response.status, response.read()
+    except urllib.error.HTTPError as error:
+        return error.code, error.read()
+    except Exception as error:  # noqa: BLE001 — the canary reports, never raises
+        return None, str(error).encode()
+
+
+def notify(webhook, text, post=post_json):
+    """Post one message to the Discord webhook. False when it did not arrive."""
+    if not webhook:
+        return False
+    url = webhook + ("&" if "?" in webhook else "?") + "wait=true"
+    status, _ = post(url, {"content": str(text)[:1900], "allowed_mentions": {"parse": []}})
+    return status is not None and 200 <= status < 300
+
+
+def checkin(checkin_url, status, duration=None, post=post_json):
+    """Report one run to the Sentry cron monitor. False when it was rejected.
+
+    The state goes in the JSON body: this endpoint answers
+    "422 missing field 'status'" to the ?status=... form the docs show.
+    """
+    if not checkin_url:
+        return False
+    payload = {"status": status}
+    if duration is not None:
+        payload["duration"] = round(float(duration), 3)
+    code, _ = post(checkin_url, payload)
+    return code is not None and 200 <= code < 300
+
+
+def report(code, lines, elapsed, webhook="", checkin_url="", post=post_json):
+    """Send the run's outcome to Sentry and, only on failure, to Discord.
+
+    Returns (checkin_sent, notified) so the caller can log both without
+    printing any secret.
+    """
+    checkin_sent = checkin(checkin_url, "ok" if code == 0 else "error", elapsed, post)
+    notified = False
+    if code != 0:
+        title = "⚠ qs-nmr canary: una fuente rompió su contrato"
+        notified = notify(webhook, title + "\n```\n" + "\n".join(lines) + "\n```", post)
+    return checkin_sent, notified
+
+
 def load_modules():
     """The real source modules, imported only when the canary actually runs."""
     import inmanga_source
@@ -273,6 +347,12 @@ def main(argv=None):
     parser.add_argument("--json", action="store_true", help="machine-readable output")
     parser.add_argument("--no-chain", action="store_true",
                         help="skip the routing check through manga_chain")
+    parser.add_argument("--no-report", action="store_true",
+                        help="do not send the Sentry check-in or the Discord alert")
+    parser.add_argument("--fail", metavar="SOURCE",
+                        help="pretend this source broke (tests the alert path)")
+    parser.add_argument("--env-file", default=ENV_FILE,
+                        help="secrets file with QS_SENTRY_CHECKIN / QS_DISCORD_WEBHOOK")
     args = parser.parse_args(argv)
 
     try:
@@ -282,7 +362,12 @@ def main(argv=None):
         return 2
 
     sources = args.source or list(SOURCES)
+    started = time.monotonic()
     lines, code = run(sources, modules, fetch_bytes, chain=not args.no_chain)
+    if args.fail:
+        lines.append(f"FAIL {args.fail}: forced failure (--fail)")
+        code = 1
+    elapsed = time.monotonic() - started
 
     if args.json:
         print(json.dumps({
@@ -293,6 +378,15 @@ def main(argv=None):
     else:
         for line in lines:
             print(line)
+
+    if args.no_report:
+        return code
+    env = load_env_file(args.env_file)
+    sent, notified = report(code, lines, elapsed,
+                            env.get("QS_DISCORD_WEBHOOK", ""),
+                            env.get("QS_SENTRY_CHECKIN", ""))
+    print(f"reported: checkin={'yes' if sent else 'no'} discord={'yes' if notified else 'no'}",
+          file=sys.stderr)
     return code
 
 

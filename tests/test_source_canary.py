@@ -172,5 +172,101 @@ class RunTest(unittest.TestCase):
         self.assertIn("unknown source", lines[0])
 
 
+class NotifyTest(unittest.TestCase):
+    def calls(self):
+        made = []
+
+        def post(url, payload, timeout=None):
+            made.append((url, payload))
+            return 200, b""
+
+        return made, post
+
+    def test_a_message_carries_the_text_and_no_mentions(self):
+        made, post = self.calls()
+        self.assertTrue(source_canary.notify("https://discord/hook", "hola", post))
+        url, payload = made[0]
+        self.assertIn("wait=true", url)
+        self.assertEqual(payload["content"], "hola")
+        self.assertEqual(payload["allowed_mentions"], {"parse": []})
+
+    def test_no_webhook_means_no_request(self):
+        made, post = self.calls()
+        self.assertFalse(source_canary.notify("", "hola", post))
+        self.assertEqual(made, [])
+
+    def test_a_rejected_message_is_false(self):
+        self.assertFalse(source_canary.notify("https://discord/hook", "hola", lambda *a: (403, b"")))
+
+
+class CheckinTest(unittest.TestCase):
+    def test_the_state_goes_in_the_json_body(self):
+        made = []
+
+        def post(url, payload, timeout=None):
+            made.append((url, payload))
+            return 202, b""
+
+        self.assertTrue(source_canary.checkin("https://sentry/cron/x/", "ok", 1.5, post))
+        url, payload = made[0]
+        self.assertEqual(url, "https://sentry/cron/x/")
+        self.assertEqual(payload["status"], "ok")
+        self.assertEqual(payload["duration"], 1.5)
+
+    def test_a_rejected_checkin_is_false(self):
+        self.assertFalse(source_canary.checkin("https://sentry/cron/x/", "ok", None, lambda *a: (422, b"")))
+
+    def test_no_url_means_no_request(self):
+        called = []
+        self.assertFalse(source_canary.checkin("", "ok", None, lambda *a: called.append(a)))
+        self.assertEqual(called, [])
+
+
+class ReportTest(unittest.TestCase):
+    def test_a_healthy_run_reports_ok_and_stays_quiet_on_discord(self):
+        made = []
+
+        def post(url, payload, timeout=None):
+            made.append((url, payload))
+            return 202, b""
+
+        sent, notified = source_canary.report(0, ["ok   zonatmo: x"], 1.0, "https://discord", "https://sentry", post)
+        self.assertTrue(sent)
+        self.assertFalse(notified)
+        self.assertEqual([p["status"] for _, p in made], ["ok"])
+
+    def test_a_broken_run_reports_error_and_names_the_source(self):
+        made = []
+
+        def post(url, payload, timeout=None):
+            made.append((url, payload))
+            return 202, b""
+
+        sent, notified = source_canary.report(1, ["FAIL zonatmo: pages: no images"], 1.0,
+                                              "https://discord", "https://sentry", post)
+        self.assertTrue(sent)
+        self.assertTrue(notified)
+        statuses = [p["status"] for u, p in made if "sentry" in u]
+        self.assertEqual(statuses, ["error"])
+        discord = [p for u, p in made if "discord" in u]
+        self.assertEqual(len(discord), 1)
+        self.assertIn("zonatmo", discord[0]["content"])
+
+
+class EnvFileTest(unittest.TestCase):
+    def test_keys_are_read_and_comments_skipped(self):
+        import tempfile
+        with tempfile.NamedTemporaryFile("w", suffix=".env", delete=False) as handle:
+            handle.write("# comentario\nQS_DISCORD_WEBHOOK=https://x\n\nQS_SENTRY_CHECKIN=https://y?=\n")
+            name = handle.name
+        values = source_canary.load_env_file(name)
+        self.assertEqual(values["QS_DISCORD_WEBHOOK"], "https://x")
+        self.assertEqual(values["QS_SENTRY_CHECKIN"], "https://y?=")
+        self.assertEqual(len(values), 2)
+
+    def test_a_missing_file_is_empty(self):
+        self.assertEqual(source_canary.load_env_file("/nope/does-not-exist.env"), {})
+
+
 if __name__ == "__main__":
     unittest.main()
