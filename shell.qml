@@ -5,6 +5,7 @@ import Quickshell.Wayland
 import qs.modules.anime
 import qs.modules.manga
 import qs.modules.novel
+import qs.app
 import qs.components
 import qs.services
 
@@ -121,7 +122,7 @@ ShellRoot {
                 sourceComponent: MangaReader {}
                 onOpened: root.closeOthers(mangaSlot)
                 opacity: root.panelOpacity(mangaSlot)
-                Behavior on opacity { NumberAnimation { duration: 120 } }
+                Behavior on opacity { NumberAnimation { duration: Motion.fast } }
             }
 
             ReaderSlot {
@@ -134,7 +135,7 @@ ShellRoot {
                 sourceComponent: NovelReader {}
                 onOpened: root.closeOthers(novelSlot)
                 opacity: root.panelOpacity(novelSlot)
-                Behavior on opacity { NumberAnimation { duration: 120 } }
+                Behavior on opacity { NumberAnimation { duration: Motion.fast } }
             }
 
             ReaderSlot {
@@ -147,7 +148,7 @@ ShellRoot {
                 sourceComponent: AnimePanel {}
                 onOpened: root.closeOthers(animeSlot)
                 opacity: root.panelOpacity(animeSlot)
-                Behavior on opacity { NumberAnimation { duration: 120 } }
+                Behavior on opacity { NumberAnimation { duration: Motion.fast } }
             }
 
             // Omarchy adoption smoke test (Plan C, R-C1): invisible.
