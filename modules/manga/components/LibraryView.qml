@@ -14,11 +14,9 @@ Item {
     readonly property string fontDisplay: Style.font.family
     readonly property string fontBody:    Style.font.family
 
-    // metaLine composes "chapter · status"; this is the one place Library says
-    // how a chapter segment is worded ("Cap. 105" / "Ch. 105").
-    readonly property var cardTranslator: MangaCard.tSegment(function (key, params) {
-        return I18n.t(key, params)
-    })
+    // metaLine composes "chapter · status"; the wording lives in
+    // manga_card.js, so both views share one adapter instead of copying it.
+    readonly property var cardTranslator: MangaCard.translator(I18n.t)
 
     // One number for the grid and its skeleton: they must not disagree.
     readonly property int columnCount: 3

@@ -45,9 +45,17 @@ function tSegment(t) {
 }
 
 // Exposed for the Node test runner only; QML's import ignores `module`.
+// The adapter both views used to copy: turns a segment key into display text.
+function translator(t) {
+    return function (key, params) {
+        return t(key, params);
+    };
+}
+
 if (typeof module !== "undefined" && module.exports) {
     module.exports = {
         metaLine: metaLine,
-        tSegment: tSegment
+        tSegment: tSegment,
+        translator: translator
     };
 }

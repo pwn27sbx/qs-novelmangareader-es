@@ -315,7 +315,9 @@ Singleton {
                 // Optional: the listings carry it, the searches of zonatmo.org /
                 // WeebCentral / InManga do not. Missing is normal, so the card
                 // just omits the segment instead of showing an orphan.
-                chapter:  item.chapter || "",
+                // String() keeps a numeric 0 (a real "Chapter 0"); `|| ""`
+                // would have dropped it along with null/undefined.
+                chapter:  (item.chapter === 0) ? "0" : (item.chapter || ""),
                 type:     item.type   || "",
                 author:   ""
             }))

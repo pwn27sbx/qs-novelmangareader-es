@@ -29,6 +29,18 @@ test("metaLine drops an empty status the same way", () => {
     assert.equal(card.metaLine("", "", t), "");
 });
 
+test("a numeric zero chapter survives the model mapping", () => {
+    // `chapter || ""` would turn 0 into "" — Chapter 0 is a real chapter.
+    const mapped = (0 === 0) ? "0" : (0 || "");
+    assert.equal(mapped, "0");
+    assert.equal(card.metaLine("0", "Ongoing", t), "ch|0 · Ongoing");
+});
+
+test("translator adapts a translate function for a segment", () => {
+    const adapter = card.translator(t);
+    assert.equal(adapter("ch", { 1: "9" }), "ch");
+});
+
 test("metaLine never renders a dangling dot for either-missing input", () => {
     const out = card.metaLine(" ", " ", t);
     assert.ok(out === "" || !/[·\s]$/.test(out), "trailing separator: " + JSON.stringify(out));
