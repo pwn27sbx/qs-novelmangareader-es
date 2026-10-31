@@ -112,6 +112,8 @@ ShellRoot {
         Item {
             anchors.fill: parent
 
+            // All three panels share the right edge: switching never moves the
+            // eye (or the pointer) to the other side of the screen.
             ReaderSlot {
                 id: mangaSlot
                 anchors {
@@ -156,14 +158,21 @@ ShellRoot {
         }
     }
 
-    // One panel at a time: the others close (their state survives; the existing
-    // unload timer frees them later).
+    // One panel at a time. The others close but stay LOADED (minimized), so
+    // switching back is instant, and their `open` flag is cleared here instead
+    // of relying on the visible-changed cascade: maskItem() reads `open`, and a
+    // stale true would keep a hidden panel in the input mask.
     function closeOthers(keep) {
         var slots = [mangaSlot, novelSlot, animeSlot]
         for (var i = 0; i < slots.length; i++) {
             var other = slots[i]
-            if (other !== keep && other.open && other.item)
+            if (other === keep || !other.open)
+                continue
+            other.open = false
+            if (other.item) {
+                other.item.minimized = true
                 other.item.visible = false
+            }
         }
     }
 
@@ -172,8 +181,12 @@ ShellRoot {
     // which is what lets the panel notice the pointer coming back by itself.
     readonly property real idleOpacity: 0.15
 
+    // The slot contract: a panel may expose `pointerInside`. One that does not
+    // (a future panel) stays fully opaque instead of ghosting forever.
     function panelOpacity(slot) {
         if (!slot.open || !slot.item)
+            return 1
+        if (typeof slot.item.pointerInside !== "boolean")
             return 1
         return slot.item.pointerInside ? 1 : root.idleOpacity
     }
