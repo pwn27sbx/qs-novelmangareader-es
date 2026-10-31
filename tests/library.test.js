@@ -33,6 +33,10 @@ test("a prototype key is not an entry", () => {
     assert.equal(library.entryKey(["a"], ["constructor"]), "");
 });
 
+test("a real constructor entry is still found", () => {
+    assert.equal(library.entryKey(["constructor"], ["constructor"]), "constructor");
+});
+
 test("empty or missing inputs are tolerated", () => {
     assert.equal(library.entryKey(null, null), "");
     assert.equal(library.entryKey([], ["a"]), "");

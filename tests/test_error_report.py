@@ -149,6 +149,10 @@ class FailingSinkTest(unittest.TestCase):
         for now in (1000, 1001):
             self.assertFalse(error_report.report(ValueError("x"), "s", "o", dsn=DSN, sink=boom, now=now))
         self.assertEqual(len(posts), 1)
+        # ...and the backoff expires, so a real outage is not silenced forever.
+        self.assertFalse(error_report.report(ValueError("x"), "s", "o", dsn=DSN, sink=boom,
+                                             now=1000 + error_report.FAILED_BACKOFF + 1))
+        self.assertEqual(len(posts), 2)
 
 
 class ChainInstrumentationTest(unittest.TestCase):

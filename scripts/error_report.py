@@ -39,18 +39,28 @@ _sent = {}
 _failed = {}
 _warned_insecure = False
 _LOOPBACK = {"localhost", "127.0.0.1", "::1"}
-_LOCAL_SUFFIXES = (".local", ".lan", ".internal", ".home")
 
 
 def _is_local(host):
-    """True for loopback, a private/LAN address, or a local hostname."""
+    """True only for loopback, or a private/link-local IP LITERAL.
+
+    Hostnames are never trusted by their text: ".local" or ".lan" can resolve
+    anywhere, and resolving here would put DNS inside the DSN parser, so a
+    self-hosted Sentry on the LAN is configured with its address instead.
+
+    IPv4-mapped IPv6 literals are judged by the embedded IPv4: CPython marks
+    the whole mapped block private, which would let http://[::ffff:8.8.8.8]
+    skip the https upgrade and ship the key in the clear to a public host.
+    """
     host = (host or "").lower().strip("[]")
-    if host in _LOOPBACK or host.endswith(_LOCAL_SUFFIXES):
+    if host in _LOOPBACK:
         return True
     try:
         address = ipaddress.ip_address(host)
     except ValueError:
         return False
+    if isinstance(address, ipaddress.IPv6Address) and address.ipv4_mapped is not None:
+        address = address.ipv4_mapped
     return address.is_loopback or address.is_private or address.is_link_local
 
 # Exception messages raised while scraping carry the request URL, and its query
