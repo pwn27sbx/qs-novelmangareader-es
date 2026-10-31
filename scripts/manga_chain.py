@@ -26,6 +26,8 @@ the chain, otherwise WeebCentral (handled by manga_server.py).
 import os
 import re
 
+import error_report
+
 import content_lang
 import inmanga_source
 import manga_sources
@@ -102,19 +104,29 @@ def _prefix_info(name, data):
     }
 
 
-def _try(call, default=None):
+def _report(error, source="", op=""):
+    """Report a swallowed source error. Never raises: the reader comes first."""
+    try:
+        error_report.report(error, source=source, op=op)
+    except Exception:  # noqa: BLE001
+        pass
+
+
+def _try(call, default=None, *, source="", op=""):
     """Run `call`, returning `default` when a source raises.
 
     A dead domain (DNS/timeout) or a flaky parser must never break the whole
-    chain: the source is skipped and the next one is tried.
+    chain: the source is skipped and the next one is tried. The error is
+    reported first, because swallowing it is what hid the 2026-10-27 break.
     """
     try:
         return call()
-    except Exception:  # noqa: BLE001 — a dead/flaky source must not break the chain
+    except Exception as error:  # noqa: BLE001 — a dead/flaky source must not break the chain
+        _report(error, source, op)
         return default
 
 
-def _first_match(module, title):
+def _first_match(module, title, source=""):
     """Best matching series id in `module` for `title`, or "".
 
     Only a title that actually matches is accepted, so a fall-through never
@@ -122,7 +134,8 @@ def _first_match(module, title):
     """
     try:
         result = module.search(title, None, 0, "Best Match")
-    except Exception:  # noqa: BLE001 — a flaky source must not break the chain
+    except Exception as error:  # noqa: BLE001 — a flaky source must not break the chain
+        _report(error, source, "search")
         return ""
     for item in result.get("results") or []:
         if titles.titles_match(title, item.get("title", "")):
@@ -148,7 +161,8 @@ def search(query, mtype=None, offset=0, sort="Best Match"):
         module = _MODULES.get(name)
         if module is None:
             continue
-        result = _try(lambda: module.search(query, mtype, offset, sort), None)
+        result = _try(lambda: module.search(query, mtype, offset, sort), None,
+                      source=name, op="search")
         if result and result.get("results"):
             return {**result, "results": _prefix_list(name, result["results"])}
     return {"results": [], "hasMore": False, "nextOffset": offset}
@@ -159,7 +173,7 @@ def latest(page=1):
         module = _MODULES.get(name)
         if module is None:
             continue
-        result = _try(lambda: module.latest(page), None)
+        result = _try(lambda: module.latest(page), None, source=name, op="latest")
         if result and result.get("results"):
             return {**result, "results": _prefix_list(name, result["results"])}
     return {"results": [], "hasMore": False, "nextPage": page + 1}
@@ -170,7 +184,7 @@ def hot():
         module = _MODULES.get(name)
         if module is None:
             continue
-        items = _try(lambda: module.hot(), None)
+        items = _try(lambda: module.hot(), None, source=name, op="hot")
         if items:
             return _prefix_list(name, items)
     return []
@@ -195,16 +209,16 @@ def info(prefixed_id):
         if module is None:
             continue
         if policy == name:
-            data = _try(lambda: module.info(raw), None)
+            data = _try(lambda: module.info(raw), None, source=policy, op="info")
         else:
             # A source that raised left no title behind; the id slug is enough
             # to keep the fall-through alive (2026-10-27, zonatmo.net 404s).
             if not (title or hint):
                 break
-            match = _first_match(module, title or hint)
+            match = _first_match(module, title or hint, policy)
             if not match:
                 continue
-            data = _try(lambda: module.info(match), None)
+            data = _try(lambda: module.info(match), None, source=policy, op="info")
         if not data:
             continue
         title = title or data.get("title", "")
@@ -218,4 +232,10 @@ def pages(prefixed_chapter_id):
     module = _MODULES.get(name)
     if module is None:
         return []
-    return module.pages(raw)
+    # pages() never used _try, so a reader failure was invisible; report it and
+    # re-raise to keep the 500 the caller already handles.
+    try:
+        return module.pages(raw)
+    except Exception as error:  # noqa: BLE001
+        _report(error, name, "pages")
+        raise
