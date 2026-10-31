@@ -1,0 +1,14 @@
+[Unit]
+Description=Daily contract canary for the qs-nmr Spanish sources
+
+[Timer]
+# 09:15 local is 30 minutes after the Sentry cron monitor expects its check-in
+# (0 9 * * * America/Lima), inside the 180-minute grace period. A run that goes
+# first would also be fine; one after 12:00 counts as a missed check-in.
+OnCalendar=*-*-* 09:15:00
+RandomizedDelaySec=300
+# Catch up after the machine was off, so the sources do get checked.
+Persistent=true
+
+[Install]
+WantedBy=timers.target
