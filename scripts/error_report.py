@@ -17,6 +17,7 @@ Rules this module keeps:
   traceback of OUR frames. No locals, no request bodies, no titles.
 """
 
+import ipaddress
 import json
 import os
 import re
@@ -38,6 +39,19 @@ _sent = {}
 _failed = {}
 _warned_insecure = False
 _LOOPBACK = {"localhost", "127.0.0.1", "::1"}
+_LOCAL_SUFFIXES = (".local", ".lan", ".internal", ".home")
+
+
+def _is_local(host):
+    """True for loopback, a private/LAN address, or a local hostname."""
+    host = (host or "").lower().strip("[]")
+    if host in _LOOPBACK or host.endswith(_LOCAL_SUFFIXES):
+        return True
+    try:
+        address = ipaddress.ip_address(host)
+    except ValueError:
+        return False
+    return address.is_loopback or address.is_private or address.is_link_local
 
 # Exception messages raised while scraping carry the request URL, and its query
 # holds what the user was looking for. The query never leaves the machine.
@@ -70,7 +84,7 @@ def parse_dsn(dsn):
             return None
         # hostname + port, never netloc: netloc still carries "key@".
         scheme = parts.scheme
-        if scheme == "http" and parts.hostname not in _LOOPBACK:
+        if scheme == "http" and not _is_local(parts.hostname):
             # Cleartext to a public host would ship the key and the traceback in
             # the open. A self-hosted Sentry on localhost keeps http; anything
             # else is upgraded, with one warning.
@@ -80,7 +94,11 @@ def parse_dsn(dsn):
                               "reporting over https instead", RuntimeWarning)
                 _warned_insecure = True
             scheme = "https"
-        port = f":{parts.port}" if parts.port else ""
+        port = ""
+        if parts.port and not (scheme == "https" and parts.port == 80):
+            # 80 was http's default; after the upgrade the default is 443, and
+            # keeping :80 would point TLS at the wrong listener.
+            port = f":{parts.port}"
         return f"{scheme}://{parts.hostname}{port}", project, key
     except Exception:  # noqa: BLE001 — a broken DSN means "reporting off"
         return None
@@ -154,8 +172,8 @@ def report(error, source="", op="", dsn=None, sink=None, now=None):
     url = f"{base_url}/api/{project}/store/?sentry_key={key}&sentry_version=7"
     try:
         delivered = bool((sink or _post)(url, build_event(error, source, op)))
-    except Exception:  # noqa: BLE001 — reporting never breaks the caller
-        return False
+    except Exception:  # noqa: BLE001 — a raising sink is a failed delivery
+        delivered = False
     if delivered:
         mark_sent(source, op, kind, stamp)
         _failed.pop(dedupe_key, None)

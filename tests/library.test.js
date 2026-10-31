@@ -27,6 +27,12 @@ test("an entry stored under the answering source is still found", () => {
                  "zonatmo_org:y");
 });
 
+test("a prototype key is not an entry", () => {
+    // "constructor" must not read as present through Object.prototype.
+    assert.equal(library.entryKey([], ["constructor"]), "");
+    assert.equal(library.entryKey(["a"], ["constructor"]), "");
+});
+
 test("empty or missing inputs are tolerated", () => {
     assert.equal(library.entryKey(null, null), "");
     assert.equal(library.entryKey([], ["a"]), "");

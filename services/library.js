@@ -13,7 +13,8 @@
 //     "in library" and made adding impossible.
 
 function entryKey(available, wanted) {
-    var have = {};
+    // No prototype: a key named "constructor" must not read as present.
+    var have = Object.create(null);
     var list = available || [];
     var candidates = wanted || [];
     for (var i = 0; i < list.length; i++) have[list[i]] = true;

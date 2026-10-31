@@ -26,6 +26,16 @@ class ParseDsnTest(unittest.TestCase):
         self.assertEqual(error_report.parse_dsn(DSN),
                          ("https://o42.ingest.us.sentry.io", "77", "abc123"))
 
+    def test_http_is_allowed_on_a_lan_address(self):
+        base, project, _ = error_report.parse_dsn("http://key@192.168.1.10:9000/7")
+        self.assertEqual(base, "http://192.168.1.10:9000")
+        self.assertEqual(project, "7")
+
+    def test_http_to_a_public_host_drops_the_old_default_port(self):
+        # 80 was http's default; after the upgrade the endpoint is https on 443.
+        base, _, _ = error_report.parse_dsn("http://key@sentry.example.com:80/7")
+        self.assertEqual(base, "https://sentry.example.com")
+
     def test_an_explicit_port_survives(self):
         base, project, key = error_report.parse_dsn("http://key@localhost:9000/9")
         self.assertEqual(base, "http://localhost:9000")
@@ -119,6 +129,21 @@ class ReportTest(unittest.TestCase):
         # Once it expires the report goes out.
         self.assertTrue(error_report.report(ValueError("x"), "s", "o", dsn=DSN,
                                             sink=lambda u, p: True, now=1 + error_report.FAILED_BACKOFF + 1))
+
+
+class FailingSinkTest(unittest.TestCase):
+    def test_a_raising_sink_still_backs_off(self):
+        error_report._sent.clear()
+        error_report._failed.clear()
+        posts = []
+
+        def boom(url, payload):
+            posts.append(url)
+            raise OSError("offline")
+
+        for now in (1000, 1001):
+            self.assertFalse(error_report.report(ValueError("x"), "s", "o", dsn=DSN, sink=boom, now=now))
+        self.assertEqual(len(posts), 1)
 
 
 class ChainInstrumentationTest(unittest.TestCase):
